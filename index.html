@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <title>Maison De Noor</title>
+    <link rel="icon" href="https://raiyansoft.com/wp-content/uploads/2025/12/fav.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@100..900&display=swap" rel="stylesheet">
+    
+    <!-- Preload Hero Banner for LCP Optimization -->
+    <link rel="preload" as="image" href="https://raiyansoft.com/wp-content/uploads/2026/01/b2.jpg">
+
+    <style>
+      /* Global scrollbar hiding */
+      html, body {
+        margin: 0;
+        padding: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Main app wrapper and any element using no-scrollbar class */
+      html,
+      body,
+      #root,
+      .no-scrollbar,
+      * {
+        scrollbar-width: none;        /* Firefox */
+        -ms-overflow-style: none;     /* IE / Edge legacy */
+      }
+
+      /* Hide WebKit scrollbars (iOS Safari / WebView / Chrome) */
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar,
+      #root::-webkit-scrollbar,
+      .no-scrollbar::-webkit-scrollbar,
+      *::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+      }
+
+      /* Hide default video controls for Review overlay (WebKit/iOS) */
+      .no-controls::-webkit-media-controls {
+        display: none !important;
+      }
+      .no-controls::-webkit-media-controls-enclosure {
+        display: none !important;
+      }
+
+      body {
+        font-family: 'Alexandria', sans-serif;
+        background-color: #F6F2FA; /* Updated to new App Background */
+        color: #100F19; /* Updated to new Text Primary */
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      @keyframes slideLeftRtl {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+      }
+      .animate-slideLeftRtl {
+        animation: slideLeftRtl 0.3s ease-out forwards;
+      }
+      @keyframes scaleIn {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      .animate-scaleIn {
+        animation: scaleIn 0.2s ease-out forwards;
+      }
+      
+      /* Skeleton Shimmer Animation */
+      @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+      .animate-shimmer {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              app: {
+                bg: '#F6F2FA',       /* New App Background */
+                card: '#E8E0EF',     /* New Card / Surface */
+                gold: '#483383',     /* New Primary (Brand Violet) - formerly gold */
+                goldDark: '#352C48', /* New Deep Accent - formerly goldDark */
+                text: '#100F19',     /* New Text Primary */
+                textSec: '#6E585B',  /* New Text Secondary */
+              }
+            },
+            fontFamily: {
+              sans: ['Alexandria', 'sans-serif'],
+              alexandria: ['Alexandria', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@18.3.1/",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0",
+    "react/": "https://esm.sh/react@18.3.1/",
+    "react": "https://esm.sh/react@18.3.1",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?deps=react@18.3.1,react-dom@18.3.1",
+    "qrcode.react": "https://esm.sh/qrcode.react@3.1.0?deps=react@18.3.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

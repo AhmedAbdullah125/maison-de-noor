@@ -16,8 +16,8 @@ export async function loginRequest(
   const formData = new FormData();
   formData.append("phone", data.phone);
   formData.append("password", data.password);
-  formData.append("client_id", "a0ea590c-8f71-4350-8c2f-fbd97ec999a2");
-  formData.append("client_secret", "VaCSOoD5GeOYi07vbhWlkWMobVvdeLDRmYYEXZf9");
+  formData.append("client_id", "a0ebbcdd-f4d7-4b9b-9ac0-752d55d6d2be");
+  formData.append("client_secret", "ZsifN3q9uKXTLPDIIUnMVFQVAFP7umZ7pGCc8VUF");
   formData.append("grant_type", "password");
 
   const headers = { lang };

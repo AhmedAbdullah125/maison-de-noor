@@ -1,3 +1,4 @@
+
 import { Product, Brand, ServiceAddon, UserSubscription } from './types';
 
 export const APP_COLORS = {
@@ -32,8 +33,7 @@ export const DEMO_PRODUCTS: Product[] = [
   // --- Category: الشعر (Hair) ---
   {
     id: 101,
-    name: "قص شعر أطراف (Simple)",
-    type: "simple",
+    name: "قص شعر أطراف",
     price: "5.000 د.ك",
     image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80",
     images: [
@@ -46,8 +46,7 @@ export const DEMO_PRODUCTS: Product[] = [
   },
   {
     id: 102,
-    name: "سشوار وويفي (Addons)",
-    type: "addons",
+    name: "سشوار وويفي",
     price: "8.000 د.ك",
     oldPrice: "10.000 د.ك",
     image: "https://images.unsplash.com/photo-1560869713-7d0a29430803?auto=format&fit=crop&w=800&q=80",
@@ -67,7 +66,6 @@ export const DEMO_PRODUCTS: Product[] = [
   {
     id: 103,
     name: "علاج كيراتين",
-    type: "simple",
     price: "40.000 د.ك",
     image: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80",
     images: [
@@ -81,7 +79,6 @@ export const DEMO_PRODUCTS: Product[] = [
   {
     id: 104,
     name: "علاج الشعر المتقدم",
-    type: "addons",
     price: "15.000 د.ك",
     image: "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?auto=format&fit=crop&w=800&q=80",
     images: [
@@ -92,32 +89,26 @@ export const DEMO_PRODUCTS: Product[] = [
     ],
     description: "تجربة علاجية متكاملة مصممة خصيصاً لاحتياجات شعرك. ابدئي باختيار طول الشعر ثم أضيفي الخدمات التي تناسبك.",
     duration: "90 دقيقة",
-    packageOptions: [
+    subscriptions: [
       {
-        id: 'pkg_1',
+        id: 'sub_1',
+        title: 'جلسة واحدة',
         sessionsCount: 1,
-        discountPercent: 0,
-        titleText: 'جلسة واحدة',
-        isEnabled: true,
-        sortOrder: 1,
+        pricePercent: 100,
         validityDays: 30
       },
       {
-        id: 'pkg_3',
+        id: 'sub_3',
+        title: 'احصلي على خصم 10٪ على الثلاث جلسات',
         sessionsCount: 3,
-        discountPercent: 10,
-        titleText: 'احصلي على خصم 10٪ على الثلاث جلسات',
-        isEnabled: true,
-        sortOrder: 2,
+        pricePercent: 90,
         validityDays: 60
       },
       {
-        id: 'pkg_5',
+        id: 'sub_5',
+        title: 'احصلي على خصم 20٪ على الخمس جلسات',
         sessionsCount: 5,
-        discountPercent: 20,
-        titleText: 'احصلي على خصم 20٪ على الخمس جلسات',
-        isEnabled: true,
-        sortOrder: 3,
+        pricePercent: 80,
         validityDays: 120
       }
     ],
@@ -245,8 +236,7 @@ export const DEMO_PRODUCTS: Product[] = [
   // --- Category: الأظافر (Nails) ---
   {
     id: 201,
-    name: "منيكير كلاسيك (Simple)",
-    type: "simple",
+    name: "منيكير كلاسيك",
     price: "5.000 د.ك",
     image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=800&q=80",
     images: [
@@ -258,8 +248,7 @@ export const DEMO_PRODUCTS: Product[] = [
   },
   {
     id: 202,
-    name: "سبا يدين ورجلين (Addons)",
-    type: "addons",
+    name: "سبا يدين ورجلين",
     price: "15.000 د.ك",
     image: "https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&w=800&q=80",
     images: [
@@ -278,8 +267,7 @@ export const DEMO_PRODUCTS: Product[] = [
   // --- Category: المكياج (Makeup) ---
   {
     id: 301,
-    name: "مكياج ناعم (Simple)",
-    type: "simple",
+    name: "مكياج ناعم",
     price: "25.000 د.ك",
     image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80",
     images: [
@@ -291,8 +279,7 @@ export const DEMO_PRODUCTS: Product[] = [
   },
   {
     id: 302,
-    name: "مكياج سهرة VIP (Addons)",
-    type: "addons",
+    name: "مكياج سهرة VIP",
     price: "45.000 د.ك",
     image: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&w=800&q=80",
     images: [
@@ -312,7 +299,6 @@ export const DEMO_PRODUCTS: Product[] = [
   {
     id: 401,
     name: "تنظيف بشرة عميق",
-    type: "simple",
     price: "25.000 د.ك",
     image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80",
     images: [
@@ -326,8 +312,7 @@ export const DEMO_PRODUCTS: Product[] = [
   // --- Category: علاجات (Treatments) ---
   {
     id: 601,
-    name: "ترميم شعر تالف (Addons)",
-    type: "addons",
+    name: "ترميم شعر تالف",
     price: "18.000 د.ك",
     image: "https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&w=800&q=80",
     images: [
@@ -346,7 +331,6 @@ export const DEMO_PRODUCTS: Product[] = [
   {
     id: 701,
     name: "باقة الدلال المتكاملة",
-    type: "simple",
     price: "45.000 د.ك",
     oldPrice: "65.000 د.ك",
     image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80",

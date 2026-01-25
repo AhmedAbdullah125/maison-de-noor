@@ -1,88 +1,86 @@
-import React, { useMemo } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { Search, Home } from "lucide-react";
-import { Product } from "../types";
-import ProductCard from "./ProductCard";
-import AppImage from "./AppImage";
-import AppHeader from "./AppHeader";
-import { useGetService } from "./services/useGetService";
+import React, { useMemo, useState } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Search, Home, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Product } from '../types';
+import ProductCard from './ProductCard';
+import AppImage from './AppImage';
+import AppHeader from './AppHeader';
+import { useGetServiceByCategory } from './services/useGetServiceByCategory';
 
 interface BrandPageProps {
   onBook: (product: Product, quantity: number) => void;
   favourites: number[];
   onToggleFavourite: (productId: number) => void;
-
-  // ✅ add
-  lang: string;
 }
 
-function toMoneyKwd(value: number | null | undefined) {
-  if (typeof value !== "number") return "0.000 د.ك";
-  return `${value.toFixed(3)} د.ك`;
-}
-
-// ✅ Mapper: API Service -> Product (على قد ما ProductCard محتاج)
-function mapApiServiceToProduct(s: any): Product {
-  const current = typeof s.current_price === "number" ? s.current_price : (typeof s.price === "number" ? s.price : 0);
-  const hasDiscount = !!s.has_discount && typeof s.price === "number" && s.price > current;
-
-  return {
-    id: s.id,
-    name: s.name,
-    description: s.description,
-    image: s.main_image,
-    images: s.images && Array.isArray(s.images) ? s.images : undefined,
-
-    // ProductCard بيعرض product.price كـ string
-    price: toMoneyKwd(current),
-
-    // oldPrice اختياري
-    oldPrice: hasDiscount ? toMoneyKwd(s.price) : undefined,
-  } as unknown as Product;
-}
-
-const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavourite, lang = "ar" }) => {
+const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavourite }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { brandId } = useParams();
 
-  const { data, isLoading, isError } = useGetService(lang, brandId);
+  const [page, setPage] = useState(1);
 
-  const brand = data; // parent service
-  const brandProducts = useMemo(() => {
-    const subs = brand?.sub_services ?? [];
-    return subs.map(mapApiServiceToProduct);
-  }, [brand]);
+  const { data, isLoading, isError, isFetching } = useGetServiceByCategory("ar", brandId, page);
+
+  const services = useMemo(() => data?.services ?? [], [data]);
+  const pagination = data?.pagination;
+
+  // ✅ Build "brand" info from response (category object موجود جوه كل service)
+  const brandInfo = useMemo(() => {
+    const first = services?.[0];
+    const cat = first?.category;
+    return {
+      name: cat?.name ?? "القسم",
+      image: first?.main_image ?? "", // مفيش category image full url في المثال
+    };
+  }, [services]);
+
+  // ✅ map backend service -> ProductCard expected Product shape (minimal safe fields)
+  const mappedProducts: Product[] = useMemo(() => {
+    return services.map((s: any) => {
+      const currentPrice = typeof s.current_price === "number" ? s.current_price : Number(s.current_price ?? s.price ?? 0);
+      const basePrice = typeof s.price === "number" ? s.price : Number(s.price ?? 0);
+
+      return {
+        id: s.id,
+        name: s.name,
+        description: s.description,
+        image: s.main_image,
+        // لو ProductCard عندك بيستخدم price string:
+        price: currentPrice,
+        current_price: currentPrice,
+        oldPrice: s.has_discount ? basePrice : undefined,
+        category: s.category,
+        type: s.type,
+        has_discount: s.has_discount,
+        discounted_price: s.discounted_price,
+        options: s.options ?? [],
+        subscriptions: s.subscriptions ?? [],
+        is_favorite: s.is_favorite,
+      } as any as Product;
+    });
+  }, [services]);
 
   const handleProductClick = (product: Product) => {
     navigate(`/product/${product.id}`, { state: { from: location.pathname } });
   };
 
-  const handleBack = () => {
-    navigate("/");
-  };
+  const handleBack = () => navigate('/');
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex flex-col h-full bg-app-bg items-center justify-center p-6 text-center font-alexandria">
-        <div className="w-20 h-20 bg-app-card rounded-full flex items-center justify-center mb-6 animate-pulse" />
-        <h2 className="text-xl font-bold text-app-text mb-2">جاري التحميل...</h2>
-        <p className="text-sm text-app-textSec">بنجهز البيانات دلوقتي</p>
-      </div>
-    );
-  }
+  // ✅ Empty state لو مفيش خدمات في القسم
+  const isEmpty = !isLoading && !isFetching && !isError && mappedProducts.length === 0;
 
-  // Not found / error
-  if (isError || !brand) {
+  // لو عندك سيناريو "القسم غير موجود" من الباك:
+  // اعتبره empty + message
+  if (isError) {
     return (
       <div className="flex flex-col h-full bg-app-bg items-center justify-center p-6 text-center font-alexandria">
         <div className="w-20 h-20 bg-app-card rounded-full flex items-center justify-center mb-6">
           <Search size={40} className="text-app-textSec" />
         </div>
-        <h2 className="text-xl font-bold text-app-text mb-4">القسم غير موجود</h2>
+        <h2 className="text-xl font-bold text-app-text mb-4">حدث خطأ أثناء تحميل القسم</h2>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate('/')}
           className="bg-app-gold text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2"
         >
           <Home size={18} />
@@ -91,45 +89,84 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
       </div>
     );
   }
-  console.log(brand.main_image);
+
   return (
     <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden">
-      <AppHeader title={brand.name} onBack={handleBack} />
+      <AppHeader title={brandInfo.name} onBack={handleBack} />
 
       <main className="flex-1 overflow-y-auto w-full pb-28 px-6 pt-24">
-        {/* Brand Hero */}
+        {/* Hero */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-32 h-32 rounded-[2rem] bg-white shadow-md border border-app-card/30 overflow-hidden mb-4 p-2">
             <AppImage
-              src={brand.main_image}
-              alt={brand.name}
+              src={brandInfo.image}
+              alt={brandInfo.name}
               className="w-full h-full object-cover rounded-[1.5rem]"
             />
           </div>
-          <h2 className="text-2xl font-bold text-app-text">{brand.name}</h2>
+          <h2 className="text-2xl font-bold text-app-text">{brandInfo.name}</h2>
         </div>
 
-        {/* Products */}
+        {/* Section */}
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-app-text mb-4 text-right">خدمات {brand.name}</h3>
+          <h3 className="text-lg font-bold text-app-text mb-4 text-right">
+            خدمات {brandInfo.name}
+          </h3>
 
-          {brandProducts.length > 0 ? (
-            <div className="grid grid-cols-2 gap-4">
-              {brandProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  isFavourite={favourites.includes(product.id)}
-                  onToggleFavourite={onToggleFavourite}
-                  onBook={onBook}
-                  onClick={handleProductClick}
-                />
-              ))}
+          {(isLoading || isFetching) && (
+            <div className="text-center py-10 text-app-textSec bg-white rounded-2xl border border-app-card/30">
+              <p>جاري تحميل الخدمات...</p>
             </div>
-          ) : (
+          )}
+
+          {isEmpty && (
             <div className="text-center py-10 text-app-textSec bg-white rounded-2xl border border-app-card/30">
               <p>لا توجد خدمات متوفرة حالياً لهذا القسم.</p>
             </div>
+          )}
+
+          {mappedProducts.length > 0 && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                {mappedProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isFavourite={favourites.includes(product.id)}
+                    onToggleFavourite={onToggleFavourite}
+                    onBook={onBook}
+                    onClick={handleProductClick}
+                  />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {pagination && pagination.total_pages > 1 && (
+                <div className="flex items-center justify-center gap-3 mt-6">
+                  <button
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className="px-4 py-2 rounded-xl bg-white border border-app-card/30 text-app-text disabled:opacity-50 flex items-center gap-2"
+                  >
+                    <ChevronRight size={18} />
+                    السابق
+                  </button>
+
+                  <span className="text-sm text-app-textSec">
+                    صفحة {pagination.current_page} من {pagination.total_pages}
+                  </span>
+
+                  <button
+                    disabled={page >= pagination.total_pages}
+                    onClick={() => setPage((p) => Math.min(pagination.total_pages, p + 1))}
+                    className="px-4 py-2 rounded-xl bg-white border border-app-card/30 text-app-text disabled:opacity-50 flex items-center gap-2"
+                  >
+                    التالي
+                    <ChevronLeft size={18} />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

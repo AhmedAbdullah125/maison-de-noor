@@ -1,6 +1,7 @@
+"use client";
+
 import React, { useMemo } from "react";
 import { X, ChevronLeft, User, Video, ShoppingBag } from "lucide-react";
-import { Brand } from "../../types";
 import { useGetServices } from "../services/useGetServices";
 
 interface Props {
@@ -13,21 +14,24 @@ interface Props {
 export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: Props) {
     const { data, isLoading, isFetching, isError } = useGetServices(lang, 1);
 
-    // ✅ services من API
-    const services = useMemo(() => {
-        const list = data?.items?.services ?? [];
-        // ✅ اعرض الـ parent فقط (القائمة الرئيسية)
-        return list.filter((s: any) => s?.is_parent === true);
-    }, [data]);
 
-    // ✅ لو عايز تحافظ على Brand type للـ UI الحالي
-    const brands: Brand[] = useMemo(() => {
-        return services.map((s: any) => ({
-            id: s.id,
-            name: s.name,
-            image: s.main_image, // أو خليها فاضية لو مش بتستخدمها
-        })) as Brand[];
-    }, [services]);
+    // ✅ Extract unique categories from services response
+    const categories = useMemo(() => {
+        const services = data?.items?.services ?? [];
+        const map = new Map<number, any>();
+
+        for (const s of services) {
+            const c = s?.category;
+            if (!c?.id) continue;
+
+            if (!map.has(c.id)) {
+                map.set(c.id, c);
+            }
+        }
+
+        // sort by position if exists
+        return Array.from(map.values()).sort((a, b) => (a.position ?? 9999) - (b.position ?? 9999));
+    }, [data]);
 
     if (!open) return null;
 
@@ -37,47 +41,47 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                 className="absolute right-0 top-0 bottom-0 w-3/4 max-w-[320px] bg-white shadow-2xl animate-slideLeftRtl flex flex-col fixed h-full"
                 onClick={(e) => e.stopPropagation()}
             >
+                {/* Drawer Header */}
                 <div className="p-6 flex items-center justify-between border-b border-app-card/30 bg-white z-10">
-                    <span className="text-lg font-bold text-app-text font-alexandria">الخدمات</span>
+                    <span className="text-lg font-bold text-app-text font-alexandria">الأقسام</span>
                     <button onClick={onClose} className="p-2 hover:bg-app-bg rounded-full transition-colors text-app-text">
                         <X size={24} />
                     </button>
                 </div>
 
+                {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto no-scrollbar py-4 flex flex-col">
                     <div className="flex-1">
-                        {(isLoading || isFetching) && (
-                            <div className="px-6 py-4 space-y-3">
-                                <div className="h-10 rounded-xl bg-app-bg animate-pulse" />
-                                <div className="h-10 rounded-xl bg-app-bg animate-pulse" />
-                                <div className="h-10 rounded-xl bg-app-bg animate-pulse" />
-                            </div>
+                        {isLoading || isFetching ? (
+                            <div className="px-6 py-4 text-sm text-app-textSec">جاري تحميل الأقسام...</div>
+                        ) : isError ? (
+                            <div className="px-6 py-4 text-sm text-red-500">حدث خطأ أثناء تحميل الأقسام</div>
+                        ) : categories.length === 0 ? (
+                            <div className="px-6 py-4 text-sm text-app-textSec">لا توجد أقسام حالياً</div>
+                        ) : (
+                            categories.map((cat: any) => (
+                                <button
+                                    key={cat.id}
+                                    className="w-full px-6 py-5 flex items-center justify-between hover:bg-app-bg active:bg-app-card/50 transition-colors border-b border-app-card/10 group"
+                                    onClick={() => {
+                                        onNavigate(`/category/${cat.name}?id=${cat.id}`);
+                                        onClose();
+                                    }}
+                                >
+                                    <span className="text-sm font-medium text-app-text font-alexandria">{cat.name}</span>
+                                    <ChevronLeft size={18} className="text-app-gold opacity-50 group-hover:opacity-100 transition-opacity" />
+                                </button>
+                            ))
                         )}
-
-                        {isError && !(isLoading || isFetching) && (
-                            <div className="px-6 py-6 text-center text-app-textSec text-sm">
-                                حصل خطأ أثناء تحميل الخدمات.
-                            </div>
-                        )}
-
-                        {!isLoading && !isFetching && !isError && brands.map((brand) => (
-                            <button
-                                key={brand.id}
-                                className="w-full px-6 py-5 flex items-center justify-between hover:bg-app-bg active:bg-app-card/50 transition-colors border-b border-app-card/10 group"
-                                onClick={() => {
-                                    onNavigate(`/brand/${brand.id}`); // ✅ brandId = serviceId
-                                    onClose();
-                                }}
-                            >
-                                <span className="text-sm font-medium text-app-text font-alexandria">{brand.name}</span>
-                                <ChevronLeft size={18} className="text-app-gold opacity-50 group-hover:opacity-100 transition-opacity" />
-                            </button>
-                        ))}
                     </div>
 
+                    {/* Bottom CTA Buttons */}
                     <div className="px-6 mt-6 space-y-3">
                         <button
-                            onClick={() => { onNavigate("/account"); onClose(); }}
+                            onClick={() => {
+                                onNavigate("/account");
+                                onClose();
+                            }}
                             className="w-full py-3.5 rounded-xl border border-app-gold text-app-gold font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
                         >
                             <User size={18} />
@@ -85,7 +89,10 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                         </button>
 
                         <button
-                            onClick={() => { onNavigate("/technician/online"); onClose(); }}
+                            onClick={() => {
+                                onNavigate("/technician/online");
+                                onClose();
+                            }}
                             className="w-full py-3.5 rounded-xl bg-app-gold text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-app-gold/20"
                         >
                             <Video size={18} />
@@ -103,14 +110,9 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                             <span>شراء منتجات ترندي هير</span>
                         </button>
                     </div>
-
-                    <div className="mt-6 px-8 pb-4">
-                        <div className="flex items-center justify-center gap-6">
-                            {/* icons */}
-                        </div>
-                    </div>
                 </div>
 
+                {/* Footer */}
                 <div className="p-6 border-t border-app-card/30 bg-app-bg/30">
                     <a
                         href="https://raiyansoft.net"

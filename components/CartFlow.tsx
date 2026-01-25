@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
-import { CheckCircle2, CalendarDays, Clock, FileText, AlertCircle, Ticket } from 'lucide-react';
+import { CheckCircle2, CalendarDays, Clock, FileText, AlertCircle, Ticket, Wallet, CreditCard } from 'lucide-react';
 import { Order } from '../App';
 import { BookingItem, Appointment, UserSubscription } from '../types';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -27,6 +28,10 @@ const BookingPage: React.FC<BookingPageProps> = ({ onAddOrder }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastOrderId, setLastOrderId] = useState('');
   const [lastPaidAmount, setLastPaidAmount] = useState('0.000');
+  const [paymentMethod, setPaymentMethod] = useState<'online' | 'wallet'>('online');
+
+  // Mock wallet balance (source of truth for demo)
+  const walletBalance = 12.500;
 
   // Redirect if no item found
   useEffect(() => {
@@ -90,6 +95,10 @@ const BookingPage: React.FC<BookingPageProps> = ({ onAddOrder }) => {
   // Always Full Payment
   const amountDueNow = totalAmountNum;
 
+  // Split Logic Helpers
+  const walletPay = paymentMethod === 'wallet' ? Math.min(walletBalance, amountDueNow) : 0;
+  const remainingPay = amountDueNow - walletPay;
+
   const isFormValid = useMemo(() => {
     if (!bookingForm.date || !bookingForm.time) return false;
     return true;
@@ -104,7 +113,21 @@ const BookingPage: React.FC<BookingPageProps> = ({ onAddOrder }) => {
     setTimeout(() => {
       const orderId = `BK-${Math.floor(100000 + Math.random() * 900000)}`;
       
-      const statusText = 'مؤكد (تم الدفع بالكامل)';
+      let statusText = '';
+      let paymentType = 'online';
+
+      if (paymentMethod === 'online') {
+        statusText = 'مؤكد (تم الدفع بالكامل)';
+        paymentType = 'online';
+      } else {
+        if (remainingPay === 0) {
+          statusText = 'مؤكد (تم الخصم من المحفظة)';
+          paymentType = 'wallet';
+        } else {
+          statusText = `مؤكد (محفظة ${walletPay.toFixed(3)} + أونلاين ${remainingPay.toFixed(3)})`;
+          paymentType = 'wallet+online';
+        }
+      }
 
       // Determine package name
       let packageNameStr = bookingItem.product.name;
@@ -120,7 +143,10 @@ const BookingPage: React.FC<BookingPageProps> = ({ onAddOrder }) => {
         total: `${totalAmountNum.toFixed(3)} د.ك`,
         items: [], // Legacy field
         isPackage: !!bookingItem.packageOption,
-        packageName: packageNameStr
+        packageName: packageNameStr,
+        walletPaid: walletPay,
+        onlinePaid: remainingPay,
+        paymentMethodType: paymentType
       };
       
       // --- Handle Subscription Creation ---
@@ -201,7 +227,7 @@ const BookingPage: React.FC<BookingPageProps> = ({ onAddOrder }) => {
       />
 
       {/* Main Scrollable Content */}
-      <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 pt-24 pb-72">
+      <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 pt-24 pb-80">
         
         {/* Item Summary */}
         <section>
@@ -276,8 +302,8 @@ const BookingPage: React.FC<BookingPageProps> = ({ onAddOrder }) => {
 
       </div>
 
-      {/* Fixed Bottom Footer */}
-      <div className="fixed bottom-[74px] left-0 right-0 p-6 bg-white border-t border-app-card/30 z-40 max-w-[430px] mx-auto shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      {/* Absolute Bottom Footer (Constrained to Parent Width) */}
+      <div className="absolute bottom-0 left-0 w-full p-6 bg-white border-t border-app-card/30 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         
         <div className="space-y-2 mb-4">
            <div className="flex items-center justify-between text-xs text-app-textSec">
@@ -290,6 +316,31 @@ const BookingPage: React.FC<BookingPageProps> = ({ onAddOrder }) => {
             <span className="text-lg font-bold text-app-gold">{amountDueNow.toFixed(3)} د.ك</span>
           </div>
         </div>
+
+        {/* Minimal Payment Method Selector */}
+        <div className="flex gap-3 mb-4">
+           <button 
+             onClick={() => setPaymentMethod('wallet')}
+             className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-2 ${paymentMethod === 'wallet' ? 'bg-app-gold text-white border-app-gold shadow-md' : 'bg-white text-app-textSec border-gray-200'}`}
+           >
+              <Wallet size={16} />
+              <span>الدفع من المحفظة</span>
+           </button>
+           <button 
+             onClick={() => setPaymentMethod('online')}
+             className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-2 ${paymentMethod === 'online' ? 'bg-app-gold text-white border-app-gold shadow-md' : 'bg-white text-app-textSec border-gray-200'}`}
+           >
+              <CreditCard size={16} />
+              <span>الدفع أونلاين</span>
+           </button>
+        </div>
+
+        {paymentMethod === 'wallet' && remainingPay > 0 && (
+          <p className="text-[10px] text-app-textSec text-center mb-2 px-4 leading-relaxed">
+            سيتم خصم <span className="font-bold text-app-text">{walletPay.toFixed(3)} د.ك</span> من المحفظة، 
+            والمتبقي <span className="font-bold text-app-text">{remainingPay.toFixed(3)} د.ك</span> سيتم دفعه أونلاين
+          </p>
+        )}
 
         <div className="flex items-start gap-2 text-[10px] p-3 rounded-xl mb-4 bg-blue-50 text-blue-700">
           <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
@@ -306,7 +357,8 @@ const BookingPage: React.FC<BookingPageProps> = ({ onAddOrder }) => {
           {isProcessing ? (
             <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
-             'دفع كامل المبلغ'
+             paymentMethod === 'wallet' && remainingPay === 0 ? 'دفع من المحفظة' : 
+             paymentMethod === 'wallet' ? 'دفع المتبقي أونلاين' : 'دفع كامل المبلغ'
           )}
         </button>
       </div>

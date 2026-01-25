@@ -9,12 +9,12 @@ const fetchLookups = async (lang: string) => {
     const headers: Record<string, string> = { lang };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const response = await axios.post(`${API_BASE_URL}/lookups`, { headers });
+    const response = await axios.post(`${API_BASE_URL}/lookups`, null, { headers });
 
     return response.data.items;
 };
 
-export const useGetLookups = (lang: string) =>
+export const useGetLookups = (lang: string = "ar") =>
     useQuery({
         queryKey: ["lookups", lang],
         queryFn: () => fetchLookups(lang),

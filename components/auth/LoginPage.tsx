@@ -1,7 +1,10 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// src/pages/LoginPage.tsx
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Phone, Lock } from "lucide-react";
 import { loginRequest } from "../services/loginRequest";
+import { getRefreshToken } from "./authStorage";
+import { refreshToken } from "../services/refreshToken";
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
@@ -10,10 +13,45 @@ interface LoginPageProps {
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, lang = "ar" }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = (location.state as any)?.from || "/";
 
   const [formData, setFormData] = useState({ phone: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  // ✅ Auto refresh if refresh_token exists
+  useEffect(() => {
+    let mounted = true;
+
+    const run = async () => {
+      const rt = getRefreshToken?.();
+      if (!rt) {
+        if (mounted) setCheckingSession(false);
+        return;
+      }
+
+      const r = await refreshToken(lang);
+      if (!mounted) return;
+
+      if (r.ok) {
+        onLoginSuccess();
+        navigate(from, { replace: true });
+        return;
+      }
+
+      // refresh failed -> show login form
+      setCheckingSession(false);
+    };
+
+    run();
+
+    return () => {
+      mounted = false;
+    };
+  }, [lang, navigate, from, onLoginSuccess]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -36,8 +74,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, lang = "ar" }) =>
     }
 
     onLoginSuccess();
-    navigate("/", { replace: true });
+    navigate(from, { replace: true });
   };
+
+  if (checkingSession) {
+    return (
+      <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen items-center justify-center">
+        <div className="bg-white border border-app-card/50 rounded-2xl px-6 py-4 shadow-sm text-app-text">
+          جاري التحقق من الجلسة...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen">

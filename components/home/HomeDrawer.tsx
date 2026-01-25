@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { X, ChevronLeft, User, Video, ShoppingBag } from "lucide-react";
 import { useGetServices } from "../services/useGetServices";
 
@@ -12,10 +12,18 @@ interface Props {
 }
 
 export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: Props) {
-    const { data, isLoading, isFetching, isError } = useGetServices(lang, 1);
+    const { data, isLoading, isFetching, isError, error } = useGetServices(lang, 1);
 
+    const unauthorized = (error as any)?.isUnauthorized === true;
 
-    // ✅ Extract unique categories from services response
+    useEffect(() => {
+        if (unauthorized) {
+            onClose();
+            onNavigate("/login");
+        }
+    }, [unauthorized, onClose, onNavigate]);
+
+    // ✅ Extract unique categories from services response (safe default)
     const categories = useMemo(() => {
         const services = data?.items?.services ?? [];
         const map = new Map<number, any>();
@@ -23,17 +31,17 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
         for (const s of services) {
             const c = s?.category;
             if (!c?.id) continue;
-
-            if (!map.has(c.id)) {
-                map.set(c.id, c);
-            }
+            if (!map.has(c.id)) map.set(c.id, c);
         }
 
-        // sort by position if exists
-        return Array.from(map.values()).sort((a, b) => (a.position ?? 9999) - (b.position ?? 9999));
+        return Array.from(map.values()).sort(
+            (a, b) => (a.position ?? 9999) - (b.position ?? 9999)
+        );
     }, [data]);
 
+    // ✅ after hooks
     if (!open) return null;
+    if (unauthorized) return null;
 
     return (
         <div className="absolute inset-0 z-[100] bg-black/40 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
@@ -41,7 +49,6 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                 className="absolute right-0 top-0 bottom-0 w-3/4 max-w-[320px] bg-white shadow-2xl animate-slideLeftRtl flex flex-col fixed h-full"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Drawer Header */}
                 <div className="p-6 flex items-center justify-between border-b border-app-card/30 bg-white z-10">
                     <span className="text-lg font-bold text-app-text font-alexandria">الأقسام</span>
                     <button onClick={onClose} className="p-2 hover:bg-app-bg rounded-full transition-colors text-app-text">
@@ -49,7 +56,6 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                     </button>
                 </div>
 
-                {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto no-scrollbar py-4 flex flex-col">
                     <div className="flex-1">
                         {isLoading || isFetching ? (
@@ -75,7 +81,6 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                         )}
                     </div>
 
-                    {/* Bottom CTA Buttons */}
                     <div className="px-6 mt-6 space-y-3">
                         <button
                             onClick={() => {
@@ -112,7 +117,6 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="p-6 border-t border-app-card/30 bg-app-bg/30">
                     <a
                         href="https://raiyansoft.net"

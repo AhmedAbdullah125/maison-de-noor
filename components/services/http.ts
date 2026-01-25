@@ -1,63 +1,108 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import { getAccessToken, clearAuth } from "../auth/authStorage";
-import { refreshToken } from "./refreshToken";
+// src/services/http/http.ts
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { API_BASE_URL } from "@/lib/apiConfig";
+import { refreshToken } from "./refreshToken";
+import { getAccessToken, getRefreshToken, clearAuth } from "../auth/authStorage";
 
-export const http = axios.create({
-    baseURL: API_BASE_URL,
-});
-
-let isRefreshing = false;
-let queue: Array<(token: string) => void> = [];
-
-function flushQueue(token: string) {
-    queue.forEach((cb) => cb(token));
-    queue = [];
+export class UnauthorizedError extends Error {
+    isUnauthorized = true;
+    reason?: string;
+    constructor(reason?: string) {
+        super("unauthorized");
+        this.name = "UnauthorizedError";
+        this.reason = reason;
+    }
 }
 
+export const authEvents = { onLogout: (reason?: string) => { } };
+
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
+function isSessionExpiredResponse(data: any) {
+    return data?.status === false && data?.statusCode === 401;
+}
+function isAuthEndpoint(url?: string) {
+    if (!url) return false;
+    return url.includes("/login") || url.includes("/refresh-token");
+}
+
+export const http: AxiosInstance = axios.create({ baseURL: API_BASE_URL });
+
 http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    const token = getAccessToken();
-    if (token) {
-        config.headers = config.headers ?? {};
-        config.headers.Authorization = `Bearer ${token}`;
+    const skipAuth = (config.headers as any)?.["x-skip-auth"];
+    config.headers = config.headers ?? {};
+
+    if (!skipAuth) {
+        const token = getAccessToken?.();
+        if (token) (config.headers as any).Authorization = `Bearer ${token}`;
     }
     return config;
 });
 
-http.interceptors.response.use(
-    (res) => res,
-    async (error: AxiosError<any>) => {
-        const original = error.config as any;
-        const status = error.response?.status;
+async function handleUnauthorized(originalConfig: any) {
+    // لا تعمل refresh على auth endpoints
+    if (isAuthEndpoint(originalConfig?.url)) throw new UnauthorizedError("auth_endpoint");
 
-        if (status === 401 && !original?._retry) {
-            original._retry = true;
+    if (originalConfig?._retry) {
+        clearAuth();
+        authEvents.onLogout?.("session_expired");
+        throw new UnauthorizedError("already_retried");
+    }
+    originalConfig._retry = true;
 
-            if (isRefreshing) {
-                return new Promise((resolve) => {
-                    queue.push((newToken) => {
-                        original.headers.Authorization = `Bearer ${newToken}`;
-                        resolve(http(original));
-                    });
-                });
-            }
+    const hasRefresh = !!getRefreshToken?.();
+    if (!hasRefresh) {
+        clearAuth();
+        authEvents.onLogout?.("no_refresh_token");
+        throw new UnauthorizedError("no_refresh_token");
+    }
 
-            isRefreshing = true;
-            const lang = (original?.headers?.lang as string) || "ar";
-
-            const r = await refreshToken(lang);
+    if (!isRefreshing) {
+        isRefreshing = true;
+        const lang = (originalConfig.headers?.lang as string) || "ar";
+        refreshPromise = refreshToken(lang).then((r) => {
             isRefreshing = false;
+            return r.ok;
+        });
+    }
 
-            if (!r.ok) {
-                clearAuth();
-                return Promise.reject(error);
+    const ok = await refreshPromise!;
+    if (!ok) {
+        clearAuth();
+        authEvents.onLogout?.("refresh_failed");
+        throw new UnauthorizedError("refresh_failed");
+    }
+
+    const newToken = getAccessToken?.();
+    if (newToken) originalConfig.headers.Authorization = `Bearer ${newToken}`;
+
+    return http.request(originalConfig);
+}
+
+http.interceptors.response.use(
+    async (response) => {
+        if (isAuthEndpoint(response.config?.url)) return response;
+
+        if (isSessionExpiredResponse(response.data)) {
+            return handleUnauthorized(response.config);
+        }
+
+        return response;
+    },
+    async (error: AxiosError) => {
+        const originalConfig: any = error.config;
+        if (isAuthEndpoint(originalConfig?.url)) return Promise.reject(error);
+
+        const status = error.response?.status;
+        const data: any = error.response?.data;
+
+        if (status === 401 || isSessionExpiredResponse(data)) {
+            try {
+                return await handleUnauthorized(originalConfig);
+            } catch (e) {
+                return Promise.reject(e);
             }
-
-            const newToken = getAccessToken();
-            flushQueue(newToken);
-
-            original.headers.Authorization = `Bearer ${newToken}`;
-            return http(original);
         }
 
         return Promise.reject(error);

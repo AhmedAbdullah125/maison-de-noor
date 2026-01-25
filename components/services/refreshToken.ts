@@ -1,10 +1,8 @@
-import axios from "axios";
-import { API_BASE_URL } from "@/lib/apiConfig";
+// src/services/http/refreshToken.ts
+import { http } from "./http";
 import { getRefreshToken, getUser, clearAuth, setAuth } from "../auth/authStorage";
 
 export async function refreshToken(lang: string) {
-    const url = `${API_BASE_URL}/refresh-token`;
-
     const refresh_token = getRefreshToken();
     if (!refresh_token) return { ok: false as const, error: "No refresh token" };
 
@@ -15,19 +13,19 @@ export async function refreshToken(lang: string) {
     formData.append("client_secret", "ZsifN3q9uKXTLPDIIUnMVFQVAFP7umZ7pGCc8VUF");
 
     try {
-        const res = await axios.post(url, formData, { headers: { lang } });
+        const res = await http.post("/refresh-token", formData, {
+            headers: { lang, "x-skip-auth": "1" }, // ✅ مهم
+        });
 
         if (!res?.data?.status) {
             return { ok: false as const, error: res?.data?.message || "Refresh failed" };
         }
 
-        // ✅ حسب المثال بتاعك: items = { token_type, expires_in, access_token, refresh_token }
         const t = res?.data?.items;
         if (!t?.access_token || !t?.refresh_token) {
             return { ok: false as const, error: "Invalid refresh response" };
         }
 
-        // غالباً السيرفر مش بيرجع user هنا، فهنحتفظ بالـ user الحالي
         const existingUser = getUser() || undefined;
 
         setAuth(
@@ -42,8 +40,10 @@ export async function refreshToken(lang: string) {
 
         return { ok: true as const };
     } catch (e: any) {
-        // لو refresh فشل يبقى logout
         clearAuth();
-        return { ok: false as const, error: e?.response?.data?.message || e?.message || "Refresh error" };
+        return {
+            ok: false as const,
+            error: e?.response?.data?.message || e?.message || "Refresh error",
+        };
     }
 }

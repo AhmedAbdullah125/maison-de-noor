@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Search, Home, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '../types';
@@ -20,33 +20,46 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
 
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError, isFetching } = useGetServiceByCategory("ar", brandId, page);
+  const { data, isLoading, isError, isFetching, error } =
+    useGetServiceByCategory("ar", brandId, page);
 
+  const unauthorized = (error as any)?.isUnauthorized === true;
+
+  // ✅ always run effect (no early return before hooks below)
+  useEffect(() => {
+    if (unauthorized) {
+      navigate("/login", { replace: true, state: { from: location.pathname } });
+    }
+  }, [unauthorized, navigate, location.pathname]);
+
+  // ✅ hooks that were after return must be BEFORE any conditional return
   const services = useMemo(() => data?.services ?? [], [data]);
   const pagination = data?.pagination;
 
-  // ✅ Build "brand" info from response (category object موجود جوه كل service)
   const brandInfo = useMemo(() => {
     const first = services?.[0];
     const cat = first?.category;
     return {
       name: cat?.name ?? "القسم",
-      image: first?.main_image ?? "", // مفيش category image full url في المثال
+      image: first?.main_image ?? "",
     };
   }, [services]);
 
-  // ✅ map backend service -> ProductCard expected Product shape (minimal safe fields)
   const mappedProducts: Product[] = useMemo(() => {
     return services.map((s: any) => {
-      const currentPrice = typeof s.current_price === "number" ? s.current_price : Number(s.current_price ?? s.price ?? 0);
-      const basePrice = typeof s.price === "number" ? s.price : Number(s.price ?? 0);
+      const currentPrice =
+        typeof s.current_price === "number"
+          ? s.current_price
+          : Number(s.current_price ?? s.price ?? 0);
+
+      const basePrice =
+        typeof s.price === "number" ? s.price : Number(s.price ?? 0);
 
       return {
         id: s.id,
         name: s.name,
         description: s.description,
         image: s.main_image,
-        // لو ProductCard عندك بيستخدم price string:
         price: currentPrice,
         current_price: currentPrice,
         oldPrice: s.has_discount ? basePrice : undefined,
@@ -61,18 +74,21 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
     });
   }, [services]);
 
+  // ✅ now it's safe to return (after ALL hooks)
+  if (unauthorized) return null;
+
   const handleProductClick = (product: Product) => {
     navigate(`/product/${product.id}`, { state: { from: location.pathname } });
   };
 
   const handleBack = () => navigate('/');
 
-  // ✅ Empty state لو مفيش خدمات في القسم
   const isEmpty = !isLoading && !isFetching && !isError && mappedProducts.length === 0;
 
-  // لو عندك سيناريو "القسم غير موجود" من الباك:
-  // اعتبره empty + message
-  if (isError) {
+  // ✅ treat real errors only (exclude unauthorized)
+  const isRealError = isError && !unauthorized;
+
+  if (isRealError) {
     return (
       <div className="flex flex-col h-full bg-app-bg items-center justify-center p-6 text-center font-alexandria">
         <div className="w-20 h-20 bg-app-card rounded-full flex items-center justify-center mb-6">
@@ -95,7 +111,6 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
       <AppHeader title={brandInfo.name} onBack={handleBack} />
 
       <main className="flex-1 overflow-y-auto w-full pb-28 px-6 pt-24">
-        {/* Hero */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-32 h-32 rounded-[2rem] bg-white shadow-md border border-app-card/30 overflow-hidden mb-4 p-2">
             <AppImage
@@ -107,7 +122,6 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
           <h2 className="text-2xl font-bold text-app-text">{brandInfo.name}</h2>
         </div>
 
-        {/* Section */}
         <div className="mb-6">
           <h3 className="text-lg font-bold text-app-text mb-4 text-right">
             خدمات {brandInfo.name}
@@ -140,7 +154,6 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
                 ))}
               </div>
 
-              {/* Pagination */}
               {pagination && pagination.total_pages > 1 && (
                 <div className="flex items-center justify-center gap-3 mt-6">
                   <button

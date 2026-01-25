@@ -1,7 +1,7 @@
-import axios from "axios";
-import { API_BASE_URL } from "@/lib/apiConfig";
-import { toast } from "sonner";
+// src/services/loginRequest.ts
 import { setAuth } from "../auth/authStorage";
+import { http } from "./http";
+import { toast } from "sonner";
 
 type LoginPayload = { phone: string; password: string };
 
@@ -12,7 +12,6 @@ export async function loginRequest(
 ) {
   setLoading(true);
 
-  const url = `${API_BASE_URL}/login`;
   const formData = new FormData();
   formData.append("phone", data.phone);
   formData.append("password", data.password);
@@ -20,12 +19,12 @@ export async function loginRequest(
   formData.append("client_secret", "ZsifN3q9uKXTLPDIIUnMVFQVAFP7umZ7pGCc8VUF");
   formData.append("grant_type", "password");
 
-  const headers = { lang };
-
   try {
-    const response = await axios.post(url, formData, { headers });
-    const message = response?.data?.message;
+    const response = await http.post("/login", formData, {
+      headers: { lang, "x-skip-auth": "1" }, // ✅ مهم
+    });
 
+    const message = response?.data?.message;
     setLoading(false);
 
     if (!response?.data?.status) {

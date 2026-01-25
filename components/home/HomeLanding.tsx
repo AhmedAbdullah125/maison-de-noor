@@ -1,4 +1,3 @@
-// src/components/home/HomeLanding.tsx
 import React, { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Brand } from "../../types";
@@ -8,17 +7,31 @@ interface Props {
     brands: Brand[];
     banners: { id: number; image: string }[];
     isBannersLoading: boolean;
+    lookupsError?: boolean;
     onBrandClick: (brandId: number) => void;
 }
 
-export default function HomeLanding({ brands, banners, isBannersLoading, onBrandClick }: Props) {
+export default function HomeLanding({
+    brands,
+    banners,
+    isBannersLoading,
+    lookupsError,
+    onBrandClick,
+}: Props) {
     const [currentBanner, setCurrentBanner] = useState(0);
     const [touchStart, setTouchStart] = useState<number | null>(null);
     const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
+    // ✅ لو عدد البنرات اتغير، امنع out of range
+    useEffect(() => {
+        if (currentBanner > banners.length - 1) setCurrentBanner(0);
+    }, [banners.length, currentBanner]);
+
     useEffect(() => {
         if (banners.length === 0) return;
-        const timer = setInterval(() => setCurrentBanner((prev) => (prev + 1) % banners.length), 4000);
+        const timer = setInterval(() => {
+            setCurrentBanner((prev) => (prev + 1) % banners.length);
+        }, 4000);
         return () => clearInterval(timer);
     }, [banners.length]);
 
@@ -51,6 +64,12 @@ export default function HomeLanding({ brands, banners, isBannersLoading, onBrand
             <div className="px-6">
                 {isBannersLoading ? (
                     <div className="w-full h-[200px] rounded-[2rem] bg-gray-200 animate-shimmer overflow-hidden shadow-md border border-app-card/20" />
+                ) : banners.length === 0 ? (
+                    <div className="w-full h-[200px] rounded-[2rem] bg-white shadow-md border border-app-card/20 flex items-center justify-center">
+                        <span className="text-sm text-app-textSec font-alexandria">
+                            {lookupsError ? "تعذر تحميل البنرات الآن" : "لا توجد بنرات حالياً"}
+                        </span>
+                    </div>
                 ) : (
                     <div
                         className="relative w-full h-auto rounded-[2rem] overflow-hidden shadow-md bg-white border border-app-card/20"
@@ -63,11 +82,11 @@ export default function HomeLanding({ brands, banners, isBannersLoading, onBrand
                             style={{ transform: `translateX(${currentBanner * 100}%)` }}
                         >
                             {banners.map((banner, index) => (
-                                <div key={banner.id} className="min-w-full h-auto flex items-center justify-center">
+                                <div key={banner.id} className="min-w-full aspect-[3/2] h-auto flex items-center justify-center">
                                     <img
                                         src={banner.image}
                                         alt=""
-                                        className="w-full h-auto object-cover object-center block"
+                                        className="w-full h-full object-cover object-center block"
                                         loading={index === 0 ? "eager" : "lazy"}
                                         fetchPriority={index === 0 ? "high" : "auto"}
                                     />
@@ -90,24 +109,33 @@ export default function HomeLanding({ brands, banners, isBannersLoading, onBrand
 
             <div className="px-6 mt-8">
                 <h2 className="text-lg font-bold text-app-text mb-4 text-center sm:text-right">الأقسام</h2>
-                <div className="grid grid-cols-3 gap-4 pb-20">
-                    {brands.map((brand) => (
-                        <button
-                            key={brand.id}
-                            onClick={() => onBrandClick(brand.id)}
-                            className="flex flex-col items-center group active:scale-[0.98] transition-transform"
-                        >
-                            <div className="w-full aspect-square rounded-[1.5rem] overflow-hidden bg-white shadow-sm border border-app-card/30 group-hover:shadow-md transition-all">
-                                <AppImage
-                                    src={brand.image}
-                                    alt={brand.name}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                />
-                            </div>
-                            <span className="mt-2 text-xs font-bold text-app-text text-center truncate w-full px-1">{brand.name}</span>
-                        </button>
-                    ))}
-                </div>
+
+                {brands.length === 0 && !isBannersLoading ? (
+                    <div className="text-center text-app-textSec text-sm font-alexandria py-6">
+                        {lookupsError ? "تعذر تحميل الأقسام الآن" : "لا توجد أقسام حالياً"}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-3 gap-4 pb-20">
+                        {brands.map((brand) => (
+                            <button
+                                key={brand.id}
+                                onClick={() => onBrandClick(brand.id)}
+                                className="flex flex-col items-center group active:scale-[0.98] transition-transform"
+                            >
+                                <div className="w-full aspect-square rounded-[1.5rem] overflow-hidden bg-white shadow-sm border border-app-card/30 group-hover:shadow-md transition-all">
+                                    <AppImage
+                                        src={brand.image}
+                                        alt={brand.name}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                    />
+                                </div>
+                                <span className="mt-2 text-xs font-bold text-app-text text-center truncate w-full px-1">
+                                    {brand.name}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

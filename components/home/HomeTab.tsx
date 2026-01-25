@@ -9,6 +9,15 @@ import PackageConfirmModal from "./PackageConfirmModal";
 import HomeLanding from "./HomeLanding";
 import CategoryProductsView from "./CategoryProductsView";
 import ProductDetailsView from "./ProductDetailsView";
+import { useGetLookups } from "../services/useGetLookups";
+
+// ✅ لو عندك API_BASE_URL/storage pattern مختلف غيّر هنا بس
+const resolveImage = (img?: string) => {
+    if (!img) return "";
+    if (img.startsWith("http")) return img;
+    // حسب الريسبونس: image = "categories/xxx.png" أو "banners/xxx.png"
+    return img;
+};
 
 interface HomeTabProps {
     onBook: (
@@ -28,6 +37,10 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
     const { productId, categoryName } = useParams();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const lang = "ar";
+
+    // ✅ lookups returns: { categories, banners, social_links, ... }
+    const { data: lookups, isLoading: lookupsLoading, isError: lookupsError } = useGetLookups(lang);
 
     // addons selection state (for product details)
     const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());
@@ -35,13 +48,13 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
     // package confirm modal state
     const [pendingPackage, setPendingPackage] = useState<{ pkg: ServicePackageOption; price: number } | null>(null);
 
-    // cached data
+    // cached data (services + categories + banners)
     const [cachedProducts, setCachedProducts] = useState<Product[]>([]);
     const [cachedBrands, setCachedBrands] = useState<Brand[]>([]);
     const [cachedBanners, setCachedBanners] = useState<{ id: number; image: string }[]>([]);
     const [isBannersLoading, setIsBannersLoading] = useState(true);
 
-    // init from cache
+    // ✅ init from cache first (fast UI)
     useEffect(() => {
         const data = cacheService.getInitialData();
         setCachedProducts(data.services);
@@ -49,8 +62,36 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
         setCachedBanners(data.banners);
 
         if (data.banners.length > 0) setIsBannersLoading(false);
-        else setTimeout(() => setIsBannersLoading(false), 2000);
+        else setTimeout(() => setIsBannersLoading(false), 1500);
     }, []);
+
+    // ✅ when lookups arrive → replace categories + banners in UI
+    useEffect(() => {
+        if (!lookups) return;
+
+        const brandsFromLookups: Brand[] = (lookups.categories ?? [])
+            .filter((c: any) => c?.is_active === 1)
+            .sort((a: any, b: any) => (a?.position ?? 0) - (b?.position ?? 0))
+            .map((c: any) => ({
+                id: c.id,
+                name: c.name,
+                image: resolveImage(c.image),
+            }));
+
+        const bannersFromLookups = (lookups.banners ?? [])
+            .filter((b: any) => b?.is_active === 1)
+            .sort((a: any, b: any) => (a?.position ?? 0) - (b?.position ?? 0))
+            .map((b: any) => ({
+                id: b.id,
+                image: resolveImage(b.image),
+            }));
+
+        // ✅ update state
+        if (brandsFromLookups.length) setCachedBrands(brandsFromLookups);
+        if (bannersFromLookups.length) setCachedBanners(bannersFromLookups);
+
+        setIsBannersLoading(false);
+    }, [lookups]);
 
     const selectedProduct = useMemo(() => {
         if (!productId) return null;
@@ -60,7 +101,6 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
     const activeCategory = useMemo(() => categoryName || null, [categoryName]);
 
     useEffect(() => {
-        // reset addons when product changes
         setSelectedAddonIds(new Set());
     }, [selectedProduct?.id]);
 
@@ -112,14 +152,14 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
         const list: ServiceAddon[] = [];
         if (!selectedProduct) return list;
 
-        if (selectedProduct.addons) {
-            list.push(...selectedProduct.addons.filter((a) => selectedAddonIds.has(a.id)));
-        }
+        if (selectedProduct.addons) list.push(...selectedProduct.addons.filter((a) => selectedAddonIds.has(a.id)));
+
         if (selectedProduct.addonGroups) {
             selectedProduct.addonGroups.forEach((group) => {
                 list.push(...group.options.filter((a) => selectedAddonIds.has(a.id)));
             });
         }
+
         return list;
     };
 
@@ -142,7 +182,6 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
         if (!selectedProduct) return;
         if (!validateRequiredGroups()) return;
 
-        // package CTA → open confirm modal
         if (pkgOption && customPrice !== undefined) {
             setPendingPackage({ pkg: pkgOption, price: customPrice });
             return;
@@ -158,21 +197,22 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
 
         const addonsList = buildSelectedAddonsList();
         const { pkg, price } = pendingPackage;
+
         setPendingPackage(null);
         onBook(selectedProduct, 1, addonsList, pkg, price);
     };
 
     return (
         <div className="flex flex-col h-[100vh] bg-app-bg relative font-alexandria overflow-hidden">
-            {/* Drawer */}
+            {/* Drawer (unchanged — uses services pagination) */}
             <HomeDrawer
                 open={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
-                brands={cachedBrands}
                 onNavigate={(path) => {
                     navigate(path);
                     setIsMenuOpen(false);
                 }}
+                lang={lang}
             />
 
             {/* Package Confirm Modal */}
@@ -201,7 +241,8 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                     <HomeLanding
                         brands={cachedBrands}
                         banners={cachedBanners}
-                        isBannersLoading={isBannersLoading}
+                        isBannersLoading={isBannersLoading || lookupsLoading}
+                        lookupsError={!!lookupsError}
                         onBrandClick={(brandId) => navigate(`/brand/${brandId}`)}
                     />
                 ) : (

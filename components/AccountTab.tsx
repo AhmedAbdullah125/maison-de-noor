@@ -1,23 +1,39 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from "react";
+import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import {
-  Heart, ClipboardList, Info, Mail, Phone, ChevronLeft, XCircle,
-  Wallet, Video, Check, ShoppingBag, LogOut, FileText, AlertTriangle,
-  UserCog, Save
-} from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
-import { Order } from '../App';
-import { Product, ServiceAddon } from '../types';
-import { DEMO_PRODUCTS, APP_COLORS } from '../constants';
-import ProductCard from './ProductCard';
-import ReviewsTab from './ReviewsTab';
-import SubscriptionsTab from './SubscriptionsTab';
-import AppImage from './AppImage';
-import AppHeader from './AppHeader';
+  Heart,
+  ClipboardList,
+  Info,
+  Mail,
+  Phone,
+  ChevronLeft,
+  XCircle,
+  Wallet,
+  Video,
+  Check,
+  ShoppingBag,
+  LogOut,
+  FileText,
+  AlertTriangle,
+  UserCog,
+  Save,
+  Camera,
+} from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 
-// ✅ NEW
-import { useGetProfile } from './services/useGetProfile';
-import { clearAuth, isLoggedIn } from './auth/authStorage';
+import { Order } from "../App";
+import { Product, ServiceAddon } from "../types";
+import { DEMO_PRODUCTS, APP_COLORS } from "../constants";
+import ProductCard from "./ProductCard";
+import ReviewsTab from "./ReviewsTab";
+import SubscriptionsTab from "./SubscriptionsTab";
+import AppImage from "./AppImage";
+import AppHeader from "./AppHeader";
+
+import { useGetProfile } from "./services/useGetProfile";
+import { useUpdateProfile } from "./services/useUpdateProfile";
+import { deleteAccountRequest } from "./services/deleteAccount";
+import { clearAuth, isLoggedIn } from "./auth/authStorage";
 
 interface AccountTabProps {
   orders: Order[];
@@ -45,17 +61,21 @@ const AccountTab: React.FC<AccountTabProps> = ({
   lang = "ar",
 }) => {
   const navigate = useNavigate();
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isHairProfileComplete, setIsHairProfileComplete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // ✅ Load profile only if authenticated & not guest
   const shouldLoadProfile = !isGuest && isLoggedIn();
   const profileQuery = useGetProfile(lang);
   const profile = shouldLoadProfile ? profileQuery.data : null;
 
+  const updateMut = useUpdateProfile(lang);
+
   useEffect(() => {
     if (initialOrderId) {
-      const order = orders.find(o => o.id === initialOrderId);
+      const order = orders.find((o) => o.id === initialOrderId);
       if (order) {
         navigate(`/account/order/${order.id}`);
         onClearInitialOrder?.();
@@ -63,58 +83,119 @@ const AccountTab: React.FC<AccountTabProps> = ({
     }
   }, [initialOrderId, orders, onClearInitialOrder, navigate]);
 
-  // Check hair profile completion status
   useEffect(() => {
-    const p = localStorage.getItem('mezo_hair_profile');
+    const p = localStorage.getItem("mezo_hair_profile");
     setIsHairProfileComplete(!!p);
   }, []);
 
   const favoriteProducts = useMemo(() => {
-    return DEMO_PRODUCTS.filter(p => favourites.includes(p.id));
+    return DEMO_PRODUCTS.filter((p) => favourites.includes(p.id));
   }, [favourites]);
 
   const handleProductClick = (product: Product) => {
     navigate(`/account/favorites/product/${product.id}`);
   };
 
-  // ✅ unified auth button (login/logout)
   const handleAuthButton = () => {
     if (isGuest || !isLoggedIn()) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
     clearAuth();
     onLogout?.();
-    navigate('/login', { replace: true });
+    navigate("/login", { replace: true });
+  };
+
+  // ✅ Delete account flow
+  const handleConfirmDelete = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+
+    const res = await deleteAccountRequest(lang);
+
+    setIsDeleting(false);
+
+    if (res.ok) {
+      setShowDeleteModal(false);
+      clearAuth();
+      onLogout?.();
+      navigate("/login", { replace: true });
+    }
   };
 
   const EditProfile = () => {
-    const [name, setName] = useState(profile?.name || '');
-    const [phone, setPhone] = useState(profile?.phone || '');
-    const [isSaving, setIsSaving] = useState(false);
+    const [name, setName] = useState(profile?.name || "");
+    const [email, setEmail] = useState(profile?.email || "");
+    const [phone, setPhone] = useState(profile?.phone || "");
+    const [photoFile, setPhotoFile] = useState<File | null>(null);
+
+    // preview
+    const [photoPreview, setPhotoPreview] = useState<string>(profile?.photo || "");
 
     useEffect(() => {
-      setName(profile?.name || '');
-      setPhone(profile?.phone || '');
-    }, [profile?.name, profile?.phone]);
+      setName(profile?.name || "");
+      setEmail(profile?.email || "");
+      setPhone(profile?.phone || "");
+      setPhotoPreview(profile?.photo || "");
+      setPhotoFile(null);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profile?.name, profile?.email, profile?.phone, profile?.photo]);
+
+    useEffect(() => {
+      if (!photoFile) return;
+      const url = URL.createObjectURL(photoFile);
+      setPhotoPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }, [photoFile]);
 
     const handleSave = async () => {
-      if (!name.trim() || !phone.trim()) return;
+      if (!name.trim()) return;
 
-      setIsSaving(true);
+      await updateMut.mutateAsync({
+        name,
+        email,
+        phone,
+        photo: photoFile,
+      });
 
-      setTimeout(() => {
-        setIsSaving(false);
-        navigate('/account');
-      }, 500);
+      // لو success هيعمل invalidate للـ profile
+      // نرجع للـ account
+      if (!updateMut.isError) navigate("/account");
     };
 
     return (
       <div className="animate-fadeIn flex flex-col h-full bg-app-bg">
-        <AppHeader title="تعديل الحساب" onBack={() => navigate('/account')} />
+        <AppHeader title="تعديل الحساب" onBack={() => navigate("/account")} />
 
-        <div className="flex-1 overflow-y-auto no-scrollbar px-6 pt-24 pb-10">
+        <div className="overflow-y-auto no-scrollbar px-6 pt-24 pb-10">
           <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-app-card/30 space-y-6">
+            {/* Photo */}
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col text-right">
+                <span className="text-sm font-bold text-app-text">الصورة</span>
+                <span className="text-[11px] text-app-textSec">اختياري</span>
+              </div>
+
+              <label className="relative cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                />
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-app-gold/15 bg-app-bg flex items-center justify-center">
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <Camera size={22} className="text-app-gold" />
+                  )}
+                </div>
+                <div className="absolute -bottom-1 -left-1 w-7 h-7 rounded-full bg-app-gold text-white flex items-center justify-center shadow-lg">
+                  <Camera size={14} />
+                </div>
+              </label>
+            </div>
+
             <div>
               <label className="block text-sm font-bold text-app-text mb-2">الاسم</label>
               <input
@@ -123,6 +204,18 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 onChange={(e) => setName(e.target.value)}
                 className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-bold text-app-text"
                 placeholder="الاسم"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-app-text mb-2">البريد الإلكتروني</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-bold text-app-text"
+                placeholder="email@example.com"
+                dir="ltr"
               />
             </div>
 
@@ -140,13 +233,13 @@ const AccountTab: React.FC<AccountTabProps> = ({
           </div>
         </div>
 
-        <div className="p-6 bg-white border-t border-app-card/30">
+        <div className="p-6 border-t border-app-card/30">
           <button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={updateMut.isPending}
             className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
           >
-            {isSaving ? (
+            {updateMut.isPending ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
@@ -161,10 +254,10 @@ const AccountTab: React.FC<AccountTabProps> = ({
   };
 
   const Menu = () => {
-    const userName = isGuest ? 'زائر' : (profile?.name || '—');
-    const userPhone = isGuest ? '' : (profile?.phone || '');
-    const userPhoto = isGuest ? '' : (profile?.photo || 'https://maison-de-noor.com/assets/img/unknown.svg');
-    const wallet = isGuest ? '0.00' : (profile?.wallet || '0.00');
+    const userName = isGuest ? "زائر" : profile?.name || "—";
+    const userPhone = isGuest ? "" : profile?.phone || "";
+    const userPhoto = isGuest ? "" : profile?.photo || "https://maison-de-noor.com/assets/img/unknown.svg";
+    const wallet = isGuest ? "0.00" : profile?.wallet || "0.00";
 
     return (
       <div className="animate-fadeIn flex flex-col h-full bg-app-bg">
@@ -180,11 +273,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                     <ShoppingBag size={24} />
                   </div>
                 ) : (
-                  <AppImage
-                    src={userPhoto}
-                    alt="Profile Avatar"
-                    className="w-full h-full object-cover"
-                  />
+                  <AppImage src={userPhoto} alt="Profile Avatar" className="w-full h-full object-cover" />
                 )}
               </div>
 
@@ -192,11 +281,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <span className="font-bold text-base text-app-text">
                   {!isGuest && profileQuery.isLoading ? "..." : userName}
                 </span>
-                {!isGuest && (
-                  <span className="text-xs text-app-textSec font-medium" dir="ltr">
-                    {userPhone}
-                  </span>
-                )}
+                {!isGuest && <span className="text-xs text-app-textSec font-medium" dir="ltr">{userPhone}</span>}
               </div>
             </div>
 
@@ -204,14 +289,14 @@ const AccountTab: React.FC<AccountTabProps> = ({
               onClick={handleAuthButton}
               className="flex items-center gap-1.5 text-red-500 font-bold text-xs hover:bg-red-50 px-3 py-2 rounded-xl transition-all active:scale-95"
             >
-              <span className="mt-0.5">{isGuest ? 'تسجيل الدخول' : 'تسجيل الخروج'}</span>
+              <span className="mt-0.5">{isGuest ? "تسجيل الدخول" : "تسجيل الخروج"}</span>
               {isGuest ? <LogOut size={18} className="text-red-500 rotate-180" /> : <XCircle size={18} className="text-red-500" />}
             </button>
           </div>
 
           {/* Hair Profile */}
           <div
-            onClick={() => navigate('/hair-profile')}
+            onClick={() => navigate("/hair-profile")}
             className="bg-white rounded-[2rem] p-4 flex items-center justify-between shadow-sm mb-6 border border-app-card/30 active:scale-[0.98] transition-all cursor-pointer"
           >
             <div className="flex flex-col text-right">
@@ -219,10 +304,10 @@ const AccountTab: React.FC<AccountTabProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <span className={`text-[11px] font-bold ${isHairProfileComplete ? 'text-green-600' : 'text-app-textSec/60'}`}>
-                {isHairProfileComplete ? 'مكتمل' : 'غير مكتمل'}
+              <span className={`text-[11px] font-bold ${isHairProfileComplete ? "text-green-600" : "text-app-textSec/60"}`}>
+                {isHairProfileComplete ? "مكتمل" : "غير مكتمل"}
               </span>
-              <div className={`p-2.5 rounded-2xl flex items-center justify-center transition-colors ${isHairProfileComplete ? 'bg-green-50 text-green-600' : 'bg-app-bg text-app-gold'}`}>
+              <div className={`p-2.5 rounded-2xl flex items-center justify-center transition-colors ${isHairProfileComplete ? "bg-green-50 text-green-600" : "bg-app-bg text-app-gold"}`}>
                 {isHairProfileComplete ? <Check size={20} strokeWidth={3} /> : <FileText size={20} />}
               </div>
             </div>
@@ -276,7 +361,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
           <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-app-card/30 mb-8">
             {!isGuest && (
               <div
-                onClick={() => navigate('/account/edit')}
+                onClick={() => navigate("/account/edit")}
                 className="flex items-center justify-between p-3.5 border-b border-app-bg active:bg-app-bg transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-3">
@@ -290,7 +375,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
             )}
 
             <div
-              onClick={() => navigate('/account/favorites')}
+              onClick={() => navigate("/account/favorites")}
               className="flex items-center justify-between p-3.5 border-b border-app-bg active:bg-app-bg transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
@@ -303,7 +388,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
             </div>
 
             <div
-              onClick={() => navigate('/account/history')}
+              onClick={() => navigate("/account/history")}
               className="flex items-center justify-between p-3.5 border-b border-app-bg active:bg-app-bg transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
@@ -316,7 +401,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
             </div>
 
             <div
-              onClick={() => navigate('/account/reviews')}
+              onClick={() => navigate("/account/reviews")}
               className="flex items-center justify-between p-3.5 border-b border-app-bg active:bg-app-bg transition-colors cursor-pointer group"
             >
               <div className="flex items-center gap-3">
@@ -353,7 +438,9 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <div className="p-2 bg-app-bg rounded-xl text-app-gold group-hover:bg-app-card transition-colors">
                   <Phone size={20} />
                 </div>
-                <span className="text-sm font-bold text-app-text" dir="ltr">96554647655</span>
+                <span className="text-sm font-bold text-app-text" dir="ltr">
+                  96554647655
+                </span>
               </div>
               <ChevronLeft className="text-app-textSec opacity-40" size={18} />
             </div>
@@ -376,7 +463,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
 
   const History = () => (
     <div className="animate-fadeIn flex flex-col h-full bg-app-bg">
-      <AppHeader title="سجل الحجوزات" onBack={() => navigate('/account')} />
+      <AppHeader title="سجل الحجوزات" onBack={() => navigate("/account")} />
       <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-28 pt-24">
         {orders.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4">
@@ -405,11 +492,13 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between text-xs text-app-textSec">
                     <span>تاريخ الحجز:</span>
-                    <span className="font-medium" dir="ltr">{order.date}</span>
+                    <span className="font-medium" dir="ltr">
+                      {order.date}
+                    </span>
                   </div>
                   <div className="flex justify-between text-xs text-app-textSec">
                     <span>الخدمة:</span>
-                    <span className="font-medium">{order.packageName || 'خدمة محددة'}</span>
+                    <span className="font-medium">{order.packageName || "خدمة محددة"}</span>
                   </div>
                   <div className="flex justify-between text-sm font-bold text-app-text">
                     <span>الإجمالي:</span>
@@ -433,12 +522,12 @@ const AccountTab: React.FC<AccountTabProps> = ({
 
   const OrderDetails = () => {
     const { orderId } = useParams();
-    const selectedOrder = orders.find(o => o.id === orderId);
+    const selectedOrder = orders.find((o) => o.id === orderId);
     if (!selectedOrder) return null;
 
     return (
       <div className="animate-fadeIn flex flex-col h-full bg-app-bg">
-        <AppHeader title="تفاصيل الحجز" onBack={() => navigate('/account/history')} />
+        <AppHeader title="تفاصيل الحجز" onBack={() => navigate("/account/history")} />
         <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 px-6 pb-28 pt-24">
           <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-app-card/30">
             <div className="flex items-center gap-3 mb-4">
@@ -455,7 +544,9 @@ const AccountTab: React.FC<AccountTabProps> = ({
               </div>
               <div className="flex justify-between text-xs text-app-textSec">
                 <span>التاريخ</span>
-                <span className="font-medium text-app-text" dir="ltr">{selectedOrder.date}</span>
+                <span className="font-medium text-app-text" dir="ltr">
+                  {selectedOrder.date}
+                </span>
               </div>
               <div className="flex justify-between text-xs text-app-textSec">
                 <span>الحالة</span>
@@ -477,7 +568,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
 
   const Favorites = () => (
     <div className="animate-fadeIn flex flex-col h-full bg-app-bg">
-      <AppHeader title="الخدمات المفضلة" onBack={() => navigate('/account')} />
+      <AppHeader title="الخدمات المفضلة" onBack={() => navigate("/account")} />
       <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-28 pt-24">
         {favoriteProducts.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4">
@@ -494,7 +585,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
-            {favoriteProducts.map(product => (
+            {favoriteProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -510,26 +601,26 @@ const AccountTab: React.FC<AccountTabProps> = ({
     </div>
   );
 
-  // ProductDetails (كما هو عندك بدون تغيير)
+  // ProductDetails — سيبناه زي ما هو (اختصار)
   const ProductDetails = () => {
     const { productId } = useParams();
-    const selectedProduct = DEMO_PRODUCTS.find(p => p.id === parseInt(productId || ''));
+    const selectedProduct = DEMO_PRODUCTS.find((p) => p.id === parseInt(productId || ""));
     const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());
 
     const priceData = useMemo(() => {
       if (!selectedProduct) return { base: 0, addons: 0, total: 0 };
-      const base = parseFloat(selectedProduct.price.replace(/[^\d.]/g, ''));
+      const base = parseFloat(selectedProduct.price.replace(/[^\d.]/g, ""));
       let addons = 0;
 
       if (selectedProduct.addons) {
-        selectedProduct.addons.forEach(addon => {
+        selectedProduct.addons.forEach((addon) => {
           if (selectedAddonIds.has(addon.id)) addons += addon.price_kwd;
         });
       }
 
       if (selectedProduct.addonGroups) {
-        selectedProduct.addonGroups.forEach(group => {
-          group.options.forEach(option => {
+        selectedProduct.addonGroups.forEach((group) => {
+          group.options.forEach((option) => {
             if (selectedAddonIds.has(option.id)) addons += option.price_kwd;
           });
         });
@@ -538,46 +629,16 @@ const AccountTab: React.FC<AccountTabProps> = ({
       return { base, addons, total: base + addons };
     }, [selectedProduct, selectedAddonIds]);
 
-    const handleToggleAddon = (addonId: string) => {
-      const next = new Set(selectedAddonIds);
-      next.has(addonId) ? next.delete(addonId) : next.add(addonId);
-      setSelectedAddonIds(next);
-    };
-
-    const handleGroupOptionSelect = (groupId: string, optionId: string, type: 'single' | 'multi') => {
-      const next = new Set(selectedAddonIds);
-      if (type === 'single') {
-        const group = selectedProduct?.addonGroups?.find(g => g.id === groupId);
-        if (group) group.options.forEach(opt => next.delete(opt.id));
-        next.add(optionId);
-      } else {
-        next.has(optionId) ? next.delete(optionId) : next.add(optionId);
-      }
-      setSelectedAddonIds(next);
-    };
-
     const handleAddAction = () => {
       if (!selectedProduct) return;
 
-      if (selectedProduct.addonGroups) {
-        for (const group of selectedProduct.addonGroups) {
-          if (group.required) {
-            const hasSelection = group.options.some(opt => selectedAddonIds.has(opt.id));
-            if (!hasSelection) {
-              alert(`يرجى اختيار ${group.title_ar}`);
-              return;
-            }
-          }
-        }
-      }
-
       const selectedAddonsList: ServiceAddon[] = [];
       if (selectedProduct.addons) {
-        selectedAddonsList.push(...selectedProduct.addons.filter(a => selectedAddonIds.has(a.id)));
+        selectedAddonsList.push(...selectedProduct.addons.filter((a) => selectedAddonIds.has(a.id)));
       }
       if (selectedProduct.addonGroups) {
-        selectedProduct.addonGroups.forEach(group => {
-          selectedAddonsList.push(...group.options.filter(a => selectedAddonIds.has(a.id)));
+        selectedProduct.addonGroups.forEach((group) => {
+          selectedAddonsList.push(...group.options.filter((a) => selectedAddonIds.has(a.id)));
         });
       }
 
@@ -588,16 +649,17 @@ const AccountTab: React.FC<AccountTabProps> = ({
 
     return (
       <div className="animate-fadeIn flex flex-col h-full bg-app-bg">
-        <AppHeader title="تفاصيل الخدمة" onBack={() => navigate('/account/favorites')} />
+        <AppHeader title="تفاصيل الخدمة" onBack={() => navigate("/account/favorites")} />
         <div className="flex-1 overflow-y-auto no-scrollbar px-6 pb-28 pt-24">
-          {/* ... نفس UI بتاعك كما هو ... */}
           <div className="mb-10 space-y-3">
             <button
               onClick={handleAddAction}
               className="w-full bg-app-gold active:bg-app-goldDark text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
             >
               <ShoppingBag size={20} />
-              <span>حجز جلسة</span>
+              <span>
+                حجز جلسة {priceData.total > priceData.base ? `(${priceData.total.toFixed(3)} د.ك)` : ""}
+              </span>
             </button>
           </div>
         </div>
@@ -618,6 +680,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
         <Route path="favorites/product/:productId" element={<ProductDetails />} />
       </Routes>
 
+      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="absolute inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-fadeIn">
           <div
@@ -631,13 +694,16 @@ const AccountTab: React.FC<AccountTabProps> = ({
             <p className="text-xs text-app-textSec leading-loose mb-6 font-alexandria">
               هل أنتِ متأكدة من حذف حسابك؟ لا يمكن التراجع عن هذه الخطوة.
             </p>
+
             <div className="flex flex-col gap-2">
               <button
-                onClick={() => setShowDeleteModal(false)}
-                className="w-full py-3.5 bg-red-50 text-red-500 font-bold rounded-xl text-xs active:scale-95 transition-transform font-alexandria"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="w-full py-3.5 bg-red-50 text-red-500 font-bold rounded-xl text-xs active:scale-95 transition-transform font-alexandria disabled:opacity-70"
               >
-                تأكيد الحذف
+                {isDeleting ? "جاري الحذف..." : "تأكيد الحذف"}
               </button>
+
               <button
                 onClick={() => setShowDeleteModal(false)}
                 className="w-full py-3.5 bg-app-bg text-app-text font-bold rounded-xl text-xs active:scale-95 transition-transform font-alexandria"

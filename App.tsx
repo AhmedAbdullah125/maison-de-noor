@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import TabBar from './components/TabBar';
 import NotificationsTab from './components/NotificationsTab';
-import AccountTab from './components/AccountTab';
+import AccountTab from './components/account/AccountTab';
 import AppointmentsTab from './components/AppointmentsTab';
 import SubscriptionsTab from './components/SubscriptionsTab';
 import HomeTab from './components/home/HomeTab';

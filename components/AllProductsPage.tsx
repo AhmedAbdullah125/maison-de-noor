@@ -30,7 +30,7 @@ const AllProductsPage: React.FC<AllProductsPageProps> = ({
   return (
     <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden">
       {/* Header */}
-      <AppHeader 
+      <AppHeader
         title="جميع الخدمات"
         onBack={handleBack}
       />
@@ -39,11 +39,10 @@ const AllProductsPage: React.FC<AllProductsPageProps> = ({
       <main className="flex-1 overflow-y-auto w-full pb-28 px-6 pt-24">
         <div className="grid grid-cols-2 gap-4">
           {DEMO_PRODUCTS.map(product => (
-            <ProductCard 
+            <ProductCard
               key={product.id}
               product={product}
               isFavourite={favourites.includes(product.id)}
-              onToggleFavourite={onToggleFavourite}
               onBook={onBook}
               onClick={handleProductClick}
             />

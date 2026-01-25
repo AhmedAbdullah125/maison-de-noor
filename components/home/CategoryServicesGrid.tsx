@@ -124,7 +124,6 @@ export default function CategoryServicesGrid({
                         key={product.id}
                         product={product}
                         isFavourite={favourites.includes(product.id)}
-                        onToggleFavourite={onToggleFavourite}
                         onBook={onBook}
                         onClick={onProductClick}
                     />

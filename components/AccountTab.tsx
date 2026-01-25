@@ -590,7 +590,6 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 key={product.id}
                 product={product}
                 isFavourite={true}
-                onToggleFavourite={onToggleFavourite}
                 onBook={onBook}
                 onClick={handleProductClick}
               />

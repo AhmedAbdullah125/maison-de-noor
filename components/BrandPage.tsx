@@ -147,7 +147,6 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
                     key={product.id}
                     product={product}
                     isFavourite={favourites.includes(product.id)}
-                    onToggleFavourite={onToggleFavourite}
                     onBook={onBook}
                     onClick={handleProductClick}
                   />

@@ -152,12 +152,12 @@ export default function HistoryScreen({
                                             </div>
                                         </div>
 
-                                        {/* <button
+                                        <button
                                             onClick={() => onOpenOrder(String(order.id))}
                                             className="w-full py-3 text-app-gold font-bold text-sm bg-app-bg rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
                                         >
                                             عرض تفاصيل الحجز
-                                        </button> */}
+                                        </button>
                                     </div>
                                 );
                             })}

@@ -98,7 +98,7 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                                 onNavigate("/technician/online");
                                 onClose();
                             }}
-                            className="w-full py-3.5 rounded-xl bg-app-gold text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-app-gold/20"
+                            className="w-full py-3.5 rounded-xl bg-app-gold text-white font-bold text-xs sm:text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-app-gold/20"
                         >
                             <Video size={18} />
                             <span>حجز التكنك أونلاين ( المرة الأولى مجانا )</span>

@@ -376,7 +376,7 @@ const HairProfilePage: React.FC = () => {
         )}
       </main>
 
-      <div className="fixed bottom-[90px] left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-app-card/30 z-40">
+      <div className="fixed bottom-[90px] left-1/2 -translate-x-1/2 w-full max-w-[500px] bg-white border-t border-app-card/30 z-40">
         <button
           onClick={handleSave}
           disabled={isSaving || isLoading || isFetching}

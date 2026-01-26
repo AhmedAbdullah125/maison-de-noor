@@ -174,7 +174,7 @@ const AppContent: React.FC = () => {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className={isAdminRoute ? "w-full min-h-screen" : "h-[100vh] flex flex-col bg-app-bg w-full max-w-[430px] mx-auto relative shadow-2xl overflow-hidden"}>
+    <div className={isAdminRoute ? "w-full min-h-screen" : "h-[100vh] flex flex-col bg-app-bg w-full max-w-[500px] mx-auto relative shadow-2xl overflow-hidden"}>
       <div className={isAdminRoute ? "w-full h-full" : "flex-1 overflow-hidden relative"}>
         <Routes>
           <Route path="/" element={

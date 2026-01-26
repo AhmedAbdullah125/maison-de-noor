@@ -73,7 +73,7 @@ const BookNextSessionPage: React.FC = () => {
         status: 'upcoming',
         createdAt: new Date().toISOString()
       };
-      
+
       appointments.push(newAppt);
       localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify(appointments));
 
@@ -86,26 +86,26 @@ const BookNextSessionPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen">
-      <AppHeader 
+      <AppHeader
         title="احجزي الجلسة القادمة"
         onBack={() => navigate(-1)}
       />
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-48 px-6 pt-24 space-y-8">
-        
+
         <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-app-card/30">
           <div className="mb-4">
-             <h2 className="text-xs font-bold text-app-textSec mb-1">{service.name}</h2>
-             <h3 className="text-lg font-bold text-app-text">{subscription.packageTitle}</h3>
+            <h2 className="text-xs font-bold text-app-textSec mb-1">{service.name}</h2>
+            <h3 className="text-lg font-bold text-app-text">{subscription.packageTitle}</h3>
           </div>
-          
+
           <div className="space-y-3 bg-app-bg/50 p-4 rounded-2xl">
-              <div className="flex items-center justify-between text-xs">
-                 <span className="text-app-textSec">الجلسات المتبقية:</span>
-                 <span className="font-bold text-app-gold">
-                   {subscription.sessionsTotal - subscription.sessionsUsed} من {subscription.sessionsTotal}
-                 </span>
-              </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-app-textSec">الجلسات المتبقية:</span>
+              <span className="font-bold text-app-gold">
+                {subscription.sessionsTotal - subscription.sessionsUsed} من {subscription.sessionsTotal}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -113,7 +113,7 @@ const BookNextSessionPage: React.FC = () => {
           <h2 className="text-sm font-bold text-app-text mb-4">اختاري الموعد</h2>
           <div className="space-y-4">
             <div className="relative">
-              <input 
+              <input
                 type="date"
                 className="w-full p-4 rounded-2xl border border-app-card/50 bg-white outline-none focus:border-app-gold text-sm text-right"
                 value={selectedDate}
@@ -123,7 +123,7 @@ const BookNextSessionPage: React.FC = () => {
             </div>
 
             <div className="relative">
-              <input 
+              <input
                 type="time"
                 className="w-full p-4 rounded-2xl border border-app-card/50 bg-white outline-none focus:border-app-gold text-sm text-right"
                 value={selectedTime}
@@ -136,21 +136,21 @@ const BookNextSessionPage: React.FC = () => {
 
       </div>
 
-      <div className="fixed bottom-[90px] left-0 right-0 p-6 bg-white border-t border-app-card/30 z-40 max-w-[430px] mx-auto shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-         <button 
-           onClick={handleConfirm}
-           disabled={isProcessing || !selectedDate || !selectedTime}
-           className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-50"
-         >
-           {isProcessing ? (
-             <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-           ) : (
-             <>
-               <ShoppingBag size={20} />
-               <span>تأكيد الموعد</span>
-             </>
-           )}
-         </button>
+      <div className="fixed bottom-[90px] left-0 right-0 p-6 bg-white border-t border-app-card/30 z-40 max-w-[500px] mx-auto shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <button
+          onClick={handleConfirm}
+          disabled={isProcessing || !selectedDate || !selectedTime}
+          className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {isProcessing ? (
+            <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <>
+              <ShoppingBag size={20} />
+              <span>تأكيد الموعد</span>
+            </>
+          )}
+        </button>
       </div>
 
     </div>

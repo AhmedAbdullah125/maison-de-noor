@@ -32,8 +32,10 @@ function pad2(n: number) {
     return String(n).padStart(2, "0");
 }
 
-function getTodayDate() {
+function getTomorrowDate() {
     const d = new Date();
+    d.setDate(d.getDate() + 1);
+    const pad2 = (n: number) => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 
@@ -56,14 +58,14 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
     } | null>(null);
 
     const [paymentType, setPaymentType] = useState<"cash" | "knet" | "wallet">("cash");
-    const [startDate, setStartDate] = useState<string>(getTodayDate());
+    const [startDate, setStartDate] = useState<string>(getTomorrowDate());
     const [startTime, setStartTime] = useState<string>(getNowTime());
 
     useEffect(() => {
         setSelectedAddonIds(new Set());
         setBookingModal(null);
         setPaymentType("cash");
-        setStartDate(getTodayDate());
+        setStartDate(getTomorrowDate());
         setStartTime(getNowTime());
     }, [product?.id]);
 
@@ -178,7 +180,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
         finalTotal: number;
     }) => {
         if (!validateRequiredGroups()) return;
-        setStartDate(getTodayDate());
+        setStartDate(getTomorrowDate());
         setStartTime(getNowTime());
         setPaymentType("cash");
         setBookingModal(data);
@@ -289,7 +291,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                                         type="date"
                                         className="w-full bg-white rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold"
                                         value={startDate}
-                                        min={getTodayDate()}
+                                        min={getTomorrowDate()}
                                         onChange={(e) => setStartDate(e.target.value)}
                                     />
                                 </div>
@@ -314,8 +316,8 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                                             type="button"
                                             onClick={() => setPaymentType(p)}
                                             className={`flex-1 py-3 rounded-xl text-sm font-bold border transition-all ${paymentType === p
-                                                    ? "bg-app-gold text-white border-app-gold"
-                                                    : "bg-white text-app-text border-app-card/30"
+                                                ? "bg-app-gold text-white border-app-gold"
+                                                : "bg-white text-app-text border-app-card/30"
                                                 }`}
                                         >
                                             {p === "cash" ? "كاش" : p === "knet" ? "كي نت" : "المحفظة"}

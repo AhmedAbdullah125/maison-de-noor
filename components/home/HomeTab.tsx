@@ -65,12 +65,15 @@ export default function HomeTab({ onBook, favourites, onToggleFavourite }: Props
                 {selectedProduct ? (
                     <ServiceDetails
                         product={selectedProduct}
-                        onBook={onBook}
                         onBack={() => {
                             const fromState = location.state as { from?: string } | undefined;
                             navigate(fromState?.from || "/");
                         }}
+                        onCreated={(data) => {
+                            navigate("/account", { state: { createdRequest: true, request: data } });
+                        }}
                     />
+
                 ) : !activeCategory ? (
                     <HomeLanding
                         isLoading={isLoading}

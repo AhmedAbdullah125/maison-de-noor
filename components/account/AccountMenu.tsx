@@ -17,6 +17,8 @@ import {
     UserCog,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { useGetQuestionnaire } from "../services/useGetQuestionnaire";
+
 
 import AppHeader from "../AppHeader";
 import AppImage from "../AppImage";
@@ -37,23 +39,25 @@ type Props = {
     onOpenDelete: () => void;
 };
 
-export default function AccountMenu({
-    isGuest,
-    profile,
-    profileLoading,
-    isHairProfileComplete,
-    onAuthClick,
-    onOpenEdit,
-    onOpenFavorites,
-    onOpenHistory,
-    onOpenReviews,
-    onOpenHairProfile,
-    onOpenDelete,
+export default function AccountMenu({ isGuest, profile, profileLoading, isHairProfileComplete, onAuthClick, onOpenEdit, onOpenFavorites, onOpenHistory, onOpenReviews, onOpenHairProfile, onOpenDelete,
 }: Props) {
     const userName = isGuest ? "زائر" : profile?.name || "—";
     const userPhone = isGuest ? "" : profile?.phone || "";
     const userPhoto = isGuest ? "" : profile?.photo || "https://maison-de-noor.com/assets/img/unknown.svg";
     const wallet = isGuest ? "0.00" : profile?.wallet || "0.00";
+    const lang = "ar";
+
+    const {
+        questionnaireId,
+        progress,
+        isComplete,
+        isLoading: questionnaireLoading,
+    } = useGetQuestionnaire(lang, !isGuest);
+    const hairComplete = progress?.percentage === 100;
+    console.log(hairComplete);
+
+    // (اختياري) تقدر تعرض نسبة التقدم:
+    const hairPercent = progress?.percentage ?? 0;
 
     return (
         <div className="animate-fadeIn flex flex-col h-full bg-app-bg">
@@ -104,12 +108,18 @@ export default function AccountMenu({
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <span className={`text-[11px] font-bold ${isHairProfileComplete ? "text-green-600" : "text-app-textSec/60"}`}>
-                            {isHairProfileComplete ? "مكتمل" : "غير مكتمل"}
+                        <span className={`text-[11px] font-bold ${hairComplete ? "text-green-600" : "text-app-textSec/60"}`}>
+                            {!isGuest && questionnaireLoading ? "..." : hairComplete ? "مكتمل" : "غير مكتمل"}
                         </span>
-                        <div className={`p-2.5 rounded-2xl flex items-center justify-center transition-colors ${isHairProfileComplete ? "bg-green-50 text-green-600" : "bg-app-bg text-app-gold"}`}>
-                            {isHairProfileComplete ? <Check size={20} strokeWidth={3} /> : <FileText size={20} />}
+
+                        <div className={`p-2.5 rounded-2xl flex items-center justify-center transition-colors ${hairComplete ? "bg-green-50 text-green-600" : "bg-app-bg text-app-gold"}`}>
+                            {hairComplete ? <Check size={20} strokeWidth={3} /> : <FileText size={20} />}
                         </div>
+                        {!hairComplete && !isGuest && (
+                            <span className="text-[10px] text-app-textSec/70 font-semibold">
+                                {hairPercent.toFixed(0)}%
+                            </span>
+                        )}
                     </div>
                 </div>
 

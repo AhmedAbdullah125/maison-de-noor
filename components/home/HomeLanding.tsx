@@ -91,7 +91,8 @@ export default function HomeLanding({
         if (!banners || banners.length === 0) return;
 
         const timer = setInterval(() => {
-            setCurrentBanner((prev) => (prev + 1) % banners.length);
+            // setCurrentBanner((prev) => (prev + 1) % banners.length);
+            setCurrentBanner((prev) => (prev + 1) % 2);
         }, 4000);
 
         return () => clearInterval(timer);
@@ -228,12 +229,12 @@ export default function HomeLanding({
                     <div className="w-full h-[200px] rounded-[2rem] bg-gray-200 animate-shimmer overflow-hidden shadow-md border border-app-card/20" />
                 ) : (
                     <div
-                        className="relative w-full aspect-[16/9] rounded-[2rem] overflow-hidden shadow-md bg-white border border-app-card/20"
+                        className="relative w-full h-auto rounded-[2rem] overflow-hidden shadow-md bg-white border border-app-card/20"
                         onTouchStart={onTouchStart}
                         onTouchMove={onTouchMove}
                         onTouchEnd={onTouchEnd}
                     >
-                        <div
+                        {/* <div
                             className="flex w-full h-full transition-transform duration-700 ease-in-out"
                             style={{ transform: `translateX(${currentBanner * 100}%)` }}
                         >
@@ -257,6 +258,50 @@ export default function HomeLanding({
 
                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
                             {banners.map((_, index) => (
+                                <div
+                                    key={index}
+                                    className={`h-1.5 rounded-full transition-all duration-300 ${currentBanner === index ? "w-6 bg-app-gold" : "w-1.5 bg-app-gold/30"
+                                        }`}
+                                />
+                            ))}
+                        </div> */}
+                        <div
+                            className="flex w-full h-full transition-transform duration-700 ease-in-out"
+                            style={{ transform: `translateX(${currentBanner * 100}%)` }}
+                        >
+
+                            <button
+                                // key={banner.id}
+                                className="min-w-full h-full flex items-center justify-center"
+                                // onClick={() => onBannerClick?.(banner)}
+                                type="button"
+                            >
+                                <img
+                                    src={"https://raiyansoft.com/wp-content/uploads/2026/01/b1.jpg"}
+                                    alt={""}
+                                    className="w-full h-full object-cover object-center block"
+                                    loading="eager"
+                                    fetchPriority="high"
+                                />
+                            </button>
+                            <button
+                                // key={banner.id}
+                                className="min-w-full h-full flex items-center justify-center"
+                                // onClick={() => onBannerClick?.(banner)}
+                                type="button"
+                            >
+                                <img
+                                    src={"https://raiyansoft.com/wp-content/uploads/2026/01/b2.jpg"}
+                                    alt={""}
+                                    className="w-full h-full object-cover object-center block"
+                                    loading="eager"
+                                    fetchPriority="high"
+                                />
+                            </button>
+                        </div>
+
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                            {Array(2).map((_, index) => (
                                 <div
                                     key={index}
                                     className={`h-1.5 rounded-full transition-all duration-300 ${currentBanner === index ? "w-6 bg-app-gold" : "w-1.5 bg-app-gold/30"

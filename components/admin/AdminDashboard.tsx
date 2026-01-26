@@ -1,31 +1,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Tags, 
-  Scissors, 
-  Users, 
-  CalendarClock, 
-  CalendarCheck, 
-  Ticket, 
-  ShieldCheck, 
-  UserRound, 
-  Wallet, 
-  BarChart3, 
-  Bell, 
-  History, 
-  LogOut,
-  Menu,
-  X,
-  Languages,
-  Clock,
-  LayoutGrid
-} from 'lucide-react';
+import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid } from 'lucide-react';
 import { db } from '../../services/db';
 import { translations, getLang, setLang, Locale } from '../../services/i18n';
 import { Manager, ManagerPermissions } from '../../types';
-
 // Module Components
 import DashboardHome from './DashboardHome';
 import CategoriesModule from './CategoriesModule';
@@ -112,7 +91,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className={`min-h-screen bg-gray-50 flex overflow-hidden font-alexandria`}>
-      <aside 
+      <aside
         className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#100F19] text-white transition-all duration-300 flex flex-col fixed h-full z-50 ${lang === 'ar' ? 'right-0' : 'left-0'}`}
       >
         <div className="p-6 flex items-center justify-between border-b border-white/10">
@@ -132,9 +111,8 @@ const AdminDashboard: React.FC = () => {
               <Link
                 key={item.id}
                 to={item.path!}
-                className={`flex items-center gap-4 p-3 rounded-xl transition-all ${
-                  isActive ? 'bg-[#483383] text-white shadow-lg shadow-[#483383]/30' : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                }`}
+                className={`flex items-center gap-4 p-3 rounded-xl transition-all ${isActive ? 'bg-[#483383] text-white shadow-lg shadow-[#483383]/30' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                  }`}
               >
                 <span className="shrink-0">{item.icon}</span>
                 {isSidebarOpen && <span className="font-medium text-sm">{item.label}</span>}
@@ -144,7 +122,7 @@ const AdminDashboard: React.FC = () => {
         </nav>
 
         <div className="p-4 border-t border-white/10">
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full flex items-center gap-4 p-3 rounded-xl text-red-400 hover:bg-red-400/10 transition-all"
           >
@@ -160,21 +138,21 @@ const AdminDashboard: React.FC = () => {
             {navItems.find(i => i.path === location.pathname)?.label || t.dashboard}
           </h2>
           <div className="flex items-center gap-6">
-             <button 
-               onClick={toggleLang}
-               className="flex items-center gap-2 text-sm font-bold text-[#483383] hover:bg-gray-50 px-3 py-2 rounded-xl transition-all"
-             >
-                <Languages size={18} />
-                <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
-             </button>
-             
-             <div className="flex items-center gap-4">
-               <div className={`flex flex-col ${lang === 'ar' ? 'items-start' : 'items-end'}`}>
-                  <span className="text-sm font-bold text-gray-900">{currentManager.fullName}</span>
-                  <span className="text-[10px] font-medium text-gray-400">{currentManager.email}</span>
-               </div>
-               <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200" />
-             </div>
+            <button
+              onClick={toggleLang}
+              className="flex items-center gap-2 text-sm font-bold text-[#483383] hover:bg-gray-50 px-3 py-2 rounded-xl transition-all"
+            >
+              <Languages size={18} />
+              <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
+            </button>
+
+            <div className="flex items-center gap-4">
+              <div className={`flex flex-col ${lang === 'ar' ? 'items-start' : 'items-end'}`}>
+                <span className="text-sm font-bold text-gray-900">{currentManager.fullName}</span>
+                <span className="text-[10px] font-medium text-gray-400">{currentManager.email}</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200" />
+            </div>
           </div>
         </header>
 
@@ -189,7 +167,7 @@ const AdminDashboard: React.FC = () => {
             <Route path="users" element={hasPermission('users') ? <UsersModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="bookings/upcoming" element={hasPermission('upcomingBookings') ? <BookingsModule type="upcoming" lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="bookings/completed" element={hasPermission('completedBookings') ? <BookingsModule type="completed" lang={lang} /> : <Navigate to="/admin" />} />
-            
+
             <Route path="subscriptions" element={<Navigate to="/admin/subscriptions/active" replace />} />
             <Route path="subscriptions/active" element={hasPermission('subscriptions') ? <ActiveSubscriptionsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="subscriptions/expired" element={hasPermission('subscriptions') ? <ExpiredSubscriptionsModule lang={lang} /> : <Navigate to="/admin" />} />

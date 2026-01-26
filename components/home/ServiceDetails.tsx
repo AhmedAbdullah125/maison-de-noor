@@ -44,16 +44,27 @@ function getNowTime() {
 
 export default function ServiceDetails({ product, onBack, onCreated }: Props) {
     const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());
-    const [pendingPackage, setPendingPackage] = useState<{ pkg: ServicePackageOption; price: number } | null>(null);
+
+    const [creating, setCreating] = useState(false);
+
+    const [bookingModal, setBookingModal] = useState<{
+        subscriptionId: number | null;
+        title: string;
+        sessionsCount: number;
+        validityDays: number;
+        finalTotal: number;
+    } | null>(null);
 
     const [paymentType, setPaymentType] = useState<"cash" | "knet" | "wallet">("cash");
     const [startDate, setStartDate] = useState<string>(getTodayDate());
     const [startTime, setStartTime] = useState<string>(getNowTime());
-    const [creating, setCreating] = useState(false);
 
     useEffect(() => {
         setSelectedAddonIds(new Set());
-        setPendingPackage(null);
+        setBookingModal(null);
+        setPaymentType("cash");
+        setStartDate(getTodayDate());
+        setStartTime(getNowTime());
     }, [product?.id]);
 
     const resolvedAddonGroups: ServiceAddonGroup[] = useMemo(() => {
@@ -159,18 +170,43 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
         return out;
     };
 
-    const doCreateRequest = async (subscriptionId?: number | null) => {
-        if (creating) return;
+    const openBookingModal = (data: {
+        subscriptionId: number | null;
+        title: string;
+        sessionsCount: number;
+        validityDays: number;
+        finalTotal: number;
+    }) => {
         if (!validateRequiredGroups()) return;
+        setStartDate(getTodayDate());
+        setStartTime(getNowTime());
+        setPaymentType("cash");
+        setBookingModal(data);
+    };
+
+    const doCreateRequest = async () => {
+        if (creating) return;
+        if (!bookingModal) return;
+        if (!validateRequiredGroups()) return;
+
+        const time = startTime.length === 5 ? `${startTime}:00` : startTime;
+        if (!startDate) {
+            toast("يرجى اختيار التاريخ", { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } });
+            return;
+        }
+        if (!time || time.length < 5) {
+            toast("يرجى اختيار الوقت", { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } });
+            return;
+        }
 
         setCreating(true);
 
         const payload = {
             service_id: Number(product.id),
-            subscription_id: subscriptionId ?? null,
+            subscription_id: bookingModal.subscriptionId,
             options: buildRequestOptions(),
             start_date: startDate,
-            start_time: startTime.length === 5 ? `${startTime}:00` : startTime,
+            start_time: time,
             payment_type: paymentType,
         };
 
@@ -180,12 +216,11 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
         if (!res.ok) return;
 
         toast("تم إنشاء الطلب بنجاح", { style: { background: "#198754", color: "#fff", borderRadius: "10px" } });
+        setBookingModal(null);
         onCreated?.(res.data);
     };
 
     const handleSubscriptionClick = (sub: ServiceSubscription) => {
-        if (!validateRequiredGroups()) return;
-
         const sessionsCount = (sub as any).sessionsCount ?? (sub as any).session_count ?? 1;
         const pricePercent = parsePrice((sub as any).pricePercent ?? (sub as any).price_percentage ?? 100);
         const fixedPrice = parsePrice((sub as any).fixedPrice ?? (sub as any).fixed_price ?? 0);
@@ -194,67 +229,127 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
         const computedFinal = originalTotal * (pricePercent / 100);
         const finalTotal = fixedPrice > 0 ? fixedPrice : computedFinal;
 
-        const mappedPkg: ServicePackageOption = {
-            id: String((sub as any).id),
-            sessionsCount,
-            discountPercent: Math.max(0, 100 - pricePercent),
-            titleText: (sub as any).titleText ?? (sub as any).title ?? (sub as any).name ?? "",
-            isEnabled: true,
-            sortOrder: sessionsCount,
-            validityDays: (sub as any).validityDays ?? (sub as any).validity_days ?? 30,
-        };
+        const title = (sub as any).titleText ?? (sub as any).title ?? (sub as any).name ?? "";
+        const validityDays = (sub as any).validityDays ?? (sub as any).validity_days ?? 30;
 
-        setPendingPackage({ pkg: mappedPkg, price: finalTotal });
+        openBookingModal({
+            subscriptionId: Number((sub as any).id) || null,
+            title: title || `باقة ${sessionsCount} جلسات`,
+            sessionsCount,
+            validityDays,
+            finalTotal,
+        });
     };
 
-    const handleConfirmPackageBooking = async () => {
-        if (!pendingPackage) return;
-        const subId = Number(pendingPackage.pkg.id);
-        setPendingPackage(null);
-        await doCreateRequest(Number.isFinite(subId) ? subId : null);
+    const handleSingleSessionClick = () => {
+        openBookingModal({
+            subscriptionId: null,
+            title: "حجز جلسة",
+            sessionsCount: 1,
+            validityDays: 0,
+            finalTotal: priceData.total,
+        });
     };
 
     return (
         <div className="animate-fadeIn pt-2">
-            {pendingPackage && (
+            {bookingModal && (
                 <div
                     className="absolute inset-0 z-[150] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
-                    onClick={() => setPendingPackage(null)}
+                    onClick={() => setBookingModal(null)}
                 >
                     <div
-                        className="bg-white w-full max-w-[340px] rounded-[24px] p-6 shadow-2xl relative flex flex-col items-center text-center animate-scaleIn"
+                        className="bg-white w-full max-w-[360px] rounded-[24px] p-6 shadow-2xl relative flex flex-col text-center animate-scaleIn"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button
-                            onClick={() => setPendingPackage(null)}
+                            onClick={() => setBookingModal(null)}
                             className="absolute top-4 left-4 p-2 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-full transition-colors active:scale-95"
                         >
                             <X size={20} />
                         </button>
 
-                        <h2 className="text-lg font-bold text-app-text mb-6 mt-2">تأكيد الحجز</h2>
+                        <h2 className="text-lg font-bold text-app-text mb-4 mt-2">تأكيد الحجز</h2>
 
-                        <div className="w-full space-y-3 mb-6">
+                        <div className="w-full space-y-3 mb-5">
                             <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
-                                <span className="text-xs text-app-textSec font-medium">عدد الجلسات</span>
-                                <span className="text-sm font-bold text-app-text">{pendingPackage.pkg.sessionsCount}</span>
+                                <span className="text-xs text-app-textSec font-medium">الخدمة</span>
+                                <span className="text-sm font-bold text-app-text">{product.name}</span>
                             </div>
+
                             <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
-                                <span className="text-xs text-app-textSec font-medium">صلاحية الباكج</span>
-                                <span className="text-sm font-bold text-app-text">{pendingPackage.pkg.validityDays || 30} يوم</span>
+                                <span className="text-xs text-app-textSec font-medium">الباقة</span>
+                                <span className="text-sm font-bold text-app-text">{bookingModal.title}</span>
                             </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-app-bg/50 rounded-xl border border-app-card/30 p-3 text-right">
+                                    <label className="block text-[11px] font-bold text-app-text mb-2">التاريخ</label>
+                                    <input
+                                        type="date"
+                                        className="w-full bg-white rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold"
+                                        value={startDate}
+                                        min={getTodayDate()}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="bg-app-bg/50 rounded-xl border border-app-card/30 p-3 text-right">
+                                    <label className="block text-[11px] font-bold text-app-text mb-2">الوقت</label>
+                                    <input
+                                        type="time"
+                                        className="w-full bg-white rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold"
+                                        value={startTime.slice(0, 5)}
+                                        onChange={(e) => setStartTime(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="bg-app-bg/50 rounded-xl border border-app-card/30 p-3 text-right">
+                                <label className="block text-[11px] font-bold text-app-text mb-2">طريقة الدفع</label>
+                                <div className="flex gap-2">
+                                    {(["cash", "knet", "wallet"] as const).map((p) => (
+                                        <button
+                                            key={p}
+                                            type="button"
+                                            onClick={() => setPaymentType(p)}
+                                            className={`flex-1 py-3 rounded-xl text-sm font-bold border transition-all ${paymentType === p
+                                                    ? "bg-app-gold text-white border-app-gold"
+                                                    : "bg-white text-app-text border-app-card/30"
+                                                }`}
+                                        >
+                                            {p === "cash" ? "كاش" : p === "knet" ? "كي نت" : "المحفظة"}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
+                                <span className="text-xs text-app-textSec font-medium">الإجمالي</span>
+                                <span className="text-sm font-bold text-app-gold">{bookingModal.finalTotal.toFixed(3)} د.ك</span>
+                            </div>
+
+                            {bookingModal.subscriptionId != null && (
+                                <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
+                                    <span className="text-xs text-app-textSec font-medium">عدد الجلسات</span>
+                                    <span className="text-sm font-bold text-app-text">{bookingModal.sessionsCount}</span>
+                                </div>
+                            )}
+
+                            {bookingModal.subscriptionId != null && (
+                                <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
+                                    <span className="text-xs text-app-textSec font-medium">صلاحية الباكج</span>
+                                    <span className="text-sm font-bold text-app-text">{bookingModal.validityDays || 30} يوم</span>
+                                </div>
+                            )}
                         </div>
 
-                        <p className="text-sm font-bold text-app-text leading-loose mb-6 px-1">
-                            في حال الالتزام بعدد الجلسات ستحصلين على أروع النتائج بوقت قياسي و تختصري على نفسك الوقت و الجهد
-                        </p>
-
                         <button
-                            onClick={handleConfirmPackageBooking}
+                            onClick={doCreateRequest}
                             disabled={creating}
                             className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform disabled:opacity-60"
                         >
-                            {creating ? "جاري الحجز..." : "الحجز الآن"}
+                            {creating ? "جاري الحجز..." : "تأكيد الحجز"}
                         </button>
                     </div>
                 </div>
@@ -281,7 +376,9 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
 
                 <div className="mt-2 mb-1 flex flex-wrap gap-2">
                     {resolvedAddonGroups.length > 0 && (
-                        <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg">إضافات اختيارية</span>
+                        <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg">
+                            إضافات اختيارية
+                        </span>
                     )}
                 </div>
 
@@ -308,51 +405,13 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                 </div>
             </div>
 
-            <div className="px-8 mb-6 grid grid-cols-2 gap-3">
-                <div className="bg-white rounded-2xl border border-app-card/30 p-3">
-                    <label className="block text-[11px] font-bold text-app-text mb-2">التاريخ</label>
-                    <input
-                        type="date"
-                        className="w-full bg-app-bg rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                    />
-                </div>
-
-                <div className="bg-white rounded-2xl border border-app-card/30 p-3">
-                    <label className="block text-[11px] font-bold text-app-text mb-2">الوقت</label>
-                    <input
-                        type="time"
-                        className="w-full bg-app-bg rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold"
-                        value={startTime.slice(0, 5)}
-                        onChange={(e) => setStartTime(e.target.value)}
-                    />
-                </div>
-
-                <div className="bg-white rounded-2xl border border-app-card/30 p-3 col-span-2">
-                    <label className="block text-[11px] font-bold text-app-text mb-2">طريقة الدفع</label>
-                    <div className="flex gap-2">
-                        {(["cash", "knet", "wallet"] as const).map((p) => (
-                            <button
-                                key={p}
-                                onClick={() => setPaymentType(p)}
-                                className={`flex-1 py-3 rounded-xl text-sm font-bold border transition-all ${paymentType === p ? "bg-app-gold text-white border-app-gold" : "bg-app-bg text-app-text border-app-card/30"
-                                    }`}
-                            >
-                                {p === "cash" ? "كاش" : p === "knet" ? "كي نت" : "المحفظة"}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
             {resolvedAddonGroups.length > 0 && (
                 <div className="px-6 mb-6 space-y-6">
                     {resolvedAddonGroups.map((group) => (
                         <div key={group.id}>
                             <div className="mb-3 flex items-center gap-2">
                                 <h3 className="text-sm font-bold text-app-text">{group.title_ar}</h3>
-                                {group.required && (
+                                {(group as any).required && (
                                     <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-md font-bold">مطلوب</span>
                                 )}
                             </div>
@@ -360,12 +419,12 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                             <div className="space-y-2">
                                 {(group.options ?? []).map((option: any) => {
                                     const isSelected = selectedAddonIds.has(option.id);
-                                    const isRadio = group.type === "single";
+                                    const isRadio = (group as any).type === "single";
 
                                     return (
                                         <div
                                             key={option.id}
-                                            onClick={() => handleGroupOptionSelect(group.id, option.id, group.type)}
+                                            onClick={() => handleGroupOptionSelect(String(group.id), option.id, (group as any).type)}
                                             className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all active:scale-[0.99] ${isSelected ? "bg-app-gold/5 border-app-gold shadow-sm" : "bg-white border-app-card/30 hover:border-app-card"
                                                 }`}
                                         >
@@ -453,7 +512,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                     </div>
                 ) : (
                     <button
-                        onClick={() => doCreateRequest(null)}
+                        onClick={handleSingleSessionClick}
                         disabled={creating || !canSubscribe}
                         className="w-full bg-app-gold text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-app-gold/30 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between disabled:opacity-60"
                     >

@@ -16,6 +16,7 @@ import BookNextSessionPage from './components/BookNextSessionPage';
 import SignUpPage from './components/auth/SignUpPage';
 import LoginPage from './components/auth/LoginPage';
 import OTPPage from './components/auth/OTPPage';
+import Cookies from "js-cookie";
 import HairProfilePage from './components/HairProfilePage';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminLogin from './components/admin/AdminLogin';
@@ -151,12 +152,16 @@ const AppContent: React.FC = () => {
   };
 
   const handleLogout = () => {
+    console.log("sasasasas");
+
     localStorage.removeItem(STORAGE_KEY_IS_LOGGED_IN);
     localStorage.removeItem(STORAGE_KEY_AUTH_MODE);
-    localStorage.removeItem('mezo_auth_user_name');
-    localStorage.removeItem('mezo_auth_user_phone');
-    setAuthStatus('anonymous');
-    navigate('/login');
+    localStorage.removeItem("mezo_auth_user_name");
+    localStorage.removeItem("mezo_auth_user_phone");
+    Cookies.remove("token");
+    Cookies.remove("refresh_token");
+    setAuthStatus("anonymous");
+    navigate("/login");
   };
 
   const showTabBar = !location.pathname.startsWith('/admin') &&

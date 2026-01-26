@@ -39,7 +39,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onPlay }) => {
         </div>
       </div>
       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
-        <p className="text-white text-[10px] font-bold text-right opacity-90">
+        <p className="text-white text-[10px] font-semibold text-right opacity-90">
           {review.clientName || "مراجعة عميلة"}
         </p>
       </div>
@@ -94,10 +94,10 @@ const ReviewsTab: React.FC<{ lang?: string }> = ({ lang = "ar" }) => {
         {/* Error */}
         {reviewsQuery.isError && !reviewsQuery.isLoading && (
           <div className="h-full flex flex-col items-center justify-center text-center px-6">
-            <p className="text-sm font-bold text-app-text mb-4">حدث خطأ أثناء تحميل المراجعات</p>
+            <p className="text-sm font-semibold text-app-text mb-4">حدث خطأ أثناء تحميل المراجعات</p>
             <button
               onClick={() => reviewsQuery.refetch()}
-              className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
+              className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
             >
               إعادة المحاولة
             </button>
@@ -107,7 +107,7 @@ const ReviewsTab: React.FC<{ lang?: string }> = ({ lang = "ar" }) => {
         {/* Empty */}
         {!reviewsQuery.isLoading && !reviewsQuery.isError && reviews.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center px-6">
-            <p className="text-sm font-bold text-app-text">لا يوجد مراجعات حالياً</p>
+            <p className="text-sm font-semibold text-app-text">لا يوجد مراجعات حالياً</p>
           </div>
         )}
 

@@ -11,7 +11,7 @@ const PlaceholderTab: React.FC<PlaceholderTabProps> = ({ title }) => {
       <div className="w-20 h-20 bg-app-card rounded-full flex items-center justify-center mb-6">
         <Construction size={40} className="text-app-gold" />
       </div>
-      <h2 className="text-2xl font-bold text-app-text mb-2">{title}</h2>
+      <h2 className="text-xl font-semibold text-app-text mb-2">{title}</h2>
       <p className="max-w-xs">هذه الصفحة قيد التطوير حالياً. يرجى التحقق من تبويب "إلعب".</p>
     </div>
   );

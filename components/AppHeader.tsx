@@ -10,16 +10,16 @@ interface AppHeaderProps {
   bgClassName?: string;
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({ 
-  title, 
-  onBack, 
+const AppHeader: React.FC<AppHeaderProps> = ({
+  title,
+  onBack,
   actionStart,
   actionEnd,
   className = '',
   bgClassName = 'bg-app-bg/95 backdrop-blur-md'
 }) => {
   return (
-    <header 
+    <header
       className={`absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-6 pt-6 pb-4 shadow-sm border-b border-app-card/30 transition-all ${bgClassName} ${className}`}
     >
       <div className="flex items-center gap-3 min-w-[40px]">
@@ -36,11 +36,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({
       </div>
 
       <div className="flex-1 flex items-center justify-center px-2 min-w-0">
-         {typeof title === 'string' ? (
-           <h1 className="text-xl font-bold text-app-text truncate w-full text-right">{title}</h1>
-         ) : (
-           title
-         )}
+        {typeof title === 'string' ? (
+          <h1 className="text-lg font-semibold text-app-text truncate w-full text-right">{title}</h1>
+        ) : (
+          title
+        )}
       </div>
 
       <div className="flex items-center justify-end gap-3 min-w-[40px]">

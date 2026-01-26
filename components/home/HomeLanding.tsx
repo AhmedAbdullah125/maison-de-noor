@@ -195,7 +195,7 @@ export default function HomeLanding({
                                             </div>
 
                                             <div className="flex-1 min-w-0">
-                                                <div className="font-bold text-sm text-app-text truncate">
+                                                <div className="font-semibold text-sm text-app-text truncate">
                                                     {s.name}
                                                 </div>
                                                 <div className="text-[11px] text-app-textSec truncate">
@@ -204,7 +204,7 @@ export default function HomeLanding({
                                             </div>
 
                                             <div className="flex flex-col items-end gap-1">
-                                                <span className="text-xs font-bold text-app-gold">
+                                                <span className="text-xs font-semibold text-app-gold">
                                                     {s.current_price} د.ك
                                                 </span>
                                                 {s.has_discount && (
@@ -270,7 +270,7 @@ export default function HomeLanding({
 
             {/* Categories */}
             <div className="px-6 mt-8">
-                <h2 className="text-lg font-bold text-app-text mb-4 text-center sm:text-right">الأقسام</h2>
+                <h2 className="text-base font-semibold text-app-text mb-4 text-center sm:text-right">الأقسام</h2>
                 <div className="grid grid-cols-3 gap-4 pb-20">
                     {categories.map((cat) => (
                         <button
@@ -285,7 +285,7 @@ export default function HomeLanding({
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                 />
                             </div>
-                            <span className="mt-2 text-xs font-bold text-app-text text-center truncate w-full px-1">
+                            <span className="mt-2 text-xs font-semibold text-app-text text-center truncate w-full px-1">
                                 {cat.name}
                             </span>
                         </button>

@@ -14,7 +14,7 @@ const SubscriptionBookingPage: React.FC = () => {
         >
           <ArrowRight size={20} />
         </button>
-        <h1 className="text-xl font-bold text-app-text flex-1 truncate text-right">
+        <h1 className="text-lg font-semibold text-app-text flex-1 truncate text-right">
           حجز الجلسة القادمة
         </h1>
       </header>
@@ -23,8 +23,8 @@ const SubscriptionBookingPage: React.FC = () => {
         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 text-app-gold border border-app-card/30 shadow-sm animate-pulse">
           <CalendarDays size={48} strokeWidth={1.5} />
         </div>
-        <h2 className="text-2xl font-bold text-app-text mb-2">قريباً</h2>
-        <p className="text-sm text-app-textSec font-medium max-w-[240px] leading-relaxed">
+        <h2 className="text-xl font-semibold text-app-text mb-2">قريباً</h2>
+        <p className="text-sm text-app-textSec font-normal max-w-[240px] leading-relaxed">
           نعمل على إطلاق نظام حجز المواعيد المباشر من داخل الباقة قريباً.
         </p>
       </div>

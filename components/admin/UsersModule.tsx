@@ -17,7 +17,7 @@ const UsersModule: React.FC<UsersModuleProps> = ({ lang }) => {
 
   return (
     <div className="space-y-6">
-       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="relative w-full md:w-96">
           <input
             type="text"
@@ -34,11 +34,11 @@ const UsersModule: React.FC<UsersModuleProps> = ({ lang }) => {
         <table className="w-full text-start">
           <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.customer}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.phone}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.registered}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.role}</th>
-              <th className={`px-6 py-4 text-xs font-bold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.status}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.customer}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.phone}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.registered}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.role}</th>
+              <th className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.status}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -49,20 +49,20 @@ const UsersModule: React.FC<UsersModuleProps> = ({ lang }) => {
                     <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[#483383]">
                       <UserCheck size={16} />
                     </div>
-                    <span className="font-bold text-gray-900">{user.name}</span>
+                    <span className="font-semibold text-gray-900">{user.name}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500" dir="ltr">{user.phone}</td>
                 <td className="px-6 py-4 text-sm text-gray-400">{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td className="px-6 py-4">
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-blue-50 text-blue-600 uppercase">
+                  <span className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-blue-50 text-blue-600 uppercase">
                     {user.role}
                   </span>
                 </td>
                 <td className={`px-6 py-4 ${lang === 'ar' ? 'text-start' : 'text-end'}`}>
-                   <span className="text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                     {t.active}
-                   </span>
+                  <span className="text-[10px] font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                    {t.active}
+                  </span>
                 </td>
               </tr>
             ))}

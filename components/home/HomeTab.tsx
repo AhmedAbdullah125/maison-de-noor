@@ -56,7 +56,7 @@ export default function HomeTab({ onBook, favourites, onToggleFavourite }: Props
                 title={
                     <div className="flex items-center justify-center gap-2 px-2 cursor-pointer w-full" onClick={() => navigate("/")}>
                         <AppImage src="https://raiyansoft.com/wp-content/uploads/2025/12/fav.png" alt="Mezo Do Noor logo" className="h-7 w-7 object-contain" />
-                        <span className="text-xl font-bold text-app-text font-alexandria truncate">ميزو دو نور</span>
+                        <span className="text-lg font-semibold text-app-text font-alexandria truncate">ميزو دو نور</span>
                     </div>
                 }
             />

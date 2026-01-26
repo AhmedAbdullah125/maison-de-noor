@@ -78,11 +78,11 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
                         </div>
 
                         <div className="flex flex-col text-right">
-                            <span className="font-bold text-base text-app-text">
+                            <span className="font-semibold text-sm text-app-text">
                                 {!isGuest && profileLoading ? "..." : userName}
                             </span>
                             {!isGuest && (
-                                <span className="text-xs text-app-textSec font-medium" dir="ltr">
+                                <span className="text-xs text-app-textSec font-normal" dir="ltr">
                                     {userPhone}
                                 </span>
                             )}
@@ -91,7 +91,7 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
 
                     <button
                         onClick={onAuthClick}
-                        className="flex items-center gap-1.5 text-red-500 font-bold text-xs hover:bg-red-50 px-3 py-2 rounded-xl transition-all active:scale-95"
+                        className="flex items-center gap-1.5 text-red-500 font-semibold text-xs hover:bg-red-50 px-3 py-2 rounded-xl transition-all active:scale-95"
                     >
                         <span className="mt-0.5">{isGuest ? "تسجيل الدخول" : "تسجيل الخروج"}</span>
                         {isGuest ? <LogOut size={18} className="text-red-500 rotate-180" /> : <XCircle size={18} className="text-red-500" />}
@@ -104,11 +104,11 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
                     className="bg-white rounded-[2rem] p-4 flex items-center justify-between shadow-sm mb-6 border border-app-card/30 active:scale-[0.98] transition-all cursor-pointer"
                 >
                     <div className="flex flex-col text-right">
-                        <span className="font-bold text-sm text-app-text">ملف العناية بالفروة و الشعر</span>
+                        <span className="font-semibold text-sm text-app-text">ملف العناية بالفروة و الشعر</span>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <span className={`text-[11px] font-bold ${hairComplete ? "text-green-600" : "text-app-textSec/60"}`}>
+                        <span className={`text-[11px] font-semibold ${hairComplete ? "text-green-600" : "text-app-textSec/60"}`}>
                             {!isGuest && questionnaireLoading ? "..." : hairComplete ? "مكتمل" : "غير مكتمل"}
                         </span>
 
@@ -116,7 +116,7 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
                             {hairComplete ? <Check size={20} strokeWidth={3} /> : <FileText size={20} />}
                         </div>
                         {!hairComplete && !isGuest && (
-                            <span className="text-[10px] text-app-textSec/70 font-semibold">
+                            <span className="text-[10px] text-app-textSec/70 font-medium">
                                 {hairPercent.toFixed(0)}%
                             </span>
                         )}
@@ -127,7 +127,7 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
                 {!isGuest && (
                     <div className="grid grid-cols-2 gap-3 mb-6">
                         <div className="bg-white rounded-[2rem] p-4 shadow-sm border border-app-card/30 flex flex-col items-center justify-center text-center">
-                            <h2 className="text-xs font-bold text-app-text mb-3">QR الحساب</h2>
+                            <h2 className="text-xs font-semibold text-app-text mb-3">QR الحساب</h2>
                             <div className="p-2 bg-white rounded-xl border border-app-card/20 shadow-sm mb-3">
                                 <QRCodeSVG value={`mezo://account/${userPhone}`} size={100} fgColor={APP_COLORS.gold} bgColor="#ffffff" level="M" />
                             </div>
@@ -144,15 +144,15 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
                                         <div className="p-1.5 bg-app-gold/10 rounded-full text-app-gold">
                                             <Wallet size={14} />
                                         </div>
-                                        <span className="text-xs font-bold text-app-text">محفظتي</span>
+                                        <span className="text-xs font-semibold text-app-text">محفظتي</span>
                                     </div>
 
                                     <div className="flex items-baseline gap-1 mb-2">
-                                        <span className="text-2xl font-bold text-app-gold font-alexandria tracking-tight">{wallet}</span>
-                                        <span className="text-[10px] font-medium text-app-textSec">د.ك</span>
+                                        <span className="text-xl font-semibold text-app-gold font-alexandria tracking-tight">{wallet}</span>
+                                        <span className="text-[10px] font-normal text-app-textSec">د.ك</span>
                                     </div>
 
-                                    <p className="text-[12px] text-app-textSec leading-snug opacity-90 font-medium">رصيدك الحالي في المحفظة</p>
+                                    <p className="text-[12px] text-app-textSec leading-snug opacity-90 font-normal">رصيدك الحالي في المحفظة</p>
                                 </div>
                             </div>
                         </div>
@@ -178,7 +178,7 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
                     <div className="flex justify-center items-center py-4 mb-4">
                         <button
                             onClick={onOpenDelete}
-                            className="text-[10px] font-bold text-red-400/80 hover:text-red-500 underline underline-offset-4 active:opacity-60 transition-all font-alexandria"
+                            className="text-[10px] font-semibold text-red-400/80 hover:text-red-500 underline underline-offset-4 active:opacity-60 transition-all font-alexandria"
                         >
                             حذف الحساب
                         </button>
@@ -211,7 +211,7 @@ function MenuRow({
                 <div className="p-2 bg-app-bg rounded-xl text-app-gold group-hover:bg-app-card transition-colors">
                     {icon}
                 </div>
-                <span className="text-sm font-bold text-app-text" dir={dir}>{label}</span>
+                <span className="text-sm font-semibold text-app-text" dir={dir}>{label}</span>
             </div>
             <ChevronLeft className="text-app-textSec opacity-40" size={18} />
         </div>

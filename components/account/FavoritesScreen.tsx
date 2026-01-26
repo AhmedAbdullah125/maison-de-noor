@@ -60,10 +60,10 @@ export default function FavoritesScreen({
                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 text-red-400 border border-app-card/30">
                             <Heart size={48} strokeWidth={1.5} className="text-red-400" />
                         </div>
-                        <h2 className="text-lg font-bold text-app-text mb-2">حدث خطأ أثناء تحميل المفضلة</h2>
+                        <h2 className="text-base font-semibold text-app-text mb-2">حدث خطأ أثناء تحميل المفضلة</h2>
                         <button
                             onClick={() => favQuery.refetch()}
-                            className="mt-4 w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
+                            className="mt-4 w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
                         >
                             إعادة المحاولة
                         </button>
@@ -74,8 +74,8 @@ export default function FavoritesScreen({
                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 text-app-gold/40 border border-app-card/30">
                             <Heart size={48} strokeWidth={1.5} className="text-app-gold" />
                         </div>
-                        <h2 className="text-lg font-bold text-app-text mb-6">لا يوجد أي خدمات في المفضلة</h2>
-                        <button onClick={onNavigateToHome} className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform">
+                        <h2 className="text-base font-semibold text-app-text mb-6">لا يوجد أي خدمات في المفضلة</h2>
+                        <button onClick={onNavigateToHome} className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform">
                             تصفح الخدمات
                         </button>
                     </div>

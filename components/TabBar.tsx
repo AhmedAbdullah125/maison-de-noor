@@ -55,7 +55,7 @@ const TabBar: React.FC<TabBarProps> = ({ currentTab, onTabChange }) => {
                 {tab.icon}
               </div>
               <span
-                className={`text-[10px] transition-colors pb-2 duration-300 ${isActive ? 'text-app-gold font-bold' : 'text-gray-400 font-medium'
+                className={`text-[10px] transition-colors pb-2 duration-300 ${isActive ? 'text-app-gold font-semibold' : 'text-gray-400 font-normal'
                   }`}
               >
                 {tab.label}

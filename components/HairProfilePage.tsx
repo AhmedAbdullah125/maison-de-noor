@@ -189,7 +189,7 @@ const HairProfilePage: React.FC = () => {
 
       return (
         <div className="mb-6">
-          <label className="block text-sm font-bold text-app-text mb-2">
+          <label className="block text-sm font-semibold text-app-text mb-2">
             {q.question} {required && <span className="text-red-500">*</span>}
           </label>
 
@@ -275,7 +275,7 @@ const HairProfilePage: React.FC = () => {
 
       return (
         <div className="mb-6">
-          <label className="block text-sm font-bold text-app-text mb-3">
+          <label className="block text-sm font-semibold text-app-text mb-3">
             {q.question} {required && <span className="text-red-500">*</span>}
           </label>
 
@@ -307,7 +307,7 @@ const HairProfilePage: React.FC = () => {
                     {active && <div className="w-2.5 h-2.5 bg-app-gold rounded-full" />}
                   </div>
 
-                  <span className={`text-xs font-medium ${active ? "text-app-gold" : "text-app-text"}`}>
+                  <span className={`text-xs font-normal ${active ? "text-app-gold" : "text-app-text"}`}>
                     {opt.answer}
                   </span>
                 </label>
@@ -360,10 +360,10 @@ const HairProfilePage: React.FC = () => {
             يرجى تعبئة جميع البيانات المطلوبة بدقة لنتمكن من تقديم أفضل استشارة وعناية مخصصة.
           </p>
 
-          <div className="mt-4 text-center text-[10px] font-bold text-app-textSec/70">{headerProgressText}</div>
+          <div className="mt-4 text-center text-[10px] font-semibold text-app-textSec/70">{headerProgressText}</div>
 
           {serverProgress?.is_complete && (
-            <div className="mt-3 text-center text-[11px] font-bold text-green-600">✅ تم إكمال الاستبيان</div>
+            <div className="mt-3 text-center text-[11px] font-semibold text-green-600">✅ تم إكمال الاستبيان</div>
           )}
         </div>
 
@@ -380,7 +380,7 @@ const HairProfilePage: React.FC = () => {
         <button
           onClick={handleSave}
           disabled={isSaving || isLoading || isFetching}
-          className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+          className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
         >
           {isSaving ? (
             <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />

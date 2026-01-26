@@ -34,9 +34,9 @@ const CategoriesModule: React.FC<CategoriesModuleProps> = ({ lang }) => {
     if (!form.name) return;
 
     const payload = {
-        name: form.name,
-        nameEn: form.nameEn,
-        image: form.image
+      name: form.name,
+      nameEn: form.nameEn,
+      image: form.image
     };
 
     if (editingCategory) {
@@ -75,9 +75,9 @@ const CategoriesModule: React.FC<CategoriesModuleProps> = ({ lang }) => {
           />
           <Search className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-gray-400`} size={18} />
         </div>
-        <button 
+        <button
           onClick={() => handleOpenModal()}
-          className="bg-[#483383] text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-[#483383]/20"
+          className="bg-[#483383] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 shadow-lg shadow-[#483383]/20"
         >
           <Plus size={20} />
           <span>{t.addCategory}</span>
@@ -88,10 +88,10 @@ const CategoriesModule: React.FC<CategoriesModuleProps> = ({ lang }) => {
         <table className="w-full text-start">
           <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.image}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.name}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.services}</th>
-              <th className={`px-6 py-4 text-xs font-bold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.image}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.name}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.services}</th>
+              <th className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -100,9 +100,9 @@ const CategoriesModule: React.FC<CategoriesModuleProps> = ({ lang }) => {
                 <td className="px-6 py-4">
                   <img src={cat.image} className="w-10 h-10 rounded-lg object-cover bg-gray-100" />
                 </td>
-                <td className="px-6 py-4 font-bold text-gray-900">
-                    <p>{cat.name}</p>
-                    {cat.nameEn && <p className="text-xs text-gray-400 font-normal">{cat.nameEn}</p>}
+                <td className="px-6 py-4 font-semibold text-gray-900">
+                  <p>{cat.name}</p>
+                  {cat.nameEn && <p className="text-xs text-gray-400 font-normal">{cat.nameEn}</p>}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">{cat.productIds.length} {t.services}</td>
                 <td className={`px-6 py-4 ${lang === 'ar' ? 'text-start' : 'text-end'}`}>
@@ -121,43 +121,43 @@ const CategoriesModule: React.FC<CategoriesModuleProps> = ({ lang }) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-scaleIn">
             <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-xl font-bold">{editingCategory ? t.edit : t.addCategory}</h3>
+              <h3 className="text-lg font-semibold">{editingCategory ? t.edit : t.addCategory}</h3>
               <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-gray-50 rounded-full"><X size={20} /></button>
             </div>
             <div className="p-8 space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t.categoryNameAr}</label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t.categoryNameAr}</label>
+                <input
+                  type="text"
                   className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-[#483383]"
                   value={form.name}
-                  onChange={e => setForm({...form, name: e.target.value})}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
                   placeholder="مثال: الشعر"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t.categoryNameEn}</label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t.categoryNameEn}</label>
+                <input
+                  type="text"
                   className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-[#483383] text-left"
                   dir="ltr"
                   value={form.nameEn}
-                  onChange={e => setForm({...form, nameEn: e.target.value})}
+                  onChange={e => setForm({ ...form, nameEn: e.target.value })}
                   placeholder="e.g. Hair"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t.imageUrl}</label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t.imageUrl}</label>
+                <input
+                  type="text"
                   className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-[#483383]"
                   value={form.image}
-                  onChange={e => setForm({...form, image: e.target.value})}
+                  onChange={e => setForm({ ...form, image: e.target.value })}
                 />
               </div>
               <div className="flex gap-4 pt-4">
-                <button onClick={() => setModalOpen(false)} className="flex-1 py-4 font-bold text-gray-500 bg-gray-50 rounded-2xl">{t.cancel}</button>
-                <button onClick={handleSave} className="flex-1 py-4 font-bold text-white bg-[#483383] rounded-2xl shadow-lg">{t.save}</button>
+                <button onClick={() => setModalOpen(false)} className="flex-1 py-4 font-semibold text-gray-500 bg-gray-50 rounded-2xl">{t.cancel}</button>
+                <button onClick={handleSave} className="flex-1 py-4 font-semibold text-white bg-[#483383] rounded-2xl shadow-lg">{t.save}</button>
               </div>
             </div>
           </div>

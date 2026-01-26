@@ -183,13 +183,13 @@ const SubscriptionsTab: React.FC = () => {
       <div className="w-24 h-24 bg-app-card/50 rounded-full flex items-center justify-center mb-6 text-app-gold">
         <Ticket size={48} strokeWidth={1.5} />
       </div>
-      <h2 className="text-xl font-bold text-app-text mb-2">لا يوجد لديك أي اشتراك</h2>
+      <h2 className="text-lg font-semibold text-app-text mb-2">لا يوجد لديك أي اشتراك</h2>
       <p className="text-sm text-app-textSec mb-8 max-w-[280px] leading-relaxed">
         عند شراء أي باقة ستظهر هنا ويمكنك حجز الجلسات منها
       </p>
       <button
         onClick={() => navigate("/")}
-        className="bg-app-bg border border-app-gold text-app-gold px-8 py-4 rounded-2xl font-bold flex items-center gap-2 active:scale-95 transition-transform"
+        className="bg-app-bg border border-app-gold text-app-gold px-8 py-4 rounded-2xl font-semibold flex items-center gap-2 active:scale-95 transition-transform"
       >
         <ShoppingBag size={20} />
         <span>استكشفي خدماتنا</span>
@@ -216,7 +216,7 @@ const SubscriptionsTab: React.FC = () => {
           <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
             <Check size={16} strokeWidth={3} />
           </div>
-          <span className="font-bold text-sm">{toastMessage}</span>
+          <span className="font-semibold text-sm">{toastMessage}</span>
         </div>
       )}
 
@@ -241,12 +241,12 @@ const SubscriptionsTab: React.FC = () => {
                 >
                   <div className="px-6 pt-6 pb-4 flex justify-between items-start border-b border-app-bg/60">
                     <div>
-                      <span className="block text-[10px] font-bold text-app-textSec mb-1">
+                      <span className="block text-[10px] font-semibold text-app-textSec mb-1">
                         {service?.name ?? sub.serviceId ? service?.name : "الخدمة"}
                       </span>
-                      <h3 className="text-lg font-bold text-app-text leading-tight">{sub.packageTitle}</h3>
+                      <h3 className="text-base font-semibold text-app-text leading-tight">{sub.packageTitle}</h3>
                     </div>
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${getStatusStyle(sub.status)}`}>
+                    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg border ${getStatusStyle(sub.status)}`}>
                       {getStatusLabel(sub.status)}
                     </span>
                   </div>
@@ -255,21 +255,21 @@ const SubscriptionsTab: React.FC = () => {
                     <div className="col-span-2">
                       <div className="flex items-center gap-2 mb-1.5">
                         <CalendarDays size={16} className="text-app-gold" />
-                        <span className="text-xs font-bold text-app-text">الجلسة القادمة</span>
+                        <span className="text-xs font-semibold text-app-text">الجلسة القادمة</span>
                       </div>
                       {sub.nextSession ? (
                         <div className="bg-app-bg/50 rounded-xl px-3 py-2 flex items-center justify-between border border-app-card/30">
-                          <span className="text-sm font-bold text-app-text" dir="ltr">
+                          <span className="text-sm font-semibold text-app-text" dir="ltr">
                             {sub.nextSession.date}
                           </span>
-                          <span className="text-xs font-medium text-app-textSec" dir="ltr">
+                          <span className="text-xs font-normal text-app-textSec" dir="ltr">
                             {sub.nextSession.time}
                           </span>
                         </div>
                       ) : (
                         <div className="bg-gray-50 rounded-xl px-3 py-2 border border-gray-100 flex flex-col justify-center text-center">
-                          <span className="text-xs font-bold text-app-textSec">غير محدد</span>
-                          <p className="text-[8px] text-app-textSec/60 mt-1 font-medium">
+                          <span className="text-xs font-semibold text-app-textSec">غير محدد</span>
+                          <p className="text-[8px] text-app-textSec/60 mt-1 font-normal">
                             احجزي الجلسة القادمة من زر "احجزي الجلسة القادمة"
                           </p>
                         </div>
@@ -279,9 +279,9 @@ const SubscriptionsTab: React.FC = () => {
                     <div className="col-span-2">
                       <div className="flex items-center gap-1.5 mb-1 opacity-70">
                         <Timer size={13} />
-                        <span className="text-[10px] font-bold">صلاحية الاشتراك</span>
+                        <span className="text-[10px] font-semibold">صلاحية الاشتراك</span>
                       </div>
-                      <span className="text-xs font-bold text-app-text block" dir="ltr">
+                      <span className="text-xs font-semibold text-app-text block" dir="ltr">
                         ينتهي: {sub.expiryDate}
                       </span>
                     </div>
@@ -290,9 +290,9 @@ const SubscriptionsTab: React.FC = () => {
                       <div className="flex justify-between items-end mb-2">
                         <div className="flex items-center gap-1.5">
                           <Ticket size={14} className="text-app-gold" />
-                          <span className="text-xs font-bold text-app-text">الجلسات المتبقية</span>
+                          <span className="text-xs font-semibold text-app-text">الجلسات المتبقية</span>
                         </div>
-                        <span className="text-xs font-bold text-app-gold">
+                        <span className="text-xs font-semibold text-app-gold">
                           {remaining} من {sub.sessionsTotal}
                         </span>
                       </div>
@@ -317,12 +317,12 @@ const SubscriptionsTab: React.FC = () => {
                         {sub.nextSession ? (
                           <button
                             onClick={(e) => handleEditAppointment(e, sub.id)}
-                            className="flex-1 bg-app-gold text-white font-bold py-3 rounded-xl shadow-sm text-sm active:scale-[0.98] transition-all"
+                            className="flex-1 bg-app-gold text-white font-semibold py-3 rounded-xl shadow-sm text-sm active:scale-[0.98] transition-all"
                           >
                             تعديل الموعد
                           </button>
                         ) : (
-                          <button onClick={(e) => handleBookNext(e, sub.id)} className="flex-1 bg-app-gold text-white font-bold py-3 rounded-xl shadow-sm text-sm active:scale-[0.98] transition-all">
+                          <button onClick={(e) => handleBookNext(e, sub.id)} className="flex-1 bg-app-gold text-white font-semibold py-3 rounded-xl shadow-sm text-sm active:scale-[0.98] transition-all">
                             احجزي الجلسة القادمة
                           </button>
                         )}
@@ -333,10 +333,10 @@ const SubscriptionsTab: React.FC = () => {
                       </div>
                     ) : (
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-app-textSec">
+                        <span className="text-xs font-semibold text-app-textSec">
                           {sub.status === "expired" ? "هذا الاشتراك منتهي" : "تم استخدام جميع الجلسات"}
                         </span>
-                        <div className="flex items-center gap-1 text-[10px] text-app-gold font-bold">
+                        <div className="flex items-center gap-1 text-[10px] text-app-gold font-semibold">
                           <span>عرض التفاصيل</span>
                           <ChevronLeft size={14} />
                         </div>

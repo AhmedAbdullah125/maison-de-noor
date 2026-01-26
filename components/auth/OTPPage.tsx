@@ -87,9 +87,9 @@ const OTPPage: React.FC<OTPPageProps> = ({ onLoginSuccess, lang = "ar" }) => {
 
       <div className="flex-1 overflow-y-auto no-scrollbar px-6 pt-24 pb-10 flex flex-col justify-center">
         <div className="text-center mb-10">
-          <h1 className="text-2xl font-bold text-app-text mb-2">كود التفعيل</h1>
+          <h1 className="text-xl font-semibold text-app-text mb-2">كود التفعيل</h1>
           <p className="text-sm text-app-textSec">أدخلي كود التفعيل المرسل بالواتساب</p>
-          <p className="text-xs text-app-gold mt-2 font-bold" dir="ltr">
+          <p className="text-xs text-app-gold mt-2 font-semibold" dir="ltr">
             {phone}
           </p>
         </div>
@@ -104,19 +104,19 @@ const OTPPage: React.FC<OTPPageProps> = ({ onLoginSuccess, lang = "ar" }) => {
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-14 h-14 rounded-2xl border-2 border-app-card bg-white text-center text-2xl font-bold text-app-gold outline-none focus:border-app-gold focus:shadow-lg transition-all"
+              className="w-14 h-14 rounded-2xl border-2 border-app-card bg-white text-center text-xl font-semibold text-app-gold outline-none focus:border-app-gold focus:shadow-lg transition-all"
               inputMode="numeric"
               disabled={loading}
             />
           ))}
         </div>
 
-        {error && <div className="text-red-500 text-xs font-bold text-center mb-6">{error}</div>}
+        {error && <div className="text-red-500 text-xs font-semibold text-center mb-6">{error}</div>}
 
         <button
           onClick={handleVerify}
           disabled={loading}
-          className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform disabled:opacity-60 disabled:active:scale-100"
+          className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform disabled:opacity-60 disabled:active:scale-100"
         >
           {loading ? "جاري التفعيل..." : "تأكيد"}
         </button>

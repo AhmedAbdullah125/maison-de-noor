@@ -94,10 +94,10 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
         <div className="w-20 h-20 bg-app-card rounded-full flex items-center justify-center mb-6">
           <Search size={40} className="text-app-textSec" />
         </div>
-        <h2 className="text-xl font-bold text-app-text mb-4">حدث خطأ أثناء تحميل القسم</h2>
+        <h2 className="text-lg font-semibold text-app-text mb-4">حدث خطأ أثناء تحميل القسم</h2>
         <button
           onClick={() => navigate('/')}
-          className="bg-app-gold text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2"
+          className="bg-app-gold text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2"
         >
           <Home size={18} />
           <span>العودة للرئيسية</span>
@@ -119,11 +119,11 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
               className="w-full h-full object-cover rounded-[1.5rem]"
             />
           </div>
-          <h2 className="text-2xl font-bold text-app-text">{brandInfo.name}</h2>
+          <h2 className="text-xl font-semibold text-app-text">{brandInfo.name}</h2>
         </div>
 
         <div className="mb-6">
-          <h3 className="text-lg font-bold text-app-text mb-4 text-right">
+          <h3 className="text-base font-semibold text-app-text mb-4 text-right">
             خدمات {brandInfo.name}
           </h3>
 

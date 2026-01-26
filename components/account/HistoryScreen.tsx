@@ -104,10 +104,10 @@ export default function HistoryScreen({
                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 text-app-gold/40 border border-app-card/30">
                             <ClipboardList size={48} strokeWidth={1.5} />
                         </div>
-                        <h2 className="text-lg font-bold text-app-text mb-6">لا يوجد أي حجوزات حتى الآن</h2>
+                        <h2 className="text-base font-semibold text-app-text mb-6">لا يوجد أي حجوزات حتى الآن</h2>
                         <button
                             onClick={onNavigateToHome}
-                            className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
+                            className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
                         >
                             استعراض الخدمات
                         </button>
@@ -129,8 +129,8 @@ export default function HistoryScreen({
                                 return (
                                     <div key={order.id} className="bg-white rounded-[2rem] p-6 shadow-sm border border-app-card/30">
                                         <div className="flex items-center justify-between mb-4">
-                                            <span className="text-sm font-bold text-app-text">رقم الحجز: {order.request_number}</span>
-                                            <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${pill}`}>
+                                            <span className="text-sm font-semibold text-app-text">رقم الحجز: {order.request_number}</span>
+                                            <span className={`text-[10px] font-semibold px-3 py-1 rounded-full ${pill}`}>
                                                 {label}
                                             </span>
                                         </div>
@@ -138,15 +138,15 @@ export default function HistoryScreen({
                                         <div className="space-y-2 mb-6">
                                             <div className="flex justify-between text-xs text-app-textSec">
                                                 <span>تاريخ الحجز:</span>
-                                                <span className="font-medium" dir="ltr">
+                                                <span className="font-normal" dir="ltr">
                                                     {dateStr}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between text-xs text-app-textSec">
                                                 <span>الخدمة:</span>
-                                                <span className="font-medium">{order.service || "خدمة محددة"}</span>
+                                                <span className="font-normal">{order.service || "خدمة محددة"}</span>
                                             </div>
-                                            <div className="flex justify-between text-sm font-bold text-app-text">
+                                            <div className="flex justify-between text-sm font-semibold text-app-text">
                                                 <span>الإجمالي:</span>
                                                 <span className="text-app-gold">{formatMoney(order.final_price)}</span>
                                             </div>
@@ -154,7 +154,7 @@ export default function HistoryScreen({
 
                                         <button
                                             onClick={() => onOpenOrder(String(order.id))}
-                                            className="w-full py-3 text-app-gold font-bold text-sm bg-app-bg rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+                                            className="w-full py-3 text-app-gold font-semibold text-sm bg-app-bg rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
                                         >
                                             عرض تفاصيل الحجز
                                         </button>

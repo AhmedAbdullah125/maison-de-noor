@@ -95,7 +95,7 @@ const AdminDashboard: React.FC = () => {
         className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#100F19] text-white transition-all duration-300 flex flex-col fixed h-full z-50 ${lang === 'ar' ? 'right-0' : 'left-0'}`}
       >
         <div className="p-6 flex items-center justify-between border-b border-white/10">
-          <div className={`${isSidebarOpen ? 'block' : 'hidden'} font-bold text-lg flex items-center gap-2`}>
+          <div className={`${isSidebarOpen ? 'block' : 'hidden'} font-semibold text-base flex items-center gap-2`}>
             <div className="w-8 h-8 bg-[#483383] rounded-lg flex items-center justify-center text-white">M</div>
             <span>Admin</span>
           </div>
@@ -115,7 +115,7 @@ const AdminDashboard: React.FC = () => {
                   }`}
               >
                 <span className="shrink-0">{item.icon}</span>
-                {isSidebarOpen && <span className="font-medium text-sm">{item.label}</span>}
+                {isSidebarOpen && <span className="font-normal text-sm">{item.label}</span>}
               </Link>
             );
           })}
@@ -127,20 +127,20 @@ const AdminDashboard: React.FC = () => {
             className="w-full flex items-center gap-4 p-3 rounded-xl text-red-400 hover:bg-red-400/10 transition-all"
           >
             <LogOut size={20} />
-            {isSidebarOpen && <span className="font-medium text-sm">{t.logout}</span>}
+            {isSidebarOpen && <span className="font-normal text-sm">{t.logout}</span>}
           </button>
         </div>
       </aside>
 
       <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? (lang === 'ar' ? 'mr-64' : 'ml-64') : (lang === 'ar' ? 'mr-20' : 'ml-20')} flex flex-col min-h-screen h-screen overflow-hidden`}>
         <header className="bg-white border-b border-gray-100 p-6 flex items-center justify-between shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-lg font-semibold text-gray-900">
             {navItems.find(i => i.path === location.pathname)?.label || t.dashboard}
           </h2>
           <div className="flex items-center gap-6">
             <button
               onClick={toggleLang}
-              className="flex items-center gap-2 text-sm font-bold text-[#483383] hover:bg-gray-50 px-3 py-2 rounded-xl transition-all"
+              className="flex items-center gap-2 text-sm font-semibold text-[#483383] hover:bg-gray-50 px-3 py-2 rounded-xl transition-all"
             >
               <Languages size={18} />
               <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
@@ -148,8 +148,8 @@ const AdminDashboard: React.FC = () => {
 
             <div className="flex items-center gap-4">
               <div className={`flex flex-col ${lang === 'ar' ? 'items-start' : 'items-end'}`}>
-                <span className="text-sm font-bold text-gray-900">{currentManager.fullName}</span>
-                <span className="text-[10px] font-medium text-gray-400">{currentManager.email}</span>
+                <span className="text-sm font-semibold text-gray-900">{currentManager.fullName}</span>
+                <span className="text-[10px] font-normal text-gray-400">{currentManager.email}</span>
               </div>
               <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200" />
             </div>

@@ -16,8 +16,8 @@ const AdminLogin: React.FC = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const data = db.getData();
-    const manager = data.managers.find(m => 
-      m.username === credentials.username && 
+    const manager = data.managers.find(m =>
+      m.username === credentials.username &&
       m.password === credentials.password
     );
 
@@ -26,10 +26,10 @@ const AdminLogin: React.FC = () => {
         setError(lang === 'ar' ? 'حسابك معطل حالياً.' : 'Your account is currently disabled.');
         return;
       }
-      
+
       // Update last login
       db.updateEntity('managers', manager.id, { lastLoginAt: new Date().toISOString() });
-      
+
       localStorage.setItem('salon_admin_session', JSON.stringify(manager));
       db.addLog(manager.fullName, 'admin', 'login', 'Manager', manager.id, 'Manager Login', `Logged into dashboard`);
       navigate('/admin');
@@ -45,13 +45,13 @@ const AdminLogin: React.FC = () => {
           <div className="w-16 h-16 bg-[#483383] text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Lock size={32} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">{t.adminLogin}</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{t.adminLogin}</h1>
           <p className="text-gray-500 mt-2">{t.signInMessage}</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">{t.username}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t.username}</label>
             <div className="relative">
               <input
                 type="text"
@@ -64,7 +64,7 @@ const AdminLogin: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">{t.password}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t.password}</label>
             <div className="relative">
               <input
                 type="password"
@@ -76,11 +76,11 @@ const AdminLogin: React.FC = () => {
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm font-medium text-center">{error}</p>}
+          {error && <p className="text-red-500 text-sm font-normal text-center">{error}</p>}
 
           <button
             type="submit"
-            className="w-full bg-[#483383] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-[#352C48] transition-all"
+            className="w-full bg-[#483383] text-white font-semibold py-4 rounded-xl shadow-lg hover:bg-[#352C48] transition-all"
           >
             {t.signIn}
           </button>

@@ -172,7 +172,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
             {/* Photo */}
             <div className="flex items-center justify-between">
               <div className="flex flex-col text-right">
-                <span className="text-sm font-bold text-app-text">الصورة</span>
+                <span className="text-sm font-semibold text-app-text">الصورة</span>
                 <span className="text-[11px] text-app-textSec">اختياري</span>
               </div>
 
@@ -197,35 +197,35 @@ const AccountTab: React.FC<AccountTabProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-app-text mb-2">الاسم</label>
+              <label className="block text-sm font-semibold text-app-text mb-2">الاسم</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-bold text-app-text"
+                className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-semibold text-app-text"
                 placeholder="الاسم"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-app-text mb-2">البريد الإلكتروني</label>
+              <label className="block text-sm font-semibold text-app-text mb-2">البريد الإلكتروني</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-bold text-app-text"
+                className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-semibold text-app-text"
                 placeholder="email@example.com"
                 dir="ltr"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-app-text mb-2">رقم الهاتف</label>
+              <label className="block text-sm font-semibold text-app-text mb-2">رقم الهاتف</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-bold text-app-text"
+                className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-semibold text-app-text"
                 dir="ltr"
                 placeholder="رقم الهاتف"
               />
@@ -237,7 +237,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
           <button
             onClick={handleSave}
             disabled={updateMut.isPending}
-            className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
+            className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
           >
             {updateMut.isPending ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -278,16 +278,16 @@ const AccountTab: React.FC<AccountTabProps> = ({
               </div>
 
               <div className="flex flex-col text-right">
-                <span className="font-bold text-base text-app-text">
+                <span className="font-semibold text-sm text-app-text">
                   {!isGuest && profileQuery.isLoading ? "..." : userName}
                 </span>
-                {!isGuest && <span className="text-xs text-app-textSec font-medium" dir="ltr">{userPhone}</span>}
+                {!isGuest && <span className="text-xs text-app-textSec font-normal" dir="ltr">{userPhone}</span>}
               </div>
             </div>
 
             <button
               onClick={handleAuthButton}
-              className="flex items-center gap-1.5 text-red-500 font-bold text-xs hover:bg-red-50 px-3 py-2 rounded-xl transition-all active:scale-95"
+              className="flex items-center gap-1.5 text-red-500 font-semibold text-xs hover:bg-red-50 px-3 py-2 rounded-xl transition-all active:scale-95"
             >
               <span className="mt-0.5">{isGuest ? "تسجيل الدخول" : "تسجيل الخروج"}</span>
               {isGuest ? <LogOut size={18} className="text-red-500 rotate-180" /> : <XCircle size={18} className="text-red-500" />}
@@ -300,11 +300,11 @@ const AccountTab: React.FC<AccountTabProps> = ({
             className="bg-white rounded-[2rem] p-4 flex items-center justify-between shadow-sm mb-6 border border-app-card/30 active:scale-[0.98] transition-all cursor-pointer"
           >
             <div className="flex flex-col text-right">
-              <span className="font-bold text-sm text-app-text">ملف العناية بالفروة و الشعر</span>
+              <span className="font-semibold text-sm text-app-text">ملف العناية بالفروة و الشعر</span>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className={`text-[11px] font-bold ${isHairProfileComplete ? "text-green-600" : "text-app-textSec/60"}`}>
+              <span className={`text-[11px] font-semibold ${isHairProfileComplete ? "text-green-600" : "text-app-textSec/60"}`}>
                 {isHairProfileComplete ? "مكتمل" : "غير مكتمل"}
               </span>
               <div className={`p-2.5 rounded-2xl flex items-center justify-center transition-colors ${isHairProfileComplete ? "bg-green-50 text-green-600" : "bg-app-bg text-app-gold"}`}>
@@ -317,7 +317,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
           {!isGuest && (
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div className="bg-white rounded-[2rem] p-4 shadow-sm border border-app-card/30 flex flex-col items-center justify-center text-center">
-                <h2 className="text-xs font-bold text-app-text mb-3">QR الحساب</h2>
+                <h2 className="text-xs font-semibold text-app-text mb-3">QR الحساب</h2>
                 <div className="p-2 bg-white rounded-xl border border-app-card/20 shadow-sm mb-3">
                   <QRCodeSVG
                     value={`mezo://account/${userPhone}`}
@@ -340,15 +340,15 @@ const AccountTab: React.FC<AccountTabProps> = ({
                       <div className="p-1.5 bg-app-gold/10 rounded-full text-app-gold">
                         <Wallet size={14} />
                       </div>
-                      <span className="text-xs font-bold text-app-text">محفظتي</span>
+                      <span className="text-xs font-semibold text-app-text">محفظتي</span>
                     </div>
 
                     <div className="flex items-baseline gap-1 mb-2">
-                      <span className="text-2xl font-bold text-app-gold font-alexandria tracking-tight">{wallet}</span>
-                      <span className="text-[10px] font-medium text-app-textSec">د.ك</span>
+                      <span className="text-xl font-semibold text-app-gold font-alexandria tracking-tight">{wallet}</span>
+                      <span className="text-[10px] font-normal text-app-textSec">د.ك</span>
                     </div>
 
-                    <p className="text-[12px] text-app-textSec leading-snug opacity-90 font-medium">
+                    <p className="text-[12px] text-app-textSec leading-snug opacity-90 font-normal">
                       رصيدك الحالي في المحفظة
                     </p>
                   </div>
@@ -368,7 +368,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                   <div className="p-2 bg-app-bg rounded-xl text-app-gold group-hover:bg-app-card transition-colors">
                     <UserCog size={20} />
                   </div>
-                  <span className="text-sm font-bold text-app-text">تعديل الحساب</span>
+                  <span className="text-sm font-semibold text-app-text">تعديل الحساب</span>
                 </div>
                 <ChevronLeft className="text-app-textSec opacity-40" size={18} />
               </div>
@@ -382,7 +382,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <div className="p-2 bg-app-bg rounded-xl text-app-gold group-hover:bg-app-card transition-colors">
                   <Heart size={20} />
                 </div>
-                <span className="text-sm font-bold text-app-text">الخدمات المفضلة</span>
+                <span className="text-sm font-semibold text-app-text">الخدمات المفضلة</span>
               </div>
               <ChevronLeft className="text-app-textSec opacity-40" size={18} />
             </div>
@@ -395,7 +395,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <div className="p-2 bg-app-bg rounded-xl text-app-gold group-hover:bg-app-card transition-colors">
                   <ClipboardList size={20} />
                 </div>
-                <span className="text-sm font-bold text-app-text">سجل الحجوزات</span>
+                <span className="text-sm font-semibold text-app-text">سجل الحجوزات</span>
               </div>
               <ChevronLeft className="text-app-textSec opacity-40" size={18} />
             </div>
@@ -408,7 +408,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <div className="p-2 bg-app-bg rounded-xl text-app-gold group-hover:bg-app-card transition-colors">
                   <Video size={20} />
                 </div>
-                <span className="text-sm font-bold text-app-text">تجارب عميلاتنا</span>
+                <span className="text-sm font-semibold text-app-text">تجارب عميلاتنا</span>
               </div>
               <ChevronLeft className="text-app-textSec opacity-40" size={18} />
             </div>
@@ -418,7 +418,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <div className="p-2 bg-app-bg rounded-xl text-app-gold group-hover:bg-app-card transition-colors">
                   <Info size={20} />
                 </div>
-                <span className="text-sm font-bold text-app-text">عن Mezo Do Noor</span>
+                <span className="text-sm font-semibold text-app-text">عن Mezo Do Noor</span>
               </div>
               <ChevronLeft className="text-app-textSec opacity-40" size={18} />
             </div>
@@ -428,7 +428,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <div className="p-2 bg-app-bg rounded-xl text-app-gold group-hover:bg-app-card transition-colors">
                   <Mail size={20} />
                 </div>
-                <span className="text-sm font-bold text-app-text">contact@mezodonoor.com</span>
+                <span className="text-sm font-semibold text-app-text">contact@mezodonoor.com</span>
               </div>
               <ChevronLeft className="text-app-textSec opacity-40" size={18} />
             </div>
@@ -438,7 +438,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <div className="p-2 bg-app-bg rounded-xl text-app-gold group-hover:bg-app-card transition-colors">
                   <Phone size={20} />
                 </div>
-                <span className="text-sm font-bold text-app-text" dir="ltr">
+                <span className="text-sm font-semibold text-app-text" dir="ltr">
                   96554647655
                 </span>
               </div>
@@ -450,7 +450,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
             <div className="flex justify-center items-center py-4 mb-4">
               <button
                 onClick={() => setShowDeleteModal(true)}
-                className="text-[10px] font-bold text-red-400/80 hover:text-red-500 underline underline-offset-4 active:opacity-60 transition-all font-alexandria"
+                className="text-[10px] font-semibold text-red-400/80 hover:text-red-500 underline underline-offset-4 active:opacity-60 transition-all font-alexandria"
               >
                 حذف الحساب
               </button>
@@ -470,10 +470,10 @@ const AccountTab: React.FC<AccountTabProps> = ({
             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 text-app-gold/40 border border-app-card/30">
               <ClipboardList size={48} strokeWidth={1.5} />
             </div>
-            <h2 className="text-lg font-bold text-app-text mb-6">لا يوجد أي حجوزات حتى الآن</h2>
+            <h2 className="text-base font-semibold text-app-text mb-6">لا يوجد أي حجوزات حتى الآن</h2>
             <button
               onClick={onNavigateToHome}
-              className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
+              className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
             >
               استعراض الخدمات
             </button>
@@ -483,8 +483,8 @@ const AccountTab: React.FC<AccountTabProps> = ({
             {orders.map((order) => (
               <div key={order.id} className="bg-white rounded-[2rem] p-6 shadow-sm border border-app-card/30">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-bold text-app-text">رقم الحجز: {order.id}</span>
-                  <span className="text-[10px] font-bold px-3 py-1 bg-green-50 text-green-600 rounded-full">
+                  <span className="text-sm font-semibold text-app-text">رقم الحجز: {order.id}</span>
+                  <span className="text-[10px] font-semibold px-3 py-1 bg-green-50 text-green-600 rounded-full">
                     {order.status}
                   </span>
                 </div>
@@ -492,15 +492,15 @@ const AccountTab: React.FC<AccountTabProps> = ({
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between text-xs text-app-textSec">
                     <span>تاريخ الحجز:</span>
-                    <span className="font-medium" dir="ltr">
+                    <span className="font-normal" dir="ltr">
                       {order.date}
                     </span>
                   </div>
                   <div className="flex justify-between text-xs text-app-textSec">
                     <span>الخدمة:</span>
-                    <span className="font-medium">{order.packageName || "خدمة محددة"}</span>
+                    <span className="font-normal">{order.packageName || "خدمة محددة"}</span>
                   </div>
-                  <div className="flex justify-between text-sm font-bold text-app-text">
+                  <div className="flex justify-between text-sm font-semibold text-app-text">
                     <span>الإجمالي:</span>
                     <span className="text-app-gold">{order.total}</span>
                   </div>
@@ -508,7 +508,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
 
                 <button
                   onClick={() => navigate(`/account/order/${order.id}`)}
-                  className="w-full py-3 text-app-gold font-bold text-sm bg-app-bg rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+                  className="w-full py-3 text-app-gold font-semibold text-sm bg-app-bg rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
                 >
                   عرض تفاصيل الحجز
                 </button>
@@ -534,31 +534,31 @@ const AccountTab: React.FC<AccountTabProps> = ({
               <div className="p-2 bg-app-bg rounded-xl text-app-gold">
                 <ShoppingBag size={20} />
               </div>
-              <span className="text-sm font-bold text-app-text">ملخص الحجز</span>
+              <span className="text-sm font-semibold text-app-text">ملخص الحجز</span>
             </div>
 
             <div className="space-y-3">
               <div className="flex justify-between text-xs text-app-textSec">
                 <span>رقم الحجز</span>
-                <span className="font-bold text-app-text">#{selectedOrder.id}</span>
+                <span className="font-semibold text-app-text">#{selectedOrder.id}</span>
               </div>
               <div className="flex justify-between text-xs text-app-textSec">
                 <span>التاريخ</span>
-                <span className="font-medium text-app-text" dir="ltr">
+                <span className="font-normal text-app-text" dir="ltr">
                   {selectedOrder.date}
                 </span>
               </div>
               <div className="flex justify-between text-xs text-app-textSec">
                 <span>الحالة</span>
-                <span className="text-green-600 font-bold">{selectedOrder.status}</span>
+                <span className="text-green-600 font-semibold">{selectedOrder.status}</span>
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-app-card/30">
             <div className="pt-3 flex justify-between">
-              <span className="text-sm font-bold text-app-text">الإجمالي الكلي</span>
-              <span className="text-lg font-bold text-app-gold">{selectedOrder.total}</span>
+              <span className="text-sm font-semibold text-app-text">الإجمالي الكلي</span>
+              <span className="text-base font-semibold text-app-gold">{selectedOrder.total}</span>
             </div>
           </div>
         </div>
@@ -575,10 +575,10 @@ const AccountTab: React.FC<AccountTabProps> = ({
             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 text-app-gold/40 border border-app-card/30">
               <Heart size={48} strokeWidth={1.5} className="text-app-gold" />
             </div>
-            <h2 className="text-lg font-bold text-app-text mb-6">لا يوجد أي خدمات في المفضلة</h2>
+            <h2 className="text-base font-semibold text-app-text mb-6">لا يوجد أي خدمات في المفضلة</h2>
             <button
               onClick={onNavigateToHome}
-              className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
+              className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
             >
               تصفح الخدمات
             </button>
@@ -653,7 +653,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
           <div className="mb-10 space-y-3">
             <button
               onClick={handleAddAction}
-              className="w-full bg-app-gold active:bg-app-goldDark text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+              className="w-full bg-app-gold active:bg-app-goldDark text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
             >
               <ShoppingBag size={20} />
               <span>
@@ -689,7 +689,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
             <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
               <AlertTriangle size={32} />
             </div>
-            <h2 className="text-base font-bold text-app-text mb-2 font-alexandria">تأكيد حذف الحساب</h2>
+            <h2 className="text-sm font-semibold text-app-text mb-2 font-alexandria">تأكيد حذف الحساب</h2>
             <p className="text-xs text-app-textSec leading-loose mb-6 font-alexandria">
               هل أنتِ متأكدة من حذف حسابك؟ لا يمكن التراجع عن هذه الخطوة.
             </p>
@@ -698,14 +698,14 @@ const AccountTab: React.FC<AccountTabProps> = ({
               <button
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="w-full py-3.5 bg-red-50 text-red-500 font-bold rounded-xl text-xs active:scale-95 transition-transform font-alexandria disabled:opacity-70"
+                className="w-full py-3.5 bg-red-50 text-red-500 font-semibold rounded-xl text-xs active:scale-95 transition-transform font-alexandria disabled:opacity-70"
               >
                 {isDeleting ? "جاري الحذف..." : "تأكيد الحذف"}
               </button>
 
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="w-full py-3.5 bg-app-bg text-app-text font-bold rounded-xl text-xs active:scale-95 transition-transform font-alexandria"
+                className="w-full py-3.5 bg-app-bg text-app-text font-semibold rounded-xl text-xs active:scale-95 transition-transform font-alexandria"
               >
                 إلغاء
               </button>

@@ -112,7 +112,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/90 to-transparent z-10" />
 
         <div className="absolute inset-x-0 bottom-0 px-3 pb-7 pt-4 z-20 pointer-events-none">
-          <h3 className="text-xs font-bold text-app-text text-right w-full line-clamp-2 font-alexandria leading-relaxed">
+          <h3 className="text-xs font-semibold text-app-text text-right w-full line-clamp-2 font-alexandria leading-relaxed">
             {product.name}
           </h3>
         </div>
@@ -143,7 +143,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
       <div className="p-3 pt-2 mt-auto flex items-center justify-between bg-white relative z-10">
         <div className="flex flex-col items-start">
-          <span className="text-sm font-bold text-app-gold font-alexandria leading-none">
+          <span className="text-sm font-semibold text-app-gold font-alexandria leading-none">
             {product.price}
           </span>
           {product.oldPrice && (
@@ -158,7 +158,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             e.stopPropagation();
             if (!wasSwipe.current) onClick(product);
           }}
-          className="bg-app-bg text-app-text font-bold text-[10px] py-1.5 px-3 rounded-xl border border-app-card hover:bg-app-card transition-colors shadow-sm flex items-center gap-1 active:scale-90"
+          className="bg-app-bg text-app-text font-semibold text-[10px] py-1.5 px-3 rounded-xl border border-app-card hover:bg-app-card transition-colors shadow-sm flex items-center gap-1 active:scale-90"
         >
           <span>التفاصيل</span>
         </button>

@@ -40,9 +40,9 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
           />
           <Search className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-gray-400`} size={18} />
         </div>
-        <button 
+        <button
           onClick={() => navigate('/admin/services/new')}
-          className="bg-[#483383] text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-[#483383]/20"
+          className="bg-[#483383] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 shadow-lg shadow-[#483383]/20"
         >
           <Plus size={20} />
           <span>{t.addService}</span>
@@ -53,10 +53,10 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
         <table className="w-full text-start">
           <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.service}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.price}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.duration}</th>
-              <th className={`px-6 py-4 text-xs font-bold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.service}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.price}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.duration}</th>
+              <th className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -66,12 +66,12 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
                   <div className="flex items-center gap-4">
                     <img src={svc.image} className="w-10 h-10 rounded-lg object-cover bg-gray-100" />
                     <div>
-                      <p className="font-bold text-gray-900">{svc.name}</p>
+                      <p className="font-semibold text-gray-900">{svc.name}</p>
                       <p className="text-[10px] text-gray-400 truncate max-w-[200px]">{svc.description}</p>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 font-bold text-[#483383]">{svc.price}</td>
+                <td className="px-6 py-4 font-semibold text-[#483383]">{svc.price}</td>
                 <td className="px-6 py-4 text-sm text-gray-500">{svc.duration}</td>
                 <td className={`px-6 py-4 ${lang === 'ar' ? 'text-start' : 'text-end'}`}>
                   <div className={`flex items-center gap-2 ${lang === 'ar' ? 'justify-start' : 'justify-end'}`}>

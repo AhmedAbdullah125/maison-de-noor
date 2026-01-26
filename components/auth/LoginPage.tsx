@@ -91,7 +91,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, lang = "ar" }) =>
     <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen">
       <div className="flex-1 overflow-y-auto no-scrollbar px-6 pt-12 pb-10 flex flex-col justify-center">
         <div className="text-center mb-10">
-          <h1 className="text-2xl font-bold text-app-text mb-2">تسجيل الدخول</h1>
+          <h1 className="text-xl font-semibold text-app-text mb-2">تسجيل الدخول</h1>
           <p className="text-sm text-app-textSec">أهلاً بك مجدداً في ميزو دو نور</p>
         </div>
 
@@ -124,7 +124,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, lang = "ar" }) =>
         </div>
 
         {error && (
-          <div className="text-red-500 text-xs font-bold text-center mb-6 bg-red-50 py-2 rounded-lg">
+          <div className="text-red-500 text-xs font-semibold text-center mb-6 bg-red-50 py-2 rounded-lg">
             {error}
           </div>
         )}
@@ -132,14 +132,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, lang = "ar" }) =>
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform mb-6 disabled:opacity-60 disabled:active:scale-100"
+          className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform mb-6 disabled:opacity-60 disabled:active:scale-100"
         >
           {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
         </button>
 
         <button
           onClick={() => navigate("/signup")}
-          className="w-full text-app-textSec text-sm font-medium underline decoration-app-textSec/30 underline-offset-4 active:opacity-70"
+          className="w-full text-app-textSec text-sm font-normal underline decoration-app-textSec/30 underline-offset-4 active:opacity-70"
         >
           ليس لديكي حسابي سجلي حساب جديد
         </button>

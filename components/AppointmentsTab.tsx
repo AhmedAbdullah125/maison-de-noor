@@ -168,7 +168,7 @@ const AppointmentsTab: React.FC = () => {
           <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
             <Check size={16} strokeWidth={3} />
           </div>
-          <span className="font-bold text-sm">{toastMessage}</span>
+          <span className="font-semibold text-sm">{toastMessage}</span>
         </div>
       )}
 
@@ -194,18 +194,18 @@ const AppointmentsTab: React.FC = () => {
                       )}
                     </div>
                     <div>
-                      <h3 className="font-bold text-app-text">موعد قادم</h3>
-                      <p className="text-xs text-app-textSec text-green-600 font-medium">
+                      <h3 className="font-semibold text-app-text">موعد قادم</h3>
+                      <p className="text-xs text-app-textSec text-green-600 font-normal">
                         حالة الحجز: {appointment.status === "upcoming" ? "مؤكد" : appointment.status}
                       </p>
                     </div>
                   </div>
 
                   {appointment.source === "subscription" && (
-                    <span className="bg-app-gold text-white text-[10px] font-bold px-2 py-1 rounded-lg">اشتراك</span>
+                    <span className="bg-app-gold text-white text-[10px] font-semibold px-2 py-1 rounded-lg">اشتراك</span>
                   )}
                   {appointment.bookingType === "HOME_SERVICE" && (
-                    <span className="bg-green-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg">زيارة منزلية</span>
+                    <span className="bg-green-600 text-white text-[10px] font-semibold px-2 py-1 rounded-lg">زيارة منزلية</span>
                   )}
                 </div>
 
@@ -215,8 +215,8 @@ const AppointmentsTab: React.FC = () => {
                       <Info size={20} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-app-textSec uppercase tracking-wider">الخدمات</span>
-                      <span className="text-sm font-bold text-app-text truncate max-w-[220px]">
+                      <span className="text-[10px] font-semibold text-app-textSec uppercase tracking-wider">الخدمات</span>
+                      <span className="text-sm font-semibold text-app-text truncate max-w-[220px]">
                         {appointment.serviceName}
                       </span>
                     </div>
@@ -227,8 +227,8 @@ const AppointmentsTab: React.FC = () => {
                       <CalendarDays size={20} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-app-textSec uppercase tracking-wider">تاريخ الموعد</span>
-                      <span className="text-sm font-bold text-app-text" dir="ltr">
+                      <span className="text-[10px] font-semibold text-app-textSec uppercase tracking-wider">تاريخ الموعد</span>
+                      <span className="text-sm font-semibold text-app-text" dir="ltr">
                         {appointment.dateISO}
                       </span>
                     </div>
@@ -239,8 +239,8 @@ const AppointmentsTab: React.FC = () => {
                       <Clock size={20} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-app-textSec uppercase tracking-wider">وقت الموعد</span>
-                      <span className="text-sm font-bold text-app-text" dir="ltr">
+                      <span className="text-[10px] font-semibold text-app-textSec uppercase tracking-wider">وقت الموعد</span>
+                      <span className="text-sm font-semibold text-app-text" dir="ltr">
                         {appointment.time24}
                       </span>
                     </div>
@@ -252,10 +252,10 @@ const AppointmentsTab: React.FC = () => {
                         <MapPin size={18} />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider mb-1">
+                        <span className="text-[10px] font-semibold text-green-700 uppercase tracking-wider mb-1">
                           العنوان المسجل
                         </span>
-                        <p className="text-xs font-bold text-app-text leading-relaxed">
+                        <p className="text-xs font-semibold text-app-text leading-relaxed">
                           {appointment.address.area}, قطعة {appointment.address.block}, شارع {appointment.address.street}
                           <br />
                           منزل {appointment.address.building}{" "}
@@ -268,11 +268,11 @@ const AppointmentsTab: React.FC = () => {
                   {/* Optional footer row (nice-to-have) */}
                   {(appointment.requestNumber || appointment.finalPrice) && (
                     <div className="bg-app-bg/40 rounded-2xl p-3 border border-app-card/30 flex items-center justify-between">
-                      <div className="text-[10px] font-bold text-app-textSec">
+                      <div className="text-[10px] font-semibold text-app-textSec">
                         {appointment.requestNumber ? `رقم الطلب: ${appointment.requestNumber}` : ""}
                       </div>
                       {appointment.finalPrice ? (
-                        <div className="text-xs font-bold text-app-gold">{Number(appointment.finalPrice).toFixed?.(3) ?? appointment.finalPrice} د.ك</div>
+                        <div className="text-xs font-semibold text-app-gold">{Number(appointment.finalPrice).toFixed?.(3) ?? appointment.finalPrice} د.ك</div>
                       ) : null}
                     </div>
                   )}
@@ -286,7 +286,7 @@ const AppointmentsTab: React.FC = () => {
               <CalendarDays size={48} strokeWidth={1.5} />
             </div>
 
-            <h2 className="text-lg font-bold text-app-text mb-2 text-center">لا توجد مواعيد حالياً</h2>
+            <h2 className="text-base font-semibold text-app-text mb-2 text-center">لا توجد مواعيد حالياً</h2>
             <p className="text-sm text-app-textSec text-center max-w-[200px]">
               يمكنك حجز موعد جديد من خلال اختيار الخدمات من الصفحة الرئيسية أو من اشتراكاتي
             </p>

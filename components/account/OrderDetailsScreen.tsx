@@ -95,7 +95,7 @@ export default function HistoryScreen({
                                 <div className="p-2 bg-app-bg rounded-xl text-app-gold">
                                     <ShoppingBag size={20} />
                                 </div>
-                                <span className="text-sm font-bold text-app-text">تفاصيل الحجز</span>
+                                <span className="text-sm font-semibold text-app-text">تفاصيل الحجز</span>
                             </div>
 
                             <button
@@ -111,38 +111,38 @@ export default function HistoryScreen({
                                 <div className="space-y-3">
                                     <div className="flex justify-between text-xs text-app-textSec">
                                         <span>رقم الحجز</span>
-                                        <span className="font-bold text-app-text" dir="ltr">
+                                        <span className="font-semibold text-app-text" dir="ltr">
                                             {selected.request_number}
                                         </span>
                                     </div>
 
                                     <div className="flex justify-between text-xs text-app-textSec">
                                         <span>الخدمة</span>
-                                        <span className="font-bold text-app-text">{selected.service || "خدمة محددة"}</span>
+                                        <span className="font-semibold text-app-text">{selected.service || "خدمة محددة"}</span>
                                     </div>
 
                                     <div className="flex justify-between text-xs text-app-textSec">
                                         <span>التاريخ</span>
-                                        <span className="font-medium text-app-text" dir="ltr">
+                                        <span className="font-normal text-app-text" dir="ltr">
                                             {`${selected.start_date} ${formatTime(selected.start_time)}`.trim()}
                                         </span>
                                     </div>
 
                                     <div className="flex justify-between text-xs text-app-textSec">
                                         <span>الحالة</span>
-                                        <span className={`text-[11px] font-bold px-3 py-1 rounded-full ${statusPillClass(selected.status, selected.is_confirmed)}`}>
+                                        <span className={`text-[11px] font-semibold px-3 py-1 rounded-full ${statusPillClass(selected.status, selected.is_confirmed)}`}>
                                             {mapStatusLabel(selected.status, selected.is_confirmed)}
                                         </span>
                                     </div>
 
                                     <div className="flex justify-between text-xs text-app-textSec">
                                         <span>الدفع</span>
-                                        <span className="font-bold text-app-text">{selected.payment_type || "-"}</span>
+                                        <span className="font-semibold text-app-text">{selected.payment_type || "-"}</span>
                                     </div>
 
                                     <div className="flex justify-between text-xs text-app-textSec">
                                         <span>حالة الدفع</span>
-                                        <span className="font-bold text-app-text">{selected.payment_status || "-"}</span>
+                                        <span className="font-semibold text-app-text">{selected.payment_status || "-"}</span>
                                     </div>
                                 </div>
                             </div>
@@ -151,24 +151,24 @@ export default function HistoryScreen({
                                 <div className="space-y-3">
                                     <div className="flex justify-between text-xs text-app-textSec">
                                         <span>السعر الأساسي</span>
-                                        <span className="font-bold text-app-text">{formatMoney(String(selected.base_price ?? "0"))}</span>
+                                        <span className="font-semibold text-app-text">{formatMoney(String(selected.base_price ?? "0"))}</span>
                                     </div>
 
                                     <div className="flex justify-between text-xs text-app-textSec">
                                         <span>سعر الإضافات</span>
-                                        <span className="font-bold text-app-text">{formatMoney(String(selected.options_price ?? "0"))}</span>
+                                        <span className="font-semibold text-app-text">{formatMoney(String(selected.options_price ?? "0"))}</span>
                                     </div>
 
                                     <div className="pt-3 flex justify-between items-center">
-                                        <span className="text-sm font-bold text-app-text">الإجمالي الكلي</span>
-                                        <span className="text-lg font-bold text-app-gold">{formatMoney(String(selected.final_price ?? "0"))}</span>
+                                        <span className="text-sm font-semibold text-app-text">الإجمالي الكلي</span>
+                                        <span className="text-base font-semibold text-app-gold">{formatMoney(String(selected.final_price ?? "0"))}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <button
                                 onClick={() => setOpenId(null)}
-                                className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
+                                className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
                             >
                                 إغلاق
                             </button>
@@ -189,10 +189,10 @@ export default function HistoryScreen({
                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 text-app-gold/40 border border-app-card/30">
                             <ClipboardList size={48} strokeWidth={1.5} />
                         </div>
-                        <h2 className="text-lg font-bold text-app-text mb-6">لا يوجد أي حجوزات حتى الآن</h2>
+                        <h2 className="text-base font-semibold text-app-text mb-6">لا يوجد أي حجوزات حتى الآن</h2>
                         <button
                             onClick={onNavigateToHome}
-                            className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
+                            className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
                         >
                             استعراض الخدمات
                         </button>
@@ -207,22 +207,22 @@ export default function HistoryScreen({
                             return (
                                 <div key={order.id} className="bg-white rounded-[2rem] p-6 shadow-sm border border-app-card/30">
                                     <div className="flex items-center justify-between mb-4">
-                                        <span className="text-sm font-bold text-app-text">رقم الحجز: {order.request_number}</span>
-                                        <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${pill}`}>{label}</span>
+                                        <span className="text-sm font-semibold text-app-text">رقم الحجز: {order.request_number}</span>
+                                        <span className={`text-[10px] font-semibold px-3 py-1 rounded-full ${pill}`}>{label}</span>
                                     </div>
 
                                     <div className="space-y-2 mb-6">
                                         <div className="flex justify-between text-xs text-app-textSec">
                                             <span>تاريخ الحجز:</span>
-                                            <span className="font-medium" dir="ltr">
+                                            <span className="font-normal" dir="ltr">
                                                 {dateStr}
                                             </span>
                                         </div>
                                         <div className="flex justify-between text-xs text-app-textSec">
                                             <span>الخدمة:</span>
-                                            <span className="font-medium">{order.service || "خدمة محددة"}</span>
+                                            <span className="font-normal">{order.service || "خدمة محددة"}</span>
                                         </div>
-                                        <div className="flex justify-between text-sm font-bold text-app-text">
+                                        <div className="flex justify-between text-sm font-semibold text-app-text">
                                             <span>الإجمالي:</span>
                                             <span className="text-app-gold">{formatMoney(order.final_price)}</span>
                                         </div>
@@ -230,7 +230,7 @@ export default function HistoryScreen({
 
                                     <button
                                         onClick={() => setOpenId(String(order.id))}
-                                        className="w-full py-3 text-app-gold font-bold text-sm bg-app-bg rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+                                        className="w-full py-3 text-app-gold font-semibold text-sm bg-app-bg rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
                                     >
                                         عرض تفاصيل الحجز
                                     </button>

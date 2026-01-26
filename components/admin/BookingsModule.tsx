@@ -14,8 +14,8 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const t = translations[lang];
 
-  const filtered = dbData.appointments.filter(a => 
-    a.status === type && 
+  const filtered = dbData.appointments.filter(a =>
+    a.status === type &&
     (a.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) || a.userId?.includes(searchTerm))
   );
 
@@ -59,11 +59,11 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
         <table className="w-full text-start">
           <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.bookingId}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.service}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.schedule}</th>
-              <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.staffAssigned}</th>
-              <th className={`px-6 py-4 text-xs font-bold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.bookingId}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.service}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.schedule}</th>
+              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.staffAssigned}</th>
+              <th className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -71,50 +71,50 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
               const assignedStaff = dbData.staff.find(s => s.id === appt.staffId);
               return (
                 <tr key={appt.id} className="hover:bg-gray-50/50">
-                  <td className="px-6 py-4 font-bold text-gray-400 text-xs">#{appt.id.slice(-6)}</td>
-                  <td className="px-6 py-4 font-bold text-gray-900">{appt.serviceName}</td>
+                  <td className="px-6 py-4 font-semibold text-gray-400 text-xs">#{appt.id.slice(-6)}</td>
+                  <td className="px-6 py-4 font-semibold text-gray-900">{appt.serviceName}</td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-900" dir="ltr">{appt.dateISO}</span>
-                      <span className="text-[10px] text-gray-500 font-medium">{appt.time24}</span>
+                      <span className="text-sm font-semibold text-gray-900" dir="ltr">{appt.dateISO}</span>
+                      <span className="text-[10px] text-gray-500 font-normal">{appt.time24}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                     {assignedStaff ? (
-                        <span className="text-xs font-bold text-gray-900">{assignedStaff.name}</span>
-                     ) : (
-                        <select 
-                          className="bg-gray-50 border border-gray-100 text-[10px] font-bold rounded-lg p-1 outline-none"
-                          onChange={(e) => {
-                             db.updateEntity('appointments', appt.id, { staffId: e.target.value });
-                             setDbData({ ...db.getData() });
-                          }}
-                        >
-                           <option value="">{t.unassigned}</option>
-                           {dbData.staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                        </select>
-                     )}
+                    {assignedStaff ? (
+                      <span className="text-xs font-semibold text-gray-900">{assignedStaff.name}</span>
+                    ) : (
+                      <select
+                        className="bg-gray-50 border border-gray-100 text-[10px] font-semibold rounded-lg p-1 outline-none"
+                        onChange={(e) => {
+                          db.updateEntity('appointments', appt.id, { staffId: e.target.value });
+                          setDbData({ ...db.getData() });
+                        }}
+                      >
+                        <option value="">{t.unassigned}</option>
+                        {dbData.staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      </select>
+                    )}
                   </td>
                   <td className={`px-6 py-4 ${lang === 'ar' ? 'text-start' : 'text-end'}`}>
                     {appt.status === 'upcoming' ? (
                       <div className={`flex items-center gap-2 ${lang === 'ar' ? 'justify-start' : 'justify-end'}`}>
-                         <button 
-                           onClick={() => handleStatusChange(appt.id, 'completed')}
-                           className="p-2 text-green-500 hover:bg-green-50 rounded-lg"
-                           title={t.markCompleted}
-                         >
-                           <CheckCircle2 size={18} />
-                         </button>
-                         <button 
-                           onClick={() => handleStatusChange(appt.id, 'canceled')}
-                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                           title={t.cancelBooking}
-                         >
-                           <XCircle size={18} />
-                         </button>
+                        <button
+                          onClick={() => handleStatusChange(appt.id, 'completed')}
+                          className="p-2 text-green-500 hover:bg-green-50 rounded-lg"
+                          title={t.markCompleted}
+                        >
+                          <CheckCircle2 size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleStatusChange(appt.id, 'canceled')}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          title={t.cancelBooking}
+                        >
+                          <XCircle size={18} />
+                        </button>
                       </div>
                     ) : (
-                      <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${appt.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                      <span className={`text-[10px] font-semibold px-3 py-1 rounded-full ${appt.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                         {appt.status === 'completed' ? t.completed : t.canceled}
                       </span>
                     )}

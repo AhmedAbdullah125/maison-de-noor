@@ -69,7 +69,7 @@ export default function EditProfileScreen({
                     {/* Photo */}
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col text-right">
-                            <span className="text-sm font-bold text-app-text">الصورة</span>
+                            <span className="text-sm font-semibold text-app-text">الصورة</span>
                             <span className="text-[11px] text-app-textSec">اختياري</span>
                         </div>
 
@@ -98,7 +98,7 @@ export default function EditProfileScreen({
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-bold text-app-text"
+                            className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-semibold text-app-text"
                             placeholder="الاسم"
                         />
                     </Field>
@@ -108,7 +108,7 @@ export default function EditProfileScreen({
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-bold text-app-text"
+                            className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-semibold text-app-text"
                             placeholder="email@example.com"
                             dir="ltr"
                         />
@@ -119,7 +119,7 @@ export default function EditProfileScreen({
                             type="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
-                            className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-bold text-app-text"
+                            className="w-full p-4 bg-app-bg border border-app-card/50 rounded-2xl outline-none focus:border-app-gold text-right font-semibold text-app-text"
                             dir="ltr"
                             placeholder="رقم الهاتف"
                         />
@@ -131,7 +131,7 @@ export default function EditProfileScreen({
                 <button
                     onClick={handleSave}
                     disabled={updateMut.isPending || isGuest}
-                    className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
+                    className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
                 >
                     {updateMut.isPending ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -150,7 +150,7 @@ export default function EditProfileScreen({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
         <div>
-            <label className="block text-sm font-bold text-app-text mb-2">{label}</label>
+            <label className="block text-sm font-semibold text-app-text mb-2">{label}</label>
             {children}
         </div>
     );

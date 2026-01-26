@@ -55,7 +55,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, alt, className = 
     // But we need to sync prevTranslate to index * width for smooth transition
     // Actually, simple index-based CSS transform is cleaner for React than manual pixel pushing
     // So we reset translate state to rely on index
-    setCurrentTranslate(0); 
+    setCurrentTranslate(0);
     setPrevTranslate(0);
   };
 
@@ -71,7 +71,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, alt, className = 
   const onTouchEnd = () => handleEnd();
 
   return (
-    <div 
+    <div
       className={`relative overflow-hidden bg-app-bg/50 select-none group ${className}`}
       ref={containerRef}
       onMouseDown={onMouseDown}
@@ -82,16 +82,16 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, alt, className = 
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      <div 
+      <div
         className="flex h-full w-full transition-transform duration-500 ease-out will-change-transform"
         style={{ transform: `translateX(${currentIndex * 100}%)` }} // Positive because RTL layout (images stack right to left)
       >
         {images.map((src, index) => (
           <div key={`${src}-${index}`} className="min-w-full h-full flex items-center justify-center relative">
-            <AppImage 
-              src={src} 
-              alt={`${alt} ${index + 1}`} 
-              className="w-full h-full object-cover pointer-events-none" 
+            <AppImage
+              src={src}
+              alt={`${alt} ${index + 1}`}
+              className="w-full h-full object-cover pointer-events-none"
               loading={index === 0 ? "eager" : "lazy"}
             />
           </div>
@@ -102,11 +102,10 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, alt, className = 
       {images.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {images.map((_, index) => (
-            <div 
+            <div
               key={index}
-              className={`h-1.5 rounded-full transition-all duration-300 shadow-sm ${
-                currentIndex === index ? 'w-6 bg-white' : 'w-1.5 bg-white/50'
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 shadow-sm ${currentIndex === index ? 'w-6 bg-white' : 'w-1.5 bg-white/50'
+                }`}
             />
           ))}
         </div>
@@ -115,24 +114,24 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, alt, className = 
       {/* Desktop Arrows (Visible on Hover) */}
       {images.length > 1 && (
         <>
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); prevSlide(); }}
             className="hidden md:flex absolute top-1/2 -translate-y-1/2 right-4 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-app-text shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-white"
           >
             <ChevronRight size={20} />
           </button>
-          <button 
-             onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+          <button
+            onClick={(e) => { e.stopPropagation(); nextSlide(); }}
             className="hidden md:flex absolute top-1/2 -translate-y-1/2 left-4 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-app-text shadow-sm opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-white"
           >
             <ChevronLeft size={20} />
           </button>
         </>
       )}
-      
+
       {/* Image Counter Badge */}
       {images.length > 1 && (
-        <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-lg z-20">
+        <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-1 rounded-lg z-20">
           {currentIndex + 1} / {images.length}
         </div>
       )}

@@ -50,7 +50,7 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="p-6 flex items-center justify-between border-b border-app-card/30 bg-white z-10">
-                    <span className="text-lg font-bold text-app-text font-alexandria">الأقسام</span>
+                    <span className="text-base font-semibold text-app-text font-alexandria">الأقسام</span>
                     <button onClick={onClose} className="p-2 hover:bg-app-bg rounded-full transition-colors text-app-text">
                         <X size={24} />
                     </button>
@@ -74,7 +74,7 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                                         onClose();
                                     }}
                                 >
-                                    <span className="text-sm font-medium text-app-text font-alexandria">{cat.name}</span>
+                                    <span className="text-sm font-normal text-app-text font-alexandria">{cat.name}</span>
                                     <ChevronLeft size={18} className="text-app-gold opacity-50 group-hover:opacity-100 transition-opacity" />
                                 </button>
                             ))
@@ -87,7 +87,7 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                                 onNavigate("/account");
                                 onClose();
                             }}
-                            className="w-full py-3.5 rounded-xl border border-app-gold text-app-gold font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                            className="w-full py-3.5 rounded-xl border border-app-gold text-app-gold font-semibold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
                         >
                             <User size={18} />
                             <span>حسابي</span>
@@ -98,7 +98,7 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                                 onNavigate("/technician/online");
                                 onClose();
                             }}
-                            className="w-full py-3.5 rounded-xl bg-app-gold text-white font-bold text-xs sm:text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-app-gold/20"
+                            className="w-full py-3.5 rounded-xl bg-app-gold text-white font-semibold text-xs sm:text-xs flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-app-gold/20"
                         >
                             <Video size={18} />
                             <span>حجز التكنك أونلاين ( المرة الأولى مجانا )</span>
@@ -109,7 +109,7 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
                                 window.open("https://google.com", "_blank", "noreferrer");
                                 onClose();
                             }}
-                            className="w-full py-3.5 rounded-xl border border-app-gold text-app-gold font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                            className="w-full py-3.5 rounded-xl border border-app-gold text-app-gold font-semibold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
                         >
                             <ShoppingBag size={18} />
                             <span>شراء منتجات ترندي هير</span>

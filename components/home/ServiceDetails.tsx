@@ -271,22 +271,22 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                             <X size={20} />
                         </button>
 
-                        <h2 className="text-lg font-bold text-app-text mb-4 mt-2">تأكيد الحجز</h2>
+                        <h2 className="text-base font-semibold text-app-text mb-4 mt-2">تأكيد الحجز</h2>
 
                         <div className="w-full space-y-3 mb-5">
                             <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
-                                <span className="text-xs text-app-textSec font-medium">الخدمة</span>
-                                <span className="text-sm font-bold text-app-text">{product.name}</span>
+                                <span className="text-xs text-app-textSec font-normal">الخدمة</span>
+                                <span className="text-sm font-semibold text-app-text">{product.name}</span>
                             </div>
 
                             <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
-                                <span className="text-xs text-app-textSec font-medium">الباقة</span>
-                                <span className="text-sm font-bold text-app-text">{bookingModal.title}</span>
+                                <span className="text-xs text-app-textSec font-normal">الباقة</span>
+                                <span className="text-sm font-semibold text-app-text">{bookingModal.title}</span>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="bg-app-bg/50 rounded-xl border border-app-card/30 p-3 text-right">
-                                    <label className="block text-[11px] font-bold text-app-text mb-2">التاريخ</label>
+                                    <label className="block text-[11px] font-semibold text-app-text mb-2">التاريخ</label>
                                     <input
                                         type="date"
                                         className="w-full bg-white rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold"
@@ -297,7 +297,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                                 </div>
 
                                 <div className="bg-app-bg/50 rounded-xl border border-app-card/30 p-3 text-right">
-                                    <label className="block text-[11px] font-bold text-app-text mb-2">الوقت</label>
+                                    <label className="block text-[11px] font-semibold text-app-text mb-2">الوقت</label>
                                     <input
                                         type="time"
                                         className="w-full bg-white rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold"
@@ -308,14 +308,14 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                             </div>
 
                             <div className="bg-app-bg/50 rounded-xl border border-app-card/30 p-3 text-right">
-                                <label className="block text-[11px] font-bold text-app-text mb-2">طريقة الدفع</label>
+                                <label className="block text-[11px] font-semibold text-app-text mb-2">طريقة الدفع</label>
                                 <div className="flex gap-2">
                                     {(["cash", "knet", "wallet"] as const).map((p) => (
                                         <button
                                             key={p}
                                             type="button"
                                             onClick={() => setPaymentType(p)}
-                                            className={`flex-1 py-3 rounded-xl text-sm font-bold border transition-all ${paymentType === p
+                                            className={`flex-1 py-3 rounded-xl text-sm font-semibold border transition-all ${paymentType === p
                                                 ? "bg-app-gold text-white border-app-gold"
                                                 : "bg-white text-app-text border-app-card/30"
                                                 }`}
@@ -327,21 +327,21 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                             </div>
 
                             <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
-                                <span className="text-xs text-app-textSec font-medium">الإجمالي</span>
-                                <span className="text-sm font-bold text-app-gold">{bookingModal.finalTotal.toFixed(3)} د.ك</span>
+                                <span className="text-xs text-app-textSec font-normal">الإجمالي</span>
+                                <span className="text-sm font-semibold text-app-gold">{bookingModal.finalTotal.toFixed(3)} د.ك</span>
                             </div>
 
                             {bookingModal.subscriptionId != null && (
                                 <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
-                                    <span className="text-xs text-app-textSec font-medium">عدد الجلسات</span>
-                                    <span className="text-sm font-bold text-app-text">{bookingModal.sessionsCount}</span>
+                                    <span className="text-xs text-app-textSec font-normal">عدد الجلسات</span>
+                                    <span className="text-sm font-semibold text-app-text">{bookingModal.sessionsCount}</span>
                                 </div>
                             )}
 
                             {bookingModal.subscriptionId != null && (
                                 <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
-                                    <span className="text-xs text-app-textSec font-medium">صلاحية الباكج</span>
-                                    <span className="text-sm font-bold text-app-text">{bookingModal.validityDays || 30} يوم</span>
+                                    <span className="text-xs text-app-textSec font-normal">صلاحية الباكج</span>
+                                    <span className="text-sm font-semibold text-app-text">{bookingModal.validityDays || 30} يوم</span>
                                 </div>
                             )}
                         </div>
@@ -349,7 +349,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                         <button
                             onClick={doCreateRequest}
                             disabled={creating}
-                            className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform disabled:opacity-60"
+                            className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform disabled:opacity-60"
                         >
                             {creating ? "جاري الحجز..." : "تأكيد الحجز"}
                         </button>
@@ -363,7 +363,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                     className="p-2 bg-white rounded-full shadow-sm text-app-text hover:bg-app-card transition-colors flex items-center gap-2"
                 >
                     <ArrowRight size={20} />
-                    <span className="text-sm font-medium">العودة</span>
+                    <span className="text-sm font-normal">العودة</span>
                 </button>
             </div>
 
@@ -374,11 +374,11 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
             </div>
 
             <div className="px-8 mb-4">
-                <h2 className="text-2xl font-bold text-app-text font-alexandria leading-tight">{product.name}</h2>
+                <h2 className="text-xl font-semibold text-app-text font-alexandria leading-tight">{product.name}</h2>
 
                 <div className="mt-2 mb-1 flex flex-wrap gap-2">
                     {resolvedAddonGroups.length > 0 && (
-                        <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg">
+                        <span className="text-[10px] font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg">
                             إضافات اختيارية
                         </span>
                     )}
@@ -386,14 +386,14 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
 
                 <div className="flex flex-col gap-1 mt-2">
                     <div className="flex items-center gap-3">
-                        <span className="text-2xl font-bold text-app-gold">{priceData.display}</span>
+                        <span className="text-xl font-semibold text-app-gold">{priceData.display}</span>
                         {(product as any).oldPrice && (
                             <span className="text-sm text-app-textSec line-through opacity-60">{(product as any).oldPrice}</span>
                         )}
                     </div>
 
                     {priceData.addons > 0 && (
-                        <div className="text-[10px] text-app-textSec font-medium space-y-0.5">
+                        <div className="text-[10px] text-app-textSec font-normal space-y-0.5">
                             <div className="flex items-center gap-1">
                                 <span>السعر الأساسي:</span>
                                 <span>{priceData.base.toFixed(3)} د.ك</span>
@@ -412,9 +412,9 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                     {resolvedAddonGroups.map((group) => (
                         <div key={group.id}>
                             <div className="mb-3 flex items-center gap-2">
-                                <h3 className="text-sm font-bold text-app-text">{group.title_ar}</h3>
+                                <h3 className="text-sm font-semibold text-app-text">{group.title_ar}</h3>
                                 {(group as any).required && (
-                                    <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-md font-bold">مطلوب</span>
+                                    <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-md font-semibold">مطلوب</span>
                                 )}
                             </div>
 
@@ -448,12 +448,12 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                                                 )}
 
                                                 <div>
-                                                    <p className={`text-sm font-bold ${isSelected ? "text-app-gold" : "text-app-text"}`}>{option.title_ar}</p>
+                                                    <p className={`text-sm font-semibold ${isSelected ? "text-app-gold" : "text-app-text"}`}>{option.title_ar}</p>
                                                     {option.desc_ar && <p className="text-[10px] text-app-textSec">{option.desc_ar}</p>}
                                                 </div>
                                             </div>
 
-                                            <span className="text-xs font-bold text-app-text">
+                                            <span className="text-xs font-semibold text-app-text">
                                                 +{parsePrice(option.price_kwd ?? option.price ?? 0).toFixed(3)} د.ك
                                             </span>
                                         </div>
@@ -467,7 +467,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
 
             {!canSubscribe && (
                 <div className="px-8 mb-4">
-                    <div className="bg-red-50 border border-red-100 text-red-600 rounded-2xl p-3 text-[12px] font-bold">
+                    <div className="bg-red-50 border border-red-100 text-red-600 rounded-2xl p-3 text-[12px] font-semibold">
                         يرجى اختيار الخيارات المطلوبة أولاً
                     </div>
                 </div>
@@ -488,24 +488,24 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                             return (
                                 <div key={sub.id} className="w-full">
                                     {sub.titleText || sub.title || sub.name ? (
-                                        <p className="text-xs font-bold text-app-text mb-1.5 px-1">{sub.titleText || sub.title || sub.name}</p>
+                                        <p className="text-xs font-semibold text-app-text mb-1.5 px-1">{sub.titleText || sub.title || sub.name}</p>
                                     ) : null}
 
                                     <button
                                         onClick={() => handleSubscriptionClick(sub)}
                                         disabled={creating || !canSubscribe}
-                                        className="w-full bg-app-gold text-white font-bold py-3 px-4 rounded-2xl shadow-lg shadow-app-gold/20 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between disabled:opacity-60"
+                                        className="w-full bg-app-gold text-white font-semibold py-3 px-4 rounded-2xl shadow-lg shadow-app-gold/20 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between disabled:opacity-60"
                                     >
                                         <div className="flex flex-col items-start gap-1">
                                             <div className="flex items-center gap-2">
                                                 <ShoppingBag size={18} />
-                                                <span className="text-base">حجز {sessionsCount} جلسات</span>
+                                                <span className="text-sm">حجز {sessionsCount} جلسات</span>
                                             </div>
-                                            <div className="text-[10px] bg-white/20 px-2 py-0.5 rounded font-medium">{sessionsCount} جلسات</div>
+                                            <div className="text-[10px] bg-white/20 px-2 py-0.5 rounded font-normal">{sessionsCount} جلسات</div>
                                         </div>
 
                                         <div className="flex flex-col items-end">
-                                            <span className="text-sm font-bold">{finalTotal.toFixed(3)} د.ك</span>
+                                            <span className="text-sm font-semibold">{finalTotal.toFixed(3)} د.ك</span>
                                         </div>
                                     </button>
                                 </div>
@@ -516,16 +516,16 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                     <button
                         onClick={handleSingleSessionClick}
                         disabled={creating || !canSubscribe}
-                        className="w-full bg-app-gold text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-app-gold/30 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between disabled:opacity-60"
+                        className="w-full bg-app-gold text-white font-semibold py-4 px-6 rounded-2xl shadow-lg shadow-app-gold/30 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between disabled:opacity-60"
                     >
                         <div className="flex items-center gap-2">
                             <ShoppingBag size={20} />
                             <span>{creating ? "جاري الحجز..." : "حجز جلسة"}</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className="text-sm font-bold">{priceData.total.toFixed(3)} د.ك</span>
+                            <span className="text-sm font-semibold">{priceData.total.toFixed(3)} د.ك</span>
                             <div className="h-6 w-[1px] bg-white/30" />
-                            <span className="text-[10px] font-medium opacity-90">1 جلسة</span>
+                            <span className="text-[10px] font-normal opacity-90">1 جلسة</span>
                         </div>
                     </button>
                 )}

@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { 
-  Users, 
-  Scissors, 
-  Tags, 
-  CalendarClock, 
-  Ticket, 
+import {
+  Users,
+  Scissors,
+  Tags,
+  CalendarClock,
+  Ticket,
   TrendingUp,
   Activity,
   UserCheck
@@ -27,7 +27,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ lang }) => {
 
     const upcomingCount = data.appointments.filter(a => a.status === 'upcoming').length;
     const completedCount = data.appointments.filter(a => a.status === 'completed').length;
-    
+
     return [
       { label: t.totalUsers, value: data.users.length, icon: <Users size={24} /> },
       { label: t.totalServices, value: data.services.length, icon: <Scissors size={24} /> },
@@ -50,8 +50,8 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ lang }) => {
               {stat.icon}
             </div>
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{stat.label}</p>
-              <h3 className="text-xl font-black text-gray-900">{stat.value}</h3>
+              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{stat.label}</p>
+              <h3 className="text-lg font-bold text-gray-900">{stat.value}</h3>
             </div>
           </div>
         ))}
@@ -59,9 +59,9 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ lang }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-          <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center justify-between">
+          <h3 className="text-base font-semibold text-gray-900 mb-6 flex items-center justify-between">
             {t.recentAppointments}
-            <button className="text-sm text-[#483383] font-bold">{t.viewAll}</button>
+            <button className="text-sm text-[#483383] font-semibold">{t.viewAll}</button>
           </h3>
           <div className="space-y-4">
             {data.appointments.slice(0, 5).map((appt) => (
@@ -71,11 +71,11 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ lang }) => {
                     <CalendarClock size={18} />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">{appt.serviceName}</p>
+                    <p className="text-sm font-semibold text-gray-900">{appt.serviceName}</p>
                     <p className="text-[10px] text-gray-500">{appt.dateISO} @ {appt.time24}</p>
                   </div>
                 </div>
-                <span className={`text-[10px] font-bold px-3 py-1 rounded-lg ${appt.status === 'upcoming' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
+                <span className={`text-[10px] font-semibold px-3 py-1 rounded-lg ${appt.status === 'upcoming' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
                   {appt.status === 'upcoming' ? t.upcoming : t.completed}
                 </span>
               </div>
@@ -87,21 +87,21 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ lang }) => {
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">{t.activityLog}</h3>
+          <h3 className="text-base font-semibold text-gray-900 mb-6">{t.activityLog}</h3>
           <div className="space-y-6">
             {data.logs.slice(0, 6).map((log) => (
               <div key={log.id} className="flex gap-4">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#483383] mt-1.5 shrink-0" />
                 <div>
-                   {/* Fix: Access actionType instead of non-existent action property */}
-                   <p className="text-sm font-bold text-gray-900">{log.actionType} {log.entityType}</p>
-                   <p className="text-[10px] text-gray-500">{new Date(log.timestamp).toLocaleString()}</p>
-                   <p className="text-xs text-gray-400 mt-1">{log.details}</p>
+                  {/* Fix: Access actionType instead of non-existent action property */}
+                  <p className="text-sm font-semibold text-gray-900">{log.actionType} {log.entityType}</p>
+                  <p className="text-[10px] text-gray-500">{new Date(log.timestamp).toLocaleString()}</p>
+                  <p className="text-xs text-gray-400 mt-1">{log.details}</p>
                 </div>
               </div>
             ))}
             {data.logs.length === 0 && (
-               <p className="text-center text-gray-400 py-10">{t.noRecentLogs}</p>
+              <p className="text-center text-gray-400 py-10">{t.noRecentLogs}</p>
             )}
           </div>
         </div>

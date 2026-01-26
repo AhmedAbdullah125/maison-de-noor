@@ -19,7 +19,7 @@ export default function DeleteAccountModal({
                 <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
                     <AlertTriangle size={32} />
                 </div>
-                <h2 className="text-base font-bold text-app-text mb-2 font-alexandria">تأكيد حذف الحساب</h2>
+                <h2 className="text-sm font-semibold text-app-text mb-2 font-alexandria">تأكيد حذف الحساب</h2>
                 <p className="text-xs text-app-textSec leading-loose mb-6 font-alexandria">
                     هل أنتِ متأكدة من حذف حسابك؟ لا يمكن التراجع عن هذه الخطوة.
                 </p>
@@ -28,14 +28,14 @@ export default function DeleteAccountModal({
                     <button
                         onClick={onConfirm}
                         disabled={isDeleting}
-                        className="w-full py-3.5 bg-red-50 text-red-500 font-bold rounded-xl text-xs active:scale-95 transition-transform font-alexandria disabled:opacity-70"
+                        className="w-full py-3.5 bg-red-50 text-red-500 font-semibold rounded-xl text-xs active:scale-95 transition-transform font-alexandria disabled:opacity-70"
                     >
                         {isDeleting ? "جاري الحذف..." : "تأكيد الحذف"}
                     </button>
 
                     <button
                         onClick={onCancel}
-                        className="w-full py-3.5 bg-app-bg text-app-text font-bold rounded-xl text-xs active:scale-95 transition-transform font-alexandria"
+                        className="w-full py-3.5 bg-app-bg text-app-text font-semibold rounded-xl text-xs active:scale-95 transition-transform font-alexandria"
                     >
                         إلغاء
                     </button>

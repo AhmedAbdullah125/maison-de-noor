@@ -62,7 +62,7 @@ export default function ProductDetailsScreen({
                 <div className="mb-10 space-y-3">
                     <button
                         onClick={handleAddAction}
-                        className="w-full bg-app-gold active:bg-app-goldDark text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+                        className="w-full bg-app-gold active:bg-app-goldDark text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
                     >
                         <ShoppingBag size={20} />
                         <span>

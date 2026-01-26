@@ -145,7 +145,7 @@ const EditAppointmentPage: React.FC = () => {
 
       </div>
 
-      <div className="fixed bottom-[90px] left-0 right-0 p-6 bg-white border-t border-app-card/30 z-40 max-w-[500px] mx-auto shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-[90px] left-0 right-0 p-6 bg-white border-t border-app-card/30 z-40 max-w-[430px] mx-auto shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <button
           onClick={handleConfirm}
           disabled={isProcessing || !selectedDate || !selectedTime}

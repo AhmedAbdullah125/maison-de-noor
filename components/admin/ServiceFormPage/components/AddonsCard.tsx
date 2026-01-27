@@ -67,15 +67,15 @@ export default function AddonsCard({
                                         key={opt.id}
                                         onClick={() => onToggleOption(opt.id)}
                                         className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between group ${isSelected
-                                                ? "border-[#483383] bg-violet-50"
-                                                : "border-gray-100 bg-white hover:border-gray-300"
+                                            ? "border-[#483383] bg-violet-50"
+                                            : "border-gray-100 bg-white hover:border-gray-300"
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">
                                             <div
                                                 className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-colors ${isSelected
-                                                        ? "bg-[#483383] border-[#483383] text-white"
-                                                        : "bg-gray-50 border-gray-200 text-transparent"
+                                                    ? "bg-[#483383] border-[#483383] text-white"
+                                                    : "bg-gray-50 border-gray-200 text-transparent"
                                                     }`}
                                             >
                                                 <Check size={14} strokeWidth={4} />
@@ -96,8 +96,8 @@ export default function AddonsCard({
 
                                         <span
                                             className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${opt.is_required
-                                                    ? "bg-red-100 text-red-600"
-                                                    : "bg-gray-100 text-gray-400"
+                                                ? "bg-red-100 text-red-600"
+                                                : "bg-gray-100 text-gray-400"
                                                 }`}
                                         >
                                             {opt.is_required ? t.required : t.optional}

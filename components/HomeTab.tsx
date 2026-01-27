@@ -298,7 +298,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
           >
             {/* Drawer Header */}
             <div className="p-6 flex items-center justify-between border-b border-app-card/30 bg-white z-10">
-              <span className="text-base font-semibold text-app-text font-alexandria">الأقسام</span>
+              <span className="text-base font-bold text-app-text font-alexandria">الأقسام</span>
               <button onClick={toggleMenu} className="p-2 hover:bg-app-bg rounded-full transition-colors text-app-text">
                 <X size={24} />
               </button>
@@ -326,7 +326,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
               <div className="px-6 mt-6 space-y-3">
                 <button
                   onClick={() => { navigate('/account'); setIsMenuOpen(false); }}
-                  className="w-full py-3.5 rounded-xl border border-app-gold text-app-gold font-semibold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                  className="w-full py-3.5 rounded-xl border border-app-gold text-app-gold font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
                 >
                   <User size={18} />
                   <span>حسابي</span>
@@ -334,7 +334,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
 
                 <button
                   onClick={() => { navigate('/technician/online'); setIsMenuOpen(false); }}
-                  className="w-full py-3.5 rounded-xl bg-app-gold text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-app-gold/20"
+                  className="w-full py-3.5 rounded-xl bg-app-gold text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-md shadow-app-gold/20"
                 >
                   <Video size={18} />
                   <span>حجز التكنك أونلاين ( المرة الأولى مجانا )</span>
@@ -342,7 +342,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
 
                 <button
                   onClick={() => { window.open('https://google.com', '_blank', 'noreferrer'); setIsMenuOpen(false); }}
-                  className="w-full py-3.5 rounded-xl border border-app-gold text-app-gold font-semibold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                  className="w-full py-3.5 rounded-xl border border-app-gold text-app-gold font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
                 >
                   <ShoppingBag size={18} />
                   <span>شراء منتجات ترندي هير</span>
@@ -382,26 +382,26 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
               <X size={20} />
             </button>
 
-            <h2 className="text-base font-semibold text-app-text mb-6 mt-2">تأكيد الحجز</h2>
+            <h2 className="text-base font-bold text-app-text mb-6 mt-2">تأكيد الحجز</h2>
 
             <div className="w-full space-y-3 mb-6">
               <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
                 <span className="text-xs text-app-textSec font-normal">عدد الجلسات</span>
-                <span className="text-sm font-semibold text-app-text">{pendingPackage.pkg.sessionsCount}</span>
+                <span className="text-sm font-bold text-app-text">{pendingPackage.pkg.sessionsCount}</span>
               </div>
               <div className="flex justify-between items-center bg-app-bg/50 p-3 rounded-xl border border-app-card/30">
                 <span className="text-xs text-app-textSec font-normal">صلاحية الباكج</span>
-                <span className="text-sm font-semibold text-app-text">{pendingPackage.pkg.validityDays || 30} يوم</span>
+                <span className="text-sm font-bold text-app-text">{pendingPackage.pkg.validityDays || 30} يوم</span>
               </div>
             </div>
 
-            <p className="text-sm font-semibold text-app-text leading-loose mb-8 px-1">
+            <p className="text-sm font-bold text-app-text leading-loose mb-8 px-1">
               في حال الالتزام بعدد الجلسات ستحصلين على أروع النتائج بوقت قياسي و تختصري على نفسك الوقت و الجهد
             </p>
 
             <button
               onClick={handleConfirmPackageBooking}
-              className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
+              className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/30 active:scale-95 transition-transform"
             >
               الحجز الآن
             </button>
@@ -429,7 +429,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
               alt="Mezo Do Noor logo"
               className="h-7 w-7 object-contain"
             />
-            <span className="text-lg font-semibold text-app-text font-alexandria truncate">
+            <span className="text-lg font-bold text-app-text font-alexandria truncate">
               ميزو دو نور
             </span>
           </div>
@@ -463,22 +463,22 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
 
             {/* Title & Price */}
             <div className="px-8 mb-4">
-              <h2 className="text-xl font-semibold text-app-text font-alexandria leading-tight">
+              <h2 className="text-xl font-bold text-app-text font-alexandria leading-tight">
                 {selectedProduct.name}
               </h2>
 
               <div className="mt-2 mb-1 flex flex-wrap gap-2">
                 {(selectedProduct.addons && selectedProduct.addons.length > 0) && (
-                  <span className="text-[10px] font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg">إضافات اختيارية</span>
+                  <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg">إضافات اختيارية</span>
                 )}
                 {(resolvedAddonGroups && resolvedAddonGroups.length > 0) && (
-                  <span className="text-[10px] font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg">إضافات اختيارية</span>
+                  <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg">إضافات اختيارية</span>
                 )}
               </div>
 
               <div className="flex flex-col gap-1 mt-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-xl font-semibold text-app-gold">{priceData.display}</span>
+                  <span className="text-xl font-bold text-app-gold">{priceData.display}</span>
                   {selectedProduct.oldPrice && (
                     <span className="text-sm text-app-textSec line-through opacity-60">
                       {selectedProduct.oldPrice}
@@ -505,7 +505,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
             {selectedProduct.addons && selectedProduct.addons.length > 0 && (
               <div className="px-6 mb-6">
                 <div className="mb-3">
-                  <h3 className="text-sm font-semibold text-app-text">إضافات الخدمة (اختياري)</h3>
+                  <h3 className="text-sm font-bold text-app-text">إضافات الخدمة (اختياري)</h3>
                   <p className="text-[10px] text-app-textSec mt-0.5">اختاري الإضافات التي تناسبك وسيتم تحديث السعر تلقائياً</p>
                 </div>
                 <div className="space-y-3">
@@ -526,11 +526,11 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                             {isSelected && <Check size={12} className="text-white" strokeWidth={3} />}
                           </div>
                           <div>
-                            <p className={`text-sm font-semibold ${isSelected ? 'text-app-gold' : 'text-app-text'}`}>{addon.title_ar}</p>
+                            <p className={`text-sm font-bold ${isSelected ? 'text-app-gold' : 'text-app-text'}`}>{addon.title_ar}</p>
                             {addon.desc_ar && <p className="text-[10px] text-app-textSec">{addon.desc_ar}</p>}
                           </div>
                         </div>
-                        <span className="text-xs font-semibold text-app-text">+{addon.price_kwd.toFixed(3)} د.ك</span>
+                        <span className="text-xs font-bold text-app-text">+{addon.price_kwd.toFixed(3)} د.ك</span>
                       </div>
                     );
                   })}
@@ -544,9 +544,9 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                 {resolvedAddonGroups.map(group => (
                   <div key={group.id}>
                     <div className="mb-3 flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-app-text">{group.title_ar}</h3>
+                      <h3 className="text-sm font-bold text-app-text">{group.title_ar}</h3>
                       {group.required && (
-                        <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-md font-semibold">مطلوب</span>
+                        <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-md font-bold">مطلوب</span>
                       )}
                       {!group.required && group.type === 'multi' && (
                         <span className="text-[10px] text-app-textSec bg-app-bg px-2 py-0.5 rounded-md">اختياري (متعدد)</span>
@@ -584,11 +584,11 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                               )}
 
                               <div>
-                                <p className={`text-sm font-semibold ${isSelected ? 'text-app-gold' : 'text-app-text'}`}>{option.title_ar}</p>
+                                <p className={`text-sm font-bold ${isSelected ? 'text-app-gold' : 'text-app-text'}`}>{option.title_ar}</p>
                                 {option.desc_ar && <p className="text-[10px] text-app-textSec">{option.desc_ar}</p>}
                               </div>
                             </div>
-                            <span className="text-xs font-semibold text-app-text">+{option.price_kwd.toFixed(3)} د.ك</span>
+                            <span className="text-xs font-bold text-app-text">+{option.price_kwd.toFixed(3)} د.ك</span>
                           </div>
                         );
                       })}
@@ -599,7 +599,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
             )}
 
             <div className="px-8 mb-8">
-              <h3 className="text-sm font-semibold text-app-text mb-2">الوصف</h3>
+              <h3 className="text-sm font-bold text-app-text mb-2">الوصف</h3>
               <p className="text-sm text-app-textSec leading-relaxed">
                 {selectedProduct.description || "لا يوجد وصف متوفر لهذه الخدمة حالياً."}
               </p>
@@ -616,11 +616,11 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                     return (
                       <div key={sub.id} className="w-full">
                         {sub.title && (
-                          <p className="text-xs font-semibold text-app-text mb-1.5 px-1">{sub.title}</p>
+                          <p className="text-xs font-bold text-app-text mb-1.5 px-1">{sub.title}</p>
                         )}
                         <button
                           onClick={() => handleSubscriptionClick(sub)}
-                          className="w-full bg-app-gold text-white font-semibold py-3 px-4 rounded-2xl shadow-lg shadow-app-gold/20 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between"
+                          className="w-full bg-app-gold text-white font-bold py-3 px-4 rounded-2xl shadow-lg shadow-app-gold/20 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between"
                         >
                           <div className="flex flex-col items-start gap-1">
                             <div className="flex items-center gap-2">
@@ -633,7 +633,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                           </div>
 
                           <div className="flex flex-col items-end">
-                            <span className="text-sm font-semibold">{finalTotal.toFixed(3)} د.ك</span>
+                            <span className="text-sm font-bold">{finalTotal.toFixed(3)} د.ك</span>
                           </div>
                         </button>
                       </div>
@@ -653,11 +653,11 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                       return (
                         <div key={pkg.id} className="w-full">
                           {pkg.titleText && (
-                            <p className="text-xs font-semibold text-app-text mb-1.5 px-1">{pkg.titleText}</p>
+                            <p className="text-xs font-bold text-app-text mb-1.5 px-1">{pkg.titleText}</p>
                           )}
                           <button
                             onClick={() => handleAddAction(pkg, finalTotal)}
-                            className="w-full bg-app-gold text-white font-semibold py-3 px-4 rounded-2xl shadow-lg shadow-app-gold/20 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between"
+                            className="w-full bg-app-gold text-white font-bold py-3 px-4 rounded-2xl shadow-lg shadow-app-gold/20 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between"
                           >
                             <div className="flex flex-col items-start gap-1">
                               <div className="flex items-center gap-2">
@@ -670,7 +670,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                             </div>
 
                             <div className="flex flex-col items-end">
-                              <span className="text-sm font-semibold">{finalTotal.toFixed(3)} د.ك</span>
+                              <span className="text-sm font-bold">{finalTotal.toFixed(3)} د.ك</span>
                             </div>
                           </button>
                         </div>
@@ -681,14 +681,14 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                 /* Single Service Button */
                 <button
                   onClick={() => handleAddAction()}
-                  className="w-full bg-app-gold text-white font-semibold py-4 px-6 rounded-2xl shadow-lg shadow-app-gold/30 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between"
+                  className="w-full bg-app-gold text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-app-gold/30 active:bg-app-goldDark active:scale-[0.98] transition-all flex items-center justify-between"
                 >
                   <div className="flex items-center gap-2">
                     <ShoppingBag size={20} />
                     <span>حجز جلسة</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold">{priceData.total.toFixed(3)} د.ك</span>
+                    <span className="text-sm font-bold">{priceData.total.toFixed(3)} د.ك</span>
                     <div className="h-6 w-[1px] bg-white/30"></div>
                     <span className="text-[10px] font-normal opacity-90">1 جلسات</span>
                   </div>
@@ -752,7 +752,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
 
             {/* Categories */}
             <div className="px-6 mt-8">
-              <h2 className="text-base font-semibold text-app-text mb-4 text-center sm:text-right">الأقسام</h2>
+              <h2 className="text-base font-bold text-app-text mb-4 text-center sm:text-right">الأقسام</h2>
               <div className="grid grid-cols-3 gap-4 pb-20">
                 {brands.map((brand) => (
                   <button
@@ -767,7 +767,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                     </div>
-                    <span className="mt-2 text-xs font-semibold text-app-text text-center truncate w-full px-1">
+                    <span className="mt-2 text-xs font-bold text-app-text text-center truncate w-full px-1">
                       {brand.name}
                     </span>
                   </button>
@@ -785,7 +785,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
               >
                 <ArrowRight size={20} />
               </button>
-              <h2 className="text-base font-semibold text-app-text font-alexandria truncate">
+              <h2 className="text-base font-bold text-app-text font-alexandria truncate">
                 {activeCategory}
               </h2>
             </div>

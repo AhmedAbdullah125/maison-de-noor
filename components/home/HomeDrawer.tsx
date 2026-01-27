@@ -13,6 +13,7 @@ interface Props {
 
 export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: Props) {
     const { data, isLoading, isFetching, isError, error } = useGetServices(lang, 1);
+    console.log(data?.items?.services);
 
     const unauthorized = (error as any)?.isUnauthorized === true;
 
@@ -24,20 +25,21 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
     }, [unauthorized, onClose, onNavigate]);
 
     // ✅ Extract unique categories from services response (safe default)
-    const categories = useMemo(() => {
-        const services = data?.items?.services ?? [];
-        const map = new Map<number, any>();
+    const categories = data?.items?.services ?? [];
+    // const categories = useMemo(() => {
+    //     const services = data?.items?.services ?? [];
+    //     const map = new Map<number, any>();
 
-        for (const s of services) {
-            const c = s?.category;
-            if (!c?.id) continue;
-            if (!map.has(c.id)) map.set(c.id, c);
-        }
+    //     for (const s of services) {
+    //         const c = s?.category;
+    //         if (!c?.id) continue;
+    //         if (!map.has(c.id)) map.set(c.id, c);
+    //     }
 
-        return Array.from(map.values()).sort(
-            (a, b) => (a.position ?? 9999) - (b.position ?? 9999)
-        );
-    }, [data]);
+    //     return Array.from(map.values()).sort(
+    //         (a, b) => (a.position ?? 9999) - (b.position ?? 9999)
+    //     );
+    // }, [data]);
 
     // ✅ after hooks
     if (!open) return null;

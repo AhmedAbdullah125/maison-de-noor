@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -39,6 +39,642 @@ type GalleryItem = {
   preview: string; // object url
 };
 
+// =========================
+// Helpers
+// =========================
+const normalizeIds = (ids: any[] | undefined) =>
+  (ids || [])
+    .map((x) => Number(x))
+    .filter((n) => !Number.isNaN(n));
+
+const parsePrice = (x: any) => {
+  const n = parseFloat(String(x ?? "").replace(/[^\d.]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+};
+
+// =========================
+// Small UI Components
+// =========================
+function PageHeader({
+  lang,
+  isEdit,
+  id,
+  t,
+  onCancel,
+  onSave,
+}: {
+  lang: Locale;
+  isEdit: boolean;
+  id?: string;
+  t: any;
+  onCancel: () => void;
+  onSave: () => void;
+}) {
+  return (
+    <header className="flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onCancel}
+          className="p-3 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-[#483383] hover:shadow-sm transition-all"
+        >
+          <ArrowLeft size={20} className={lang === "ar" ? "rotate-180" : ""} />
+        </button>
+
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">
+            {isEdit ? t.edit : t.addService}
+          </h2>
+          <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">
+            {isEdit ? `${t.service} ID: ${id}` : "Create new service offering"}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={onCancel}
+          className="px-6 py-3 bg-white border border-gray-100 rounded-2xl font-semibold text-gray-400 hover:bg-gray-50 transition-all flex items-center gap-2"
+        >
+          <X size={18} />
+          <span>{t.cancel}</span>
+        </button>
+
+        <button
+          onClick={onSave}
+          className="px-8 py-3 bg-[#483383] text-white rounded-2xl font-semibold shadow-lg shadow-[#483383]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
+        >
+          <Save size={18} />
+          <span>{t.save}</span>
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function BasicInfoCard({
+  lang,
+  t,
+  form,
+  setForm,
+  catsLoading,
+  categories,
+}: {
+  lang: Locale;
+  t: any;
+  form: Partial<Product>;
+  setForm: React.Dispatch<React.SetStateAction<Partial<Product>>>;
+  catsLoading: boolean;
+  categories: any[];
+}) {
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
+      <h3 className="text-base font-semibold text-gray-900 border-b border-gray-50 pb-4 flex items-center gap-2">
+        <Scissors size={18} className="text-[#483383]" />
+        Basic Information
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* name ar */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            {t.serviceNameAr}
+          </label>
+          <input
+            type="text"
+            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all"
+            value={form.name || ""}
+            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+            placeholder="اسم الخدمة بالعربية"
+          />
+        </div>
+
+        {/* name en */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            {t.serviceNameEn}
+          </label>
+          <input
+            type="text"
+            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all text-left"
+            dir="ltr"
+            value={(form as any).nameEn || ""}
+            onChange={(e) => setForm((p) => ({ ...p, nameEn: e.target.value }))}
+            placeholder="Service Name (English)"
+          />
+        </div>
+
+        {/* price */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            {t.price} ({t.currency})
+          </label>
+          <input
+            type="text"
+            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all"
+            value={String(form.price || "")}
+            onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))}
+          />
+        </div>
+
+        {/* duration */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            {t.duration}
+          </label>
+          <input
+            type="text"
+            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all"
+            value={String((form as any).duration || "")}
+            onChange={(e) => setForm((p) => ({ ...p, duration: e.target.value }))}
+          />
+        </div>
+
+        {/* Category Dropdown */}
+        <div className="col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            {t.category ?? (lang === "ar" ? "القسم" : "Category")}
+          </label>
+
+          <div className="relative">
+            <select
+              className={`w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none
+                focus:ring-2 focus:ring-[#483383] transition-all appearance-none
+                ${lang === "ar" ? "pr-4 pl-12" : "pl-4 pr-12"}`}
+              value={((form as any).category_id ?? "") as any}
+              onChange={(e) =>
+                setForm((p) => ({
+                  ...p,
+                  category_id: e.target.value ? Number(e.target.value) : undefined,
+                }))
+              }
+              disabled={catsLoading}
+            >
+              <option value="">
+                {catsLoading
+                  ? lang === "ar"
+                    ? "جاري تحميل الأقسام..."
+                    : "Loading categories..."
+                  : lang === "ar"
+                    ? "اختر القسم"
+                    : "Select category"}
+              </option>
+
+              {categories.map((c: any) => (
+                <option key={c.id} value={c.id}>
+                  {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
+                </option>
+              ))}
+            </select>
+
+            <ChevronDown
+              size={18}
+              className={`absolute top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none
+                ${lang === "ar" ? "left-4" : "right-4"}`}
+            />
+          </div>
+
+          {!catsLoading && categories.length === 0 && (
+            <p className="text-xs text-red-500 mt-2">
+              {lang === "ar" ? "لا يوجد أقسام متاحة حالياً" : "No categories available"}
+            </p>
+          )}
+        </div>
+
+        {/* description */}
+        <div className="col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            {t.description}
+          </label>
+          <textarea
+            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all h-32 resize-none"
+            value={String(form.description || "")}
+            onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AddonsCard({
+  lang,
+  t,
+  expanded,
+  onToggleExpanded,
+  optionsLoading,
+  options,
+  selectedOptionIds,
+  onToggleOption,
+}: {
+  lang: Locale;
+  t: any;
+  expanded: boolean;
+  onToggleExpanded: () => void;
+  optionsLoading: boolean;
+  options: any[];
+  selectedOptionIds: number[];
+  onToggleOption: (id: number) => void;
+}) {
+  return (
+    <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden transition-all">
+      <div
+        className="p-8 flex items-center justify-between cursor-pointer hover:bg-gray-50/30 transition-colors"
+        onClick={onToggleExpanded}
+      >
+        <div className="flex items-center gap-3">
+          <LayoutGrid size={20} className="text-[#483383]" />
+          <h3 className="text-base font-semibold text-gray-900">{t.serviceAddons}</h3>
+          <span className="text-[10px] font-bold text-white bg-[#483383] px-2 py-0.5 rounded-lg ml-2">
+            {selectedOptionIds.length} Selected
+          </span>
+        </div>
+
+        <ChevronDown
+          size={20}
+          className={`text-gray-400 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+        />
+      </div>
+
+      {expanded && (
+        <div className="px-8 pb-8 pt-0 animate-fadeIn">
+          <div className="h-px w-full bg-gray-50 mb-6" />
+
+          {optionsLoading ? (
+            <div className="py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+              <p className="text-sm text-gray-400 font-semibold">
+                {lang === "ar" ? "جاري تحميل الخيارات..." : "Loading options..."}
+              </p>
+            </div>
+          ) : options.length === 0 ? (
+            <div className="py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+              <p className="text-sm text-gray-400 font-semibold">
+                {lang === "ar" ? "لا يوجد خيارات حالياً" : "No options available"}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {options.map((opt) => {
+                const isSelected = selectedOptionIds.includes(opt.id);
+
+                return (
+                  <div
+                    key={opt.id}
+                    onClick={() => onToggleOption(opt.id)}
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between group ${isSelected
+                        ? "border-[#483383] bg-violet-50"
+                        : "border-gray-100 bg-white hover:border-gray-300"
+                      }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-colors ${isSelected
+                            ? "bg-[#483383] border-[#483383] text-white"
+                            : "bg-gray-50 border-gray-200 text-transparent"
+                          }`}
+                      >
+                        <Check size={14} strokeWidth={4} />
+                      </div>
+
+                      <div>
+                        <p
+                          className={`text-sm font-bold ${isSelected ? "text-[#483383]" : "text-gray-900"
+                            }`}
+                        >
+                          {lang === "ar" ? opt.title_ar : opt.title_en}
+                        </p>
+                        <p className="text-[10px] text-gray-400 font-semibold uppercase">
+                          {opt.values_count} {lang === "ar" ? "اختيارات" : "Options"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${opt.is_required
+                          ? "bg-red-100 text-red-600"
+                          : "bg-gray-100 text-gray-400"
+                        }`}
+                    >
+                      {opt.is_required ? t.required : t.optional}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SubscriptionsCard({
+  lang,
+  t,
+  subscriptions,
+  onAdd,
+  onRemove,
+  onDuplicate,
+  onChange,
+  calcPreview,
+}: {
+  lang: Locale;
+  t: any;
+  subscriptions: any[];
+  onAdd: () => void;
+  onRemove: (id: string) => void;
+  onDuplicate: (sub: any) => void;
+  onChange: (id: string, field: keyof ServiceSubscription, value: any) => void;
+  calcPreview: (sessions: number, percent: number) => number;
+}) {
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
+      <div className="flex items-center justify-between border-b border-gray-50 pb-4">
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+            <Ticket size={18} className="text-[#483383]" />
+            {t.serviceSubscriptions}
+          </h3>
+          <p className="text-[10px] text-gray-400 mt-1 font-semibold">{t.subscriptionsHelper}</p>
+        </div>
+
+        <button
+          onClick={onAdd}
+          className="bg-[#483383]/10 text-[#483383] px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-[#483383] hover:text-white transition-all"
+        >
+          <Plus size={16} />
+          <span>{t.addSubscription}</span>
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {subscriptions.length === 0 && (
+          <div className="py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <p className="text-sm text-gray-400 font-semibold">{t.noContentYet}</p>
+          </div>
+        )}
+
+        {subscriptions.map((sub: any) => (
+          <div
+            key={sub.id}
+            className="p-6 bg-gray-50 rounded-[2rem] border border-gray-100 relative group transition-all hover:border-gray-200 hover:shadow-sm"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                  {t.subscriptionTitle}
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-[#483383]"
+                  value={sub.title}
+                  onChange={(e) => onChange(sub.id, "title", e.target.value)}
+                  placeholder={lang === "ar" ? "مثال: باقة التوفير" : "e.g. Saver Package"}
+                />
+              </div>
+
+              <div className="flex gap-2 mr-4 ml-4">
+                <button
+                  onClick={() => onDuplicate(sub)}
+                  className="p-2 text-gray-400 hover:text-blue-500 bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
+                  title={t.duplicate}
+                >
+                  <Copy size={16} />
+                </button>
+
+                <button
+                  onClick={() => onRemove(sub.id)}
+                  className="p-2 text-gray-400 hover:text-red-500 bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
+                  title={t.delete}
+                >
+                  <Trash size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                  {t.sessionsCount}
+                </label>
+                <input
+                  type="number"
+                  min="2"
+                  className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-[#483383]"
+                  value={sub.sessionsCount}
+                  onChange={(e) =>
+                    onChange(sub.id, "sessionsCount", parseInt(e.target.value || "0", 10))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                  {t.pricePercent}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="999"
+                  className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-[#483383]"
+                  value={sub.pricePercent}
+                  onChange={(e) =>
+                    onChange(sub.id, "pricePercent", parseInt(e.target.value || "0", 10))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                  {t.validityDays}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-[#483383]"
+                  value={sub.validityDays}
+                  onChange={(e) =>
+                    onChange(sub.id, "validityDays", parseInt(e.target.value || "0", 10))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-gray-200 flex justify-end">
+              <p className="text-[10px] font-semibold text-gray-500">
+                {t.estimatedTotal}:{" "}
+                <span className="text-[#483383] text-sm">
+                  {calcPreview(sub.sessionsCount, sub.pricePercent).toFixed(3)} {t.currency}
+                </span>
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MediaCard({
+  mainImagePreview,
+  onMainImageUpload,
+  onRemoveMainImage,
+  gallery,
+  onGalleryUpload,
+  onSetAsMain,
+  onRemoveGalleryImage,
+}: {
+  mainImagePreview: string;
+  onMainImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveMainImage: () => void;
+  gallery: GalleryItem[];
+  onGalleryUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSetAsMain: (index: number) => void;
+  onRemoveGalleryImage: (index: number) => void;
+}) {
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
+      <h3 className="text-base font-semibold text-gray-900 border-b border-gray-50 pb-4">
+        Service Media
+      </h3>
+
+      {/* Main Image */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Main Image (Required)
+        </label>
+
+        {mainImagePreview ? (
+          <div className="relative aspect-video rounded-2xl overflow-hidden group border border-gray-200">
+            <img src={String(mainImagePreview)} className="w-full h-full object-cover" alt="Main" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              <label className="cursor-pointer px-4 py-2 bg-white rounded-xl text-xs font-semibold hover:bg-gray-100">
+                Change
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={onMainImageUpload}
+                />
+              </label>
+              <button
+                onClick={onRemoveMainImage}
+                className="px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-semibold hover:bg-red-600"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-[#483383] hover:bg-violet-50 transition-all bg-gray-50">
+            <Upload size={32} className="text-gray-300" />
+            <span className="text-sm font-semibold text-gray-400 mt-2">Upload Main Image</span>
+            <input type="file" className="hidden" accept="image/*" onChange={onMainImageUpload} />
+          </label>
+        )}
+      </div>
+
+      {/* Gallery */}
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <label className="block text-sm font-semibold text-gray-700">Gallery Images</label>
+          <label className="cursor-pointer text-[#483383] text-xs font-semibold hover:underline flex items-center gap-1">
+            <Plus size={14} /> Add Images
+            <input type="file" multiple className="hidden" accept="image/*" onChange={onGalleryUpload} />
+          </label>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          {gallery.map((g, idx) => (
+            <div
+              key={idx}
+              className="relative aspect-square rounded-xl overflow-hidden group border border-gray-100 bg-gray-50"
+            >
+              <img src={g.preview} className="w-full h-full object-cover" alt={`Gallery ${idx}`} />
+              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => onSetAsMain(idx)}
+                  className="p-1.5 bg-white/90 rounded-lg text-yellow-500 hover:bg-white shadow-sm"
+                  title="Set as Main"
+                >
+                  <Star size={12} fill="currentColor" />
+                </button>
+                <button
+                  onClick={() => onRemoveGalleryImage(idx)}
+                  className="p-1.5 bg-white/90 rounded-lg text-red-500 hover:bg-white shadow-sm"
+                  title="Remove"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {gallery.length === 0 && (
+            <div className="col-span-3 py-8 text-center border border-dashed border-gray-200 rounded-2xl">
+              <ImageIcon size={24} className="mx-auto text-gray-300 mb-2" />
+              <p className="text-xs font-semibold text-gray-400">No gallery images</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExitPrompt({
+  lang,
+  open,
+  onConfirm,
+  onClose,
+}: {
+  lang: Locale;
+  open: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white w-full max-w-sm rounded-[2rem] p-8 shadow-2xl animate-scaleIn text-center">
+        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+          <AlertTriangle size={32} />
+        </div>
+
+        <h2 className="text-lg font-bold text-gray-900 mb-2">
+          {lang === "ar" ? "تنبيه: تغييرات غير محفوظة" : "Unsaved Changes"}
+        </h2>
+
+        <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+          {lang === "ar"
+            ? "لديك تعديلات غير محفوظة. هل تريد الخروج بدون حفظ؟"
+            : "You have unsaved changes. Are you sure you want to leave without saving?"}
+        </p>
+
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={onConfirm}
+            className="w-full py-4 bg-red-50 text-red-600 font-semibold rounded-2xl active:scale-95 transition-transform"
+          >
+            {lang === "ar" ? "نعم، خروج بدون حفظ" : "Yes, Leave without Saving"}
+          </button>
+
+          <button
+            onClick={onClose}
+            className="w-full py-4 bg-gray-50 text-gray-700 font-semibold rounded-2xl active:scale-95 transition-transform"
+          >
+            {lang === "ar" ? "إلغاء" : "Cancel"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =========================
+// Main Component
+// =========================
 const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -50,11 +686,10 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     nameEn: "",
     description: "",
     price: "",
-    // ✅ we won't depend on base64 for API upload anymore
     image: "",
     images: [],
     duration: "60 mins",
-    globalAddonIds: [], // option_ids
+    globalAddonIds: [],
     subscriptions: [],
     category_id: undefined as any,
   });
@@ -65,20 +700,13 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   const [showExitPrompt, setShowExitPrompt] = useState(false);
   const [isAddonsExpanded, setIsAddonsExpanded] = useState(false);
 
-  // ✅ files for API
+  // files for API
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   const [mainImagePreview, setMainImagePreview] = useState<string>("");
-
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
 
   const { isLoading: catsLoading, rows: categories } = useCategoriesOptions(lang);
   const { isLoading: optionsLoading, rows: options } = useOptionsOptions(lang);
-
-  // ----------------- Helpers -----------------
-  const normalizeIds = (ids: any[] | undefined) =>
-    (ids || [])
-      .map((x) => Number(x))
-      .filter((n) => !Number.isNaN(n));
 
   const selectedOptionIds = useMemo(
     () => normalizeIds(form.globalAddonIds as any),
@@ -94,29 +722,25 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
   const confirmExit = () => navigate("/admin/services");
 
-  // ✅ Toggle Option IDs
   const handleToggleGlobalAddon = (optionId: number) => {
     const current = normalizeIds(form.globalAddonIds as any);
     const next = current.includes(optionId)
       ? current.filter((x) => x !== optionId)
       : [...current, optionId];
-
-    setForm({ ...form, globalAddonIds: next as any });
+    setForm((p) => ({ ...p, globalAddonIds: next as any }));
   };
 
-  // ----------------- Image Handling (File + Preview) -----------------
+  // ----------------- Image Handling -----------------
   const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // cleanup old preview
-    if (mainImagePreview) URL.revokeObjectURL(mainImagePreview);
+    // cleanup old preview only if it was objectUrl (we can’t safely detect url type, so keep it simple)
+    // if previous preview was object url it will be revoked on unmount anyway
 
     const preview = URL.createObjectURL(file);
     setMainImageFile(file);
     setMainImagePreview(preview);
-
-    // keep form.image only for UI (optional)
     setForm((prev) => ({ ...prev, image: preview }));
   };
 
@@ -130,8 +754,6 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     }));
 
     setGallery((prev) => [...prev, ...items]);
-
-    // keep form.images only for UI
     setForm((prev) => ({
       ...prev,
       images: [...(prev.images || []), ...items.map((x) => x.preview)],
@@ -139,7 +761,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   };
 
   const handleRemoveMainImage = () => {
-    if (mainImagePreview) URL.revokeObjectURL(mainImagePreview);
+    // don't revoke here (could be remote url). revoke object urls on unmount.
     setMainImageFile(null);
     setMainImagePreview("");
     setForm((prev) => ({ ...prev, image: "" }));
@@ -162,11 +784,11 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     const item = gallery[index];
     if (!item) return;
 
-    // move current main to gallery (if exists)
     setGallery((prev) => {
       const next = [...prev];
       next.splice(index, 1);
 
+      // push current main into gallery only if it's a real file
       if (mainImageFile && mainImagePreview) {
         next.unshift({ file: mainImageFile, preview: mainImagePreview });
       }
@@ -174,14 +796,9 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
       return next;
     });
 
-    // set new main
-    if (mainImagePreview) {
-      // do NOT revoke here because it becomes gallery item (if moved)
-      // but in our logic we moved it already, so it's preserved
-    }
-
     setMainImageFile(item.file);
     setMainImagePreview(item.preview);
+
     setForm((prev) => ({
       ...prev,
       image: item.preview,
@@ -192,60 +809,99 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   // cleanup object URLs on unmount
   useEffect(() => {
     return () => {
-      if (mainImagePreview) URL.revokeObjectURL(mainImagePreview);
       gallery.forEach((g) => g.preview && URL.revokeObjectURL(g.preview));
+      // mainImagePreview might be remote url; no revoke.
+      // if it is object url, it will stay but this is minor; you can track a boolean if you want.
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ----------------- Load/Edit (still DB here) -----------------
+  // ----------------- API: GET service by id -----------------
+  async function fetchServiceById(serviceId: string) {
+    const res = await http.get(`${DASHBOARD_API_BASE_URL}/services/${serviceId}`, {
+      headers: { lang },
+    });
+    const ok = !!res?.data?.status;
+    if (!ok) throw new Error(res?.data?.message || "Failed to load service");
+    return res.data.items;
+  }
+
+  // ----------------- Load (Create / Edit) -----------------
   useEffect(() => {
-    const dbData = db.getData();
+    let mounted = true;
 
-    if (isEdit) {
-      const service = dbData.services.find((s: any) => s.id.toString() === id);
+    async function run() {
+      try {
+        setIsLoading(true);
+        setNotFound(false);
 
-      if (service) {
-        const data = {
-          ...service,
-          category_id: (service as any).category_id ?? undefined,
-          nameEn: service.nameEn || "",
-          images: service.images || [],
-          globalAddonIds: normalizeIds(service.globalAddonIds),
-          subscriptions: service.subscriptions || [],
-        };
+        if (isEdit && id) {
+          const item = await fetchServiceById(id);
 
-        setForm(data);
-        setInitialForm(JSON.stringify(data));
+          const data: Partial<Product> = {
+            name: String(item?.name || ""),
+            nameEn: String(item?.name || ""),
+            description: String(item?.description || ""),
+            price: String(item?.price ?? ""),
+            image: String(item?.main_image || ""),
+            images: [],
+            duration: "60 mins",
+            category_id: item?.category?.id ?? undefined,
+            globalAddonIds: normalizeIds((item?.options || []).map((o: any) => o.id)),
+            subscriptions: (item?.subscriptions || []).map((s: any) => ({
+              id: `sub_${s.id}`,
+              title: s.name || "",
+              sessionsCount: Number(s.session_count || 0),
+              pricePercent: Number(parseFloat(String(s.price_percentage || 0))),
+              validityDays: Number(s.validity_days || 0),
+            })),
+          };
 
-        // NOTE: existing services in db may have string URLs not files
-        // you can keep them for preview, but API edit will need re-upload as files
-        setMainImagePreview(service.image || "");
-      } else {
-        setNotFound(true);
+          if (!mounted) return;
+
+          setForm(data);
+          setInitialForm(JSON.stringify(data));
+
+          setMainImagePreview(String(item?.main_image || ""));
+          setMainImageFile(null);
+          setGallery([]);
+        } else {
+          const empty: Partial<Product> = {
+            name: "",
+            nameEn: "",
+            description: "",
+            price: "",
+            image: "",
+            images: [],
+            duration: "60 mins",
+            globalAddonIds: [],
+            subscriptions: [],
+            category_id: undefined as any,
+          };
+
+          if (!mounted) return;
+
+          setForm(empty);
+          setInitialForm(JSON.stringify(empty));
+          setMainImageFile(null);
+          setMainImagePreview("");
+          setGallery([]);
+        }
+      } catch (e) {
+        console.error(e);
+        if (mounted) setNotFound(true);
+      } finally {
+        if (mounted) setIsLoading(false);
       }
-    } else {
-      const empty = {
-        name: "",
-        nameEn: "",
-        description: "",
-        price: "",
-        image: "",
-        images: [],
-        duration: "60 mins",
-        globalAddonIds: [] as any[],
-        subscriptions: [],
-        category_id: undefined as any,
-      };
-
-      setForm(empty);
-      setInitialForm(JSON.stringify(empty));
     }
 
-    setIsLoading(false);
-  }, [id, isEdit]);
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [id, isEdit, lang]);
 
-  // ----------------- Subscriptions -----------------
+  // ----------------- Subscriptions handlers -----------------
   const handleAddSubscription = () => {
     const newSub: ServiceSubscription = {
       id: `sub_${Date.now()}`,
@@ -263,7 +919,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   const handleRemoveSubscription = (subId: string) => {
     setForm((prev) => ({
       ...prev,
-      subscriptions: prev.subscriptions?.filter((s) => s.id !== subId),
+      subscriptions: prev.subscriptions?.filter((s: any) => s.id !== subId),
     }));
   };
 
@@ -274,7 +930,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   ) => {
     setForm((prev) => ({
       ...prev,
-      subscriptions: prev.subscriptions?.map((s) =>
+      subscriptions: prev.subscriptions?.map((s: any) =>
         s.id === subId ? { ...s, [field]: value } : s
       ),
     }));
@@ -292,11 +948,6 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     }));
   };
 
-  const parsePrice = (x: any) => {
-    const n = parseFloat(String(x ?? "").replace(/[^\d.]/g, ""));
-    return Number.isFinite(n) ? n : 0;
-  };
-
   const calculatePreviewPrice = (sessions: number, percent: number) => {
     const basePrice = parsePrice(form.price);
     const baseTotal = basePrice * sessions;
@@ -307,12 +958,9 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   async function createService() {
     const fd = new FormData();
 
-    // required fields (based on screenshot)
     fd.append("price", String(parsePrice(form.price)));
-    // if you have discounted in UI later, set it; else optional skip
-    // fd.append("discounted_price", String(parsePrice((form as any).discounted_price)));
     fd.append("service_type", "configurable");
-    fd.append("category_id", String(form.category_id));
+    fd.append("category_id", String((form as any).category_id));
 
     if (!mainImageFile) {
       toast(lang === "ar" ? "يرجى إضافة الصورة الرئيسية" : "Please add a main image.");
@@ -320,18 +968,16 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     }
     fd.append("main_image", mainImageFile);
 
-    // service translations
-    // translations[0] ar
+    // translations
     fd.append("translations[0][language]", "ar");
     fd.append("translations[0][name]", String(form.name || ""));
     fd.append("translations[0][description]", String(form.description || ""));
 
-    // translations[1] en
     fd.append("translations[1][language]", "en");
-    fd.append("translations[1][name]", String(form.nameEn || form.name || ""));
+    fd.append("translations[1][name]", String((form as any).nameEn || form.name || ""));
     fd.append("translations[1][description]", String(form.description || ""));
 
-    // gallery images (images[i][image], images[i][sort_order])
+    // gallery
     gallery.forEach((g, i) => {
       fd.append(`images[${i}][image]`, g.file);
       fd.append(`images[${i}][sort_order]`, String(i + 1));
@@ -357,8 +1003,6 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
       fd.append(`subscriptions[${i}][validity_days]`, String(Number(sub.validityDays || 0)));
       fd.append(`subscriptions[${i}][is_active]`, "1");
 
-      // nested translations like screenshot:
-      // subscriptions[0][translations][0][language]...
       fd.append(`subscriptions[${i}][translations][0][language]`, "ar");
       fd.append(`subscriptions[${i}][translations][0][name]`, String(sub.title || ""));
       fd.append(`subscriptions[${i}][translations][0][description]`, "");
@@ -371,7 +1015,6 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     const res = await http.post(`${DASHBOARD_API_BASE_URL}/services`, fd, {
       headers: {
         lang,
-        // axios will set correct boundary automatically; this is ok too:
         "Content-Type": "multipart/form-data",
       },
     });
@@ -398,19 +1041,19 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
       return;
     }
 
-    if (!form.category_id) {
+    if (!(form as any).category_id) {
       toast(lang === "ar" ? "يرجى اختيار القسم" : "Please select a category.");
       return;
     }
 
-    if (!mainImageFile && !isEdit) {
+    const hasMainImage = !!mainImageFile || !!mainImagePreview;
+    if (!hasMainImage) {
       toast(lang === "ar" ? "يرجى إضافة الصورة الرئيسية" : "Please add a main image.");
       return;
     }
 
-    // validate subs (same rules you had)
     if (form.subscriptions) {
-      for (const sub of form.subscriptions) {
+      for (const sub of form.subscriptions as any[]) {
         if (!sub.title || sub.title.trim().length < 2) {
           toast(
             lang === "ar"
@@ -419,7 +1062,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
           );
           return;
         }
-        if (sub.sessionsCount < 2) {
+        if (Number(sub.sessionsCount) < 2) {
           toast(
             lang === "ar"
               ? `عدد الجلسات يجب أن يكون 2 على الأقل للاشتراك: ${sub.title}`
@@ -427,7 +1070,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
           );
           return;
         }
-        if (sub.validityDays < 1) {
+        if (Number(sub.validityDays) < 1) {
           toast(
             lang === "ar"
               ? `مدة الصلاحية يجب أن تكون يوم واحد على الأقل للاشتراك: ${sub.title}`
@@ -440,7 +1083,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
     try {
       if (isEdit) {
-        // ✅ currently still DB edit (you asked only CREATE endpoint)
+        // TODO: replace with API update when you provide endpoint
         const payload = {
           ...form,
           globalAddonIds: normalizeIds(form.globalAddonIds as any),
@@ -459,16 +1102,15 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
         );
         navigate("/admin/services");
       } else {
-        // ✅ CREATE via API
         await createService();
         navigate("/admin/services");
       }
-    } catch (e: any) {
-      // already toasted
+    } catch (e) {
       console.error(e);
     }
   };
 
+  // ----------------- Render -----------------
   if (isLoading) return null;
 
   if (notFound) {
@@ -487,529 +1129,70 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fadeIn pb-20 relative">
-      <header className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleCancel}
-            className="p-3 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-[#483383] hover:shadow-sm transition-all"
-          >
-            <ArrowLeft size={20} className={lang === "ar" ? "rotate-180" : ""} />
-          </button>
-
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              {isEdit ? t.edit : t.addService}
-            </h2>
-            <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">
-              {isEdit ? `${t.service} ID: ${id}` : "Create new service offering"}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={handleCancel}
-            className="px-6 py-3 bg-white border border-gray-100 rounded-2xl font-semibold text-gray-400 hover:bg-gray-50 transition-all flex items-center gap-2"
-          >
-            <X size={18} />
-            <span>{t.cancel}</span>
-          </button>
-
-          <button
-            onClick={handleSave}
-            className="px-8 py-3 bg-[#483383] text-white rounded-2xl font-semibold shadow-lg shadow-[#483383]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
-          >
-            <Save size={18} />
-            <span>{t.save}</span>
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        lang={lang}
+        isEdit={isEdit}
+        id={id}
+        t={t}
+        onCancel={handleCancel}
+        onSave={handleSave}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Basic Info */}
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
-            <h3 className="text-base font-semibold text-gray-900 border-b border-gray-50 pb-4 flex items-center gap-2">
-              <Scissors size={18} className="text-[#483383]" />
-              Basic Information
-            </h3>
+          <BasicInfoCard
+            lang={lang}
+            t={t}
+            form={form}
+            setForm={setForm}
+            catsLoading={catsLoading}
+            categories={categories}
+          />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* name ar */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {t.serviceNameAr}
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all"
-                  value={form.name || ""}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="اسم الخدمة بالعربية"
-                />
-              </div>
+          <AddonsCard
+            lang={lang}
+            t={t}
+            expanded={isAddonsExpanded}
+            onToggleExpanded={() => setIsAddonsExpanded((x) => !x)}
+            optionsLoading={optionsLoading}
+            options={options}
+            selectedOptionIds={selectedOptionIds}
+            onToggleOption={handleToggleGlobalAddon}
+          />
 
-              {/* name en */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {t.serviceNameEn}
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all text-left"
-                  dir="ltr"
-                  value={form.nameEn || ""}
-                  onChange={(e) => setForm({ ...form, nameEn: e.target.value })}
-                  placeholder="Service Name (English)"
-                />
-              </div>
-
-              {/* price */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {t.price} ({t.currency})
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all"
-                  value={String(form.price || "")}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                />
-              </div>
-
-              {/* duration */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {t.duration}
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all"
-                  value={String(form.duration || "")}
-                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
-                />
-              </div>
-
-              {/* Category Dropdown */}
-              <div className="col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {t.category ?? (lang === "ar" ? "القسم" : "Category")}
-                </label>
-
-                <div className="relative">
-                  <select
-                    className={`w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none
-                      focus:ring-2 focus:ring-[#483383] transition-all appearance-none
-                      ${lang === "ar" ? "pr-4 pl-12" : "pl-4 pr-12"}`}
-                    value={(form.category_id as any) ?? ""}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        category_id: e.target.value ? Number(e.target.value) : undefined,
-                      })
-                    }
-                    disabled={catsLoading}
-                  >
-                    <option value="">
-                      {catsLoading
-                        ? lang === "ar"
-                          ? "جاري تحميل الأقسام..."
-                          : "Loading categories..."
-                        : lang === "ar"
-                          ? "اختر القسم"
-                          : "Select category"}
-                    </option>
-
-                    {categories.map((c: any) => (
-                      <option key={c.id} value={c.id}>
-                        {lang === "ar" ? c.name_ar : c.name_en || c.name_ar}
-                      </option>
-                    ))}
-                  </select>
-
-                  <ChevronDown
-                    size={18}
-                    className={`absolute top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none
-                      ${lang === "ar" ? "left-4" : "right-4"}`}
-                  />
-                </div>
-
-                {!catsLoading && categories.length === 0 && (
-                  <p className="text-xs text-red-500 mt-2">
-                    {lang === "ar" ? "لا يوجد أقسام متاحة حالياً" : "No categories available"}
-                  </p>
-                )}
-              </div>
-
-              {/* description */}
-              <div className="col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  {t.description}
-                </label>
-                <textarea
-                  className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all h-32 resize-none"
-                  value={String(form.description || "")}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Add-ons (Options from API) */}
-          <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden transition-all">
-            <div
-              className="p-8 flex items-center justify-between cursor-pointer hover:bg-gray-50/30 transition-colors"
-              onClick={() => setIsAddonsExpanded(!isAddonsExpanded)}
-            >
-              <div className="flex items-center gap-3">
-                <LayoutGrid size={20} className="text-[#483383]" />
-                <h3 className="text-base font-semibold text-gray-900">{t.serviceAddons}</h3>
-                <span className="text-[10px] font-bold text-white bg-[#483383] px-2 py-0.5 rounded-lg ml-2">
-                  {selectedOptionIds.length} Selected
-                </span>
-              </div>
-
-              <ChevronDown
-                size={20}
-                className={`text-gray-400 transition-transform duration-300 ${isAddonsExpanded ? "rotate-180" : ""
-                  }`}
-              />
-            </div>
-
-            {isAddonsExpanded && (
-              <div className="px-8 pb-8 pt-0 animate-fadeIn">
-                <div className="h-px w-full bg-gray-50 mb-6" />
-
-                {optionsLoading ? (
-                  <div className="py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                    <p className="text-sm text-gray-400 font-semibold">
-                      {lang === "ar" ? "جاري تحميل الخيارات..." : "Loading options..."}
-                    </p>
-                  </div>
-                ) : options.length === 0 ? (
-                  <div className="py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                    <p className="text-sm text-gray-400 font-semibold">
-                      {lang === "ar" ? "لا يوجد خيارات حالياً" : "No options available"}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {options.map((opt) => {
-                      const isSelected = selectedOptionIds.includes(opt.id);
-
-                      return (
-                        <div
-                          key={opt.id}
-                          onClick={() => handleToggleGlobalAddon(opt.id)}
-                          className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between group ${isSelected
-                            ? "border-[#483383] bg-violet-50"
-                            : "border-gray-100 bg-white hover:border-gray-300"
-                            }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-colors ${isSelected
-                                ? "bg-[#483383] border-[#483383] text-white"
-                                : "bg-gray-50 border-gray-200 text-transparent"
-                                }`}
-                            >
-                              <Check size={14} strokeWidth={4} />
-                            </div>
-
-                            <div>
-                              <p
-                                className={`text-sm font-bold ${isSelected ? "text-[#483383]" : "text-gray-900"
-                                  }`}
-                              >
-                                {lang === "ar" ? opt.title_ar : opt.title_en}
-                              </p>
-                              <p className="text-[10px] text-gray-400 font-semibold uppercase">
-                                {opt.values_count} {lang === "ar" ? "اختيارات" : "Options"}
-                              </p>
-                            </div>
-                          </div>
-
-                          <span
-                            className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${opt.is_required ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"
-                              }`}
-                          >
-                            {opt.is_required ? t.required : t.optional}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Subscriptions */}
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
-            <div className="flex items-center justify-between border-b border-gray-50 pb-4">
-              <div>
-                <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                  <Ticket size={18} className="text-[#483383]" />
-                  {t.serviceSubscriptions}
-                </h3>
-                <p className="text-[10px] text-gray-400 mt-1 font-semibold">
-                  {t.subscriptionsHelper}
-                </p>
-              </div>
-
-              <button
-                onClick={handleAddSubscription}
-                className="bg-[#483383]/10 text-[#483383] px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-[#483383] hover:text-white transition-all"
-              >
-                <Plus size={16} />
-                <span>{t.addSubscription}</span>
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {form.subscriptions?.length === 0 && (
-                <div className="py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                  <p className="text-sm text-gray-400 font-semibold">{t.noContentYet}</p>
-                </div>
-              )}
-
-              {form.subscriptions?.map((sub: any) => (
-                <div
-                  key={sub.id}
-                  className="p-6 bg-gray-50 rounded-[2rem] border border-gray-100 relative group transition-all hover:border-gray-200 hover:shadow-sm"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
-                        {t.subscriptionTitle}
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-[#483383]"
-                        value={sub.title}
-                        onChange={(e) => handleSubscriptionChange(sub.id, "title", e.target.value)}
-                        placeholder={lang === "ar" ? "مثال: باقة التوفير" : "e.g. Saver Package"}
-                      />
-                    </div>
-
-                    <div className="flex gap-2 mr-4 ml-4">
-                      <button
-                        onClick={() => handleDuplicateSubscription(sub)}
-                        className="p-2 text-gray-400 hover:text-blue-500 bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
-                        title={t.duplicate}
-                      >
-                        <Copy size={16} />
-                      </button>
-
-                      <button
-                        onClick={() => handleRemoveSubscription(sub.id)}
-                        className="p-2 text-gray-400 hover:text-red-500 bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
-                        title={t.delete}
-                      >
-                        <Trash size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
-                        {t.sessionsCount}
-                      </label>
-                      <input
-                        type="number"
-                        min="2"
-                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-[#483383]"
-                        value={sub.sessionsCount}
-                        onChange={(e) =>
-                          handleSubscriptionChange(
-                            sub.id,
-                            "sessionsCount",
-                            parseInt(e.target.value || "0", 10)
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
-                        {t.pricePercent}
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="999"
-                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-[#483383]"
-                        value={sub.pricePercent}
-                        onChange={(e) =>
-                          handleSubscriptionChange(
-                            sub.id,
-                            "pricePercent",
-                            parseInt(e.target.value || "0", 10)
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
-                        {t.validityDays}
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-[#483383]"
-                        value={sub.validityDays}
-                        onChange={(e) =>
-                          handleSubscriptionChange(
-                            sub.id,
-                            "validityDays",
-                            parseInt(e.target.value || "0", 10)
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-gray-200 flex justify-end">
-                    <p className="text-[10px] font-semibold text-gray-500">
-                      {t.estimatedTotal}:{" "}
-                      <span className="text-[#483383] text-sm">
-                        {calculatePreviewPrice(sub.sessionsCount, sub.pricePercent).toFixed(3)}{" "}
-                        {t.currency}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <SubscriptionsCard
+            lang={lang}
+            t={t}
+            subscriptions={(form.subscriptions || []) as any[]}
+            onAdd={handleAddSubscription}
+            onRemove={handleRemoveSubscription}
+            onDuplicate={handleDuplicateSubscription}
+            onChange={handleSubscriptionChange}
+            calcPreview={calculatePreviewPrice}
+          />
         </div>
 
         {/* Right */}
         <div className="space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
-            <h3 className="text-base font-semibold text-gray-900 border-b border-gray-50 pb-4">
-              Service Media
-            </h3>
-
-            {/* Main Image */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Main Image (Required)
-              </label>
-
-              {mainImagePreview ? (
-                <div className="relative aspect-video rounded-2xl overflow-hidden group border border-gray-200">
-                  <img src={String(mainImagePreview)} className="w-full h-full object-cover" alt="Main" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <label className="cursor-pointer px-4 py-2 bg-white rounded-xl text-xs font-semibold hover:bg-gray-100">
-                      Change
-                      <input type="file" className="hidden" accept="image/*" onChange={handleMainImageUpload} />
-                    </label>
-                    <button
-                      onClick={handleRemoveMainImage}
-                      className="px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-semibold hover:bg-red-600"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-[#483383] hover:bg-violet-50 transition-all bg-gray-50">
-                  <Upload size={32} className="text-gray-300" />
-                  <span className="text-sm font-semibold text-gray-400 mt-2">Upload Main Image</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={handleMainImageUpload} />
-                </label>
-              )}
-            </div>
-
-            {/* Gallery */}
-            <div>
-              <div className="flex justify-between items-center mb-3">
-                <label className="block text-sm font-semibold text-gray-700">Gallery Images</label>
-                <label className="cursor-pointer text-[#483383] text-xs font-semibold hover:underline flex items-center gap-1">
-                  <Plus size={14} /> Add Images
-                  <input type="file" multiple className="hidden" accept="image/*" onChange={handleGalleryUpload} />
-                </label>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                {gallery.map((g, idx) => (
-                  <div
-                    key={idx}
-                    className="relative aspect-square rounded-xl overflow-hidden group border border-gray-100 bg-gray-50"
-                  >
-                    <img src={g.preview} className="w-full h-full object-cover" alt={`Gallery ${idx}`} />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleSetAsMain(idx)}
-                        className="p-1.5 bg-white/90 rounded-lg text-yellow-500 hover:bg-white shadow-sm"
-                        title="Set as Main"
-                      >
-                        <Star size={12} fill="currentColor" />
-                      </button>
-                      <button
-                        onClick={() => handleRemoveGalleryImage(idx)}
-                        className="p-1.5 bg-white/90 rounded-lg text-red-500 hover:bg-white shadow-sm"
-                        title="Remove"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-
-                {gallery.length === 0 && (
-                  <div className="col-span-3 py-8 text-center border border-dashed border-gray-200 rounded-2xl">
-                    <ImageIcon size={24} className="mx-auto text-gray-300 mb-2" />
-                    <p className="text-xs font-semibold text-gray-400">No gallery images</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <MediaCard
+            mainImagePreview={mainImagePreview}
+            onMainImageUpload={handleMainImageUpload}
+            onRemoveMainImage={handleRemoveMainImage}
+            gallery={gallery}
+            onGalleryUpload={handleGalleryUpload}
+            onSetAsMain={handleSetAsMain}
+            onRemoveGalleryImage={handleRemoveGalleryImage}
+          />
         </div>
       </div>
 
-      {/* Exit Prompt */}
-      {showExitPrompt && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white w-full max-w-sm rounded-[2rem] p-8 shadow-2xl animate-scaleIn text-center">
-            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
-              <AlertTriangle size={32} />
-            </div>
-
-            <h2 className="text-lg font-bold text-gray-900 mb-2">
-              {lang === "ar" ? "تنبيه: تغييرات غير محفوظة" : "Unsaved Changes"}
-            </h2>
-
-            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-              {lang === "ar"
-                ? "لديك تعديلات غير محفوظة. هل تريد الخروج بدون حفظ؟"
-                : "You have unsaved changes. Are you sure you want to leave without saving?"}
-            </p>
-
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={confirmExit}
-                className="w-full py-4 bg-red-50 text-red-600 font-semibold rounded-2xl active:scale-95 transition-transform"
-              >
-                {lang === "ar" ? "نعم، خروج بدون حفظ" : "Yes, Leave without Saving"}
-              </button>
-
-              <button
-                onClick={() => setShowExitPrompt(false)}
-                className="w-full py-4 bg-gray-50 text-gray-700 font-semibold rounded-2xl active:scale-95 transition-transform"
-              >
-                {lang === "ar" ? "إلغاء" : "Cancel"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ExitPrompt
+        lang={lang}
+        open={showExitPrompt}
+        onConfirm={confirmExit}
+        onClose={() => setShowExitPrompt(false)}
+      />
     </div>
   );
 };

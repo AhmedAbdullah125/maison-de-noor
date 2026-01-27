@@ -130,11 +130,7 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
 
                   <td className={`px-6 py-4 ${lang === "ar" ? "text-start" : "text-end"}`}>
                     <div className={`flex items-center gap-2 ${lang === "ar" ? "justify-start" : "justify-end"}`}>
-                      <button
-                        onClick={() => navigate(`/admin/services/${svc.id}/edit`)}
-                        className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                        title={t.edit}
-                      >
+                      <button onClick={() => navigate(`/admin/services/${svc.id}/edit`)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all" title={t.edit}>
                         <Edit size={18} />
                       </button>
 

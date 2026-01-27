@@ -1,49 +1,20 @@
 "use client";
 
-import React, { useMemo, useEffect } from "react";
+import React from "react";
 import { X, ChevronLeft, User, Video, ShoppingBag } from "lucide-react";
-import { useGetServices } from "../services/useGetServices";
+import type { Brand } from "@/types";
 
 interface Props {
     open: boolean;
     onClose: () => void;
     onNavigate: (path: string) => void;
     lang: string;
+    categories: Brand[];
+    isLoading?: boolean;
 }
 
-export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: Props) {
-    const { data, isLoading, isFetching, isError, error } = useGetServices(lang, 1);
-    console.log(data?.items?.services);
-
-    const unauthorized = (error as any)?.isUnauthorized === true;
-
-    useEffect(() => {
-        if (unauthorized) {
-            onClose();
-            onNavigate("/login");
-        }
-    }, [unauthorized, onClose, onNavigate]);
-
-    // ✅ Extract unique categories from services response (safe default)
-    const categories = data?.items?.services ?? [];
-    // const categories = useMemo(() => {
-    //     const services = data?.items?.services ?? [];
-    //     const map = new Map<number, any>();
-
-    //     for (const s of services) {
-    //         const c = s?.category;
-    //         if (!c?.id) continue;
-    //         if (!map.has(c.id)) map.set(c.id, c);
-    //     }
-
-    //     return Array.from(map.values()).sort(
-    //         (a, b) => (a.position ?? 9999) - (b.position ?? 9999)
-    //     );
-    // }, [data]);
-
-    // ✅ after hooks
+export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar", categories, isLoading = false }: Props) {
     if (!open) return null;
-    if (unauthorized) return null;
 
     return (
         <div className="absolute inset-0 z-[100] bg-black/40 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
@@ -60,14 +31,12 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar" }: P
 
                 <div className="flex-1 overflow-y-auto no-scrollbar py-4 flex flex-col">
                     <div className="flex-1">
-                        {isLoading || isFetching ? (
+                        {isLoading ? (
                             <div className="px-6 py-4 text-sm text-app-textSec">جاري تحميل الأقسام...</div>
-                        ) : isError ? (
-                            <div className="px-6 py-4 text-sm text-red-500">حدث خطأ أثناء تحميل الأقسام</div>
                         ) : categories.length === 0 ? (
                             <div className="px-6 py-4 text-sm text-app-textSec">لا توجد أقسام حالياً</div>
                         ) : (
-                            categories.map((cat: any) => (
+                            categories.map((cat) => (
                                 <button
                                     key={cat.id}
                                     className="w-full px-6 py-5 flex items-center justify-between hover:bg-app-bg active:bg-app-card/50 transition-colors border-b border-app-card/10 group"

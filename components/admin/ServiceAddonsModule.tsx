@@ -213,7 +213,7 @@ function buildOptionFormData(form: Partial<GlobalAddon>) {
     fd.append(`values[${idx}][translations][1][language]`, "en");
     fd.append(`values[${idx}][translations][1][name]`, String(it.labelEn || ""));
     // لو لازم description للإنجليزي كمان:
-    // fd.append(`values[${idx}][translations][1][description]`, "");
+    fd.append(`values[${idx}][translations][1][description]`, "");
   });
 
   return fd;

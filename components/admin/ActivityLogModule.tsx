@@ -164,7 +164,7 @@ const ActivityLogModule: React.FC<ActivityLogModuleProps> = ({ lang }) => {
          </div>
 
          {/* Main Table */}
-         <div className="flex-1 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+         <div className="flex-1 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-auto flex flex-col">
             <div className="overflow-x-auto no-scrollbar flex-1">
                <table className="w-full text-start border-collapse">
                   <thead className="sticky top-0 bg-gray-50 border-b border-gray-100 z-10">

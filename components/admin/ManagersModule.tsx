@@ -154,7 +154,7 @@ const ManagersModule: React.FC<ManagersModuleProps> = ({ lang }) => {
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-auto">
         <table className="w-full text-start">
           <thead className="bg-gray-50 border-b border-gray-100">
             <tr>

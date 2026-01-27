@@ -20,7 +20,7 @@ interface CategoriesModuleProps {
 }
 
 export default function CategoriesModule({ lang }: CategoriesModuleProps) {
-  const perPage = 10;
+  const perPage = 20;
   const {
     isLoading,
     apiRows,

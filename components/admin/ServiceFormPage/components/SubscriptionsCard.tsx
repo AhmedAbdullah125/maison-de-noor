@@ -1,7 +1,7 @@
 import React from "react";
 import { Ticket, Plus, Copy, Trash } from "lucide-react";
-import { Locale } from "../../../services/i18n";
-import { ServiceSubscription } from "../../../types";
+import { Locale } from "../../../../services/i18n";
+import { ServiceSubscription } from "../../../../types";
 
 export default function SubscriptionsCard({
     lang,

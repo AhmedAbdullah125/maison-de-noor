@@ -93,7 +93,7 @@ type GlobalAddonItem = {
 };
 
 type GlobalAddon = {
-  id: string;
+  id: string; // option id
   titleEn: string;
   titleAr: string;
   required: boolean;
@@ -151,11 +151,12 @@ async function fetchOptionsPage(params: { lang: Locale; page: number; per_page: 
     headers: { lang: params.lang },
   });
 
-  toastApi(!!res?.data?.status, res?.data?.message);
+  // لو ما تحبش toast لكل صفحة شيل السطر ده
+  // toastApi(!!res?.data?.status, res?.data?.message);
 
   if (!res?.data?.status) throw new Error(res?.data?.message || "Failed to load options");
 
-  return { rows: res.data.data.data, meta: res.data.data.meta };
+  return { rows: res.data.data.data, meta: res.data.data.meta, message: res.data.message };
 }
 
 async function fetchAllOptions(params: { lang: Locale; per_page: number }) {
@@ -178,12 +179,19 @@ async function fetchAllOptions(params: { lang: Locale; per_page: number }) {
 }
 
 // -------------------
-// CREATE option using FormData (same keys like screenshot)
+// CREATE / EDIT FormData (same keys like screenshot)
 // -------------------
-function buildOptionFormData(form: Partial<GlobalAddon>) {
+function buildOptionFormData(args: {
+  form: Partial<GlobalAddon>;
+  mode: "create" | "edit";
+}) {
+  const { form, mode } = args;
   const fd = new FormData();
 
-  // option base fields
+  // For Laravel style update with multipart:
+  // if your backend accepts PUT directly, you can remove this.
+  if (mode === "edit") fd.append("_method", "PUT");
+
   fd.append("is_required", String(form.required ? 1 : 0));
   fd.append("is_multiple_choice", String(form.selectionType === "multiple" ? 1 : 0));
   fd.append("sort_order", "1"); // لو عندك ترتيب من UI غيّره
@@ -207,26 +215,26 @@ function buildOptionFormData(form: Partial<GlobalAddon>) {
     // value translations (ar)
     fd.append(`values[${idx}][translations][0][language]`, "ar");
     fd.append(`values[${idx}][translations][0][name]`, String(it.labelAr || ""));
-    fd.append(`values[${idx}][translations][0][description]`, ""); // UI مش فيه description
+    fd.append(`values[${idx}][translations][0][description]`, "");
 
     // value translations (en)
     fd.append(`values[${idx}][translations][1][language]`, "en");
     fd.append(`values[${idx}][translations][1][name]`, String(it.labelEn || ""));
-    // لو لازم description للإنجليزي كمان:
-    fd.append(`values[${idx}][translations][1][description]`, "");
+    // لو الـ API محتاج description للانجليزي كمان:
+    // fd.append(`values[${idx}][translations][1][description]`, "");
   });
 
   return fd;
 }
 
 async function createOption(params: { lang: Locale; form: Partial<GlobalAddon> }) {
-  const fd = buildOptionFormData(params.form);
+  const fd = buildOptionFormData({ form: params.form, mode: "create" });
 
   const res = await http.post(`${DASHBOARD_API_BASE_URL}/options`, fd, {
     headers: {
       lang: params.lang,
       Accept: "application/json",
-      // ❗️لا تضيف Content-Type بنفسك مع FormData
+      // ❗️لا تضيف Content-Type مع FormData
     },
   });
 
@@ -235,7 +243,26 @@ async function createOption(params: { lang: Locale; form: Partial<GlobalAddon> }
   toastApi(status, message);
 
   if (!status) throw new Error(message);
+  return res.data;
+}
 
+// ✅ Edit endpoint requested: {{url}}/options/:id (same payload)
+// We'll send POST + _method=PUT to be safe.
+async function updateOption(params: { lang: Locale; id: string | number; form: Partial<GlobalAddon> }) {
+  const fd = buildOptionFormData({ form: params.form, mode: "edit" });
+
+  const res = await http.post(`${DASHBOARD_API_BASE_URL}/options/${params.id}`, fd, {
+    headers: {
+      lang: params.lang,
+      Accept: "application/json",
+    },
+  });
+
+  const status = !!res?.data?.status;
+  const message = res?.data?.message || (status ? "Updated" : "Failed");
+  toastApi(status, message);
+
+  if (!status) throw new Error(message);
   return res.data;
 }
 
@@ -249,18 +276,17 @@ interface ServiceAddonsModuleProps {
 const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
   const t = translations[lang];
 
-  // API state
   const [isLoading, setIsLoading] = useState(true);
   const [apiAddons, setApiAddons] = useState<GlobalAddon[]>([]);
   const [apiError, setApiError] = useState<string>("");
 
-  // Local overrides (edit/duplicate/delete local)
+  // local only for duplicate/delete (until endpoints exist)
   const [localAddons, setLocalAddons] = useState<GlobalAddon[] | null>(null);
   const addons = localAddons ?? apiAddons;
 
-  // modal + form state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingAddon, setEditingAddon] = useState<GlobalAddon | null>(null);
+
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState<Partial<GlobalAddon>>({
@@ -271,38 +297,40 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
     items: [{ id: "1", labelEn: "", labelAr: "", price: 0 }],
   });
 
-  // Load from API
+  const reload = async () => {
+    try {
+      setIsLoading(true);
+      setApiError("");
+
+      const per_page = 50;
+      const options = await fetchAllOptions({ lang, per_page });
+
+      const mapped = options
+        .slice()
+        .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
+        .map(mapApiOptionToAddon);
+
+      setApiAddons(mapped);
+      setLocalAddons(null);
+    } catch (e: any) {
+      setApiError(e?.message || "Failed to load options");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
 
-    async function run() {
-      try {
-        setIsLoading(true);
-        setApiError("");
+    (async () => {
+      await reload();
+      if (!mounted) return;
+    })();
 
-        const per_page = 50;
-        const options = await fetchAllOptions({ lang, per_page });
-
-        const mapped = options
-          .slice()
-          .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
-          .map(mapApiOptionToAddon);
-
-        if (!mounted) return;
-        setApiAddons(mapped);
-        setLocalAddons(null); // reset local override on lang change
-      } catch (e: any) {
-        if (!mounted) return;
-        setApiError(e?.message || "Failed to load options");
-      } finally {
-        if (mounted) setIsLoading(false);
-      }
-    }
-
-    run();
     return () => {
       mounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
   const handleOpenModal = (addon?: GlobalAddon) => {
@@ -346,51 +374,46 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
     setForm({ ...form, items: nextItems });
   };
 
-  // Save: Create via API, Edit local (until endpoints exist)
+  const validateForm = () => {
+    if (!form.titleEn || !form.titleAr) return false;
+    if ((form.items?.length || 0) === 0) return false;
+
+    // validate items names at least
+    for (const it of form.items || []) {
+      if (!it.labelEn || !it.labelAr) return false;
+    }
+    return true;
+  };
+
   const handleSave = async () => {
-    if (!form.titleEn || !form.titleAr || (form.items?.length || 0) === 0) {
-      toast(lang === "ar" ? "لازم تدخل عنوان + عنصر واحد على الأقل" : "Title + at least 1 item required", {
-        style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
-      });
+    if (!validateForm()) {
+      toast(
+        lang === "ar"
+          ? "لازم تدخل (عنوان عربي/إنجليزي) + عنصر واحد على الأقل (اسم عربي/إنجليزي)"
+          : "Title (AR/EN) + at least 1 item (name AR/EN) is required",
+        { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } }
+      );
       return;
     }
 
-    // EDIT: local only
-    if (editingAddon) {
-      setLocalAddons((prev) => {
-        const base = prev ?? addons;
-        return base.map((x) => (x.id === editingAddon.id ? ({ ...x, ...(form as any) } as any) : x));
-      });
-
-      toast(lang === "ar" ? "تم تحديث العنصر (محليًا)" : "Updated (local)", {
-        style: { background: "#198754", color: "#fff", borderRadius: "10px" },
-      });
-
-      setModalOpen(false);
-      return;
-    }
-
-    // CREATE: API
     try {
       setSaving(true);
 
-      await createOption({ lang, form });
+      if (editingAddon) {
+        // ✅ UPDATE via API
+        await updateOption({ lang, id: editingAddon.id, form });
+      } else {
+        // ✅ CREATE via API
+        await createOption({ lang, form });
+      }
 
-      // refresh list from API
-      const per_page = 50;
-      const options = await fetchAllOptions({ lang, per_page });
-      const mapped = options
-        .slice()
-        .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
-        .map(mapApiOptionToAddon);
-
-      setApiAddons(mapped);
-      setLocalAddons(null);
+      await reload();
       setModalOpen(false);
     } catch (e: any) {
-      toast(e?.message || (lang === "ar" ? "فشل إنشاء الخيار" : "Failed to create option"), {
-        style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
-      });
+      toast(
+        e?.message || (lang === "ar" ? "حدث خطأ" : "Something went wrong"),
+        { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } }
+      );
     } finally {
       setSaving(false);
     }
@@ -414,7 +437,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
   };
 
   const handleDelete = (id: string) => {
-    // no DELETE endpoint provided => local only
+    // ⚠️ Delete endpoint not provided -> local only
     if (!confirm(t.confirmDelete)) return;
 
     setLocalAddons((prev) => (prev ?? addons).filter((x) => x.id !== id));
@@ -672,9 +695,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                       className="flex flex-col md:flex-row gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100 group"
                     >
                       <div className="flex-1 space-y-1">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase">
-                          {t.labelEn}
-                        </label>
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">{t.labelEn}</label>
                         <input
                           type="text"
                           className="w-full bg-white border border-gray-100 rounded-xl p-3 text-xs outline-none focus:border-[#483383]"
@@ -684,9 +705,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                       </div>
 
                       <div className="flex-1 space-y-1 text-right">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase">
-                          {t.labelAr}
-                        </label>
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">{t.labelAr}</label>
                         <input
                           type="text"
                           className="w-full bg-white border border-gray-100 rounded-xl p-3 text-xs outline-none focus:border-[#483383] text-right"
@@ -722,8 +741,8 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
 
                 <div className="text-[11px] text-gray-400 font-semibold">
                   {lang === "ar"
-                    ? "ملاحظة: الحفظ/الحذف هنا محلي مؤقتًا لأن Endpoints الإضافة/التعديل/الحذف غير متوفرة بعد."
-                    : "Note: Save/Delete here is local only until create/update/delete endpoints are available."}
+                    ? "ملاحظة: النسخ/الحذف ما زال محليًا لأن Endpoints delete غير مذكورة."
+                    : "Note: Duplicate/Delete are still local because delete endpoint wasn't provided."}
                 </div>
               </div>
             </div>
@@ -732,16 +751,18 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
               <button
                 onClick={() => setModalOpen(false)}
                 className="flex-1 py-4 font-bold text-gray-500 bg-white border border-gray-100 rounded-2xl active:scale-95 transition-all"
+                disabled={saving}
               >
                 {t.cancel}
               </button>
+
               <button
                 onClick={handleSave}
-
-                className="flex-1 py-4 font-bold text-white bg-[#483383] rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+                disabled={saving}
+                className="flex-1 py-4 font-bold text-white bg-[#483383] rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
               >
-                <Save size={20} />
-                <span>{t.save}</span>
+                {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                <span>{saving ? (lang === "ar" ? "جارٍ الحفظ..." : "Saving...") : t.save}</span>
               </button>
             </div>
           </div>

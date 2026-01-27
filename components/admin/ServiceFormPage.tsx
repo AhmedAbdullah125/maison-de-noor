@@ -173,10 +173,15 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
       headers: { lang },
     });
 
+    console.log("🔍 Service API Response:", res?.data);
+
     const ok = !!res?.data?.status;
     if (!ok) throw new Error(res?.data?.message || "Failed to load service");
 
-    return res.data.items; // ✅ items object
+    const item = res.data.items || res.data.data?.data || res.data.data;
+    console.log("📦 Extracted item:", item);
+
+    return item;
   }
 
 
@@ -228,6 +233,8 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
               validityDays: Number(s.validity_days || 0),
             })),
           };
+
+          console.log("✅ Mapped form data:", data);
 
           if (!mounted) return;
 
@@ -402,6 +409,82 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     return res.data;
   }
 
+  // ----------------- Update Service API (FormData) -----------------
+  async function updateService(serviceId: string) {
+    const fd = new FormData();
+
+    fd.append("_method", "PUT");
+    fd.append("price", String(parsePrice(form.price)));
+    fd.append("service_type", "configurable");
+    fd.append("category_id", String((form as any).category_id));
+
+    if (mainImageFile) {
+      fd.append("main_image", mainImageFile);
+    }
+
+    fd.append("translations[0][language]", "ar");
+    fd.append("translations[0][name]", String(form.name || ""));
+    fd.append("translations[0][description]", String(form.description || ""));
+
+    fd.append("translations[1][language]", "en");
+    fd.append("translations[1][name]", String((form as any).nameEn || form.name || ""));
+    fd.append("translations[1][description]", String(form.description || ""));
+
+    let imageIndex = 0;
+    gallery.forEach((g) => {
+      if (g.file) {
+        fd.append(`images[${imageIndex}][image]`, g.file);
+        fd.append(`images[${imageIndex}][sort_order]`, String(imageIndex + 1));
+        imageIndex++;
+      }
+    });
+
+    selectedOptionIds.forEach((optId, i) => {
+      fd.append(`option_ids[${i}]`, String(optId));
+    });
+
+    const subs = (form.subscriptions || []) as any[];
+    subs.forEach((sub, i) => {
+      const sessions = Number(sub.sessionsCount || 0);
+      const percent = Number(sub.pricePercent || 0);
+      const fixed = calculatePreviewPrice(sessions, percent);
+      const pps = sessions > 0 ? fixed / sessions : 0;
+
+      fd.append(`subscriptions[${i}][session_count]`, String(sessions));
+      fd.append(`subscriptions[${i}][price_percentage]`, String(percent));
+      fd.append(`subscriptions[${i}][fixed_price]`, String(fixed));
+      fd.append(`subscriptions[${i}][price_per_session]`, String(pps));
+      fd.append(`subscriptions[${i}][validity_days]`, String(Number(sub.validityDays || 0)));
+      fd.append(`subscriptions[${i}][is_active]`, "1");
+
+      fd.append(`subscriptions[${i}][translations][0][language]`, "ar");
+      fd.append(`subscriptions[${i}][translations][0][name]`, String(sub.title || ""));
+      fd.append(`subscriptions[${i}][translations][0][description]`, "");
+
+      fd.append(`subscriptions[${i}][translations][1][language]`, "en");
+      fd.append(`subscriptions[${i}][translations][1][name]`, String(sub.title || ""));
+      fd.append(`subscriptions[${i}][translations][1][description]`, "");
+    });
+
+    const res = await http.post(`${DASHBOARD_API_BASE_URL}/services/${serviceId}`, fd, {
+      headers: { lang, Accept: "application/json" },
+    });
+
+    const ok = !!res?.data?.status;
+    const msg = res?.data?.message || (ok ? "Updated" : "Failed");
+
+    toast(msg, {
+      style: {
+        background: ok ? "#198754" : "#dc3545",
+        color: "#fff",
+        borderRadius: "10px",
+      },
+    });
+
+    if (!ok) throw new Error(msg);
+    return res.data;
+  }
+
   // ----------------- Save -----------------
   const handleSave = async () => {
     if (!form.name) {
@@ -450,23 +533,8 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     }
 
     try {
-      if (isEdit) {
-        const payload = {
-          ...form,
-          globalAddonIds: normalizeIds(form.globalAddonIds as any),
-        };
-        db.updateEntity("services", Number(id), payload);
-        db.addLog(
-          "Admin",
-          "admin",
-          "update",
-          "Service",
-          id!,
-          "Service Updated",
-          `Admin updated service details for ${form.name}`,
-          "info",
-          form.name
-        );
+      if (isEdit && id) {
+        await updateService(id);
         navigate("/admin/services");
       } else {
         await createService();

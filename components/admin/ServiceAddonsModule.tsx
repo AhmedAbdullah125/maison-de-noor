@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Plus,
   Edit,
@@ -13,11 +13,11 @@ import {
 } from "lucide-react";
 import { translations, Locale } from "../../services/i18n";
 import { toast } from "sonner";
-import { http } from "../services/http";
+import { http } from "../services/http"; // ✅ عدّل المسار لو مختلف عندك
 import { DASHBOARD_API_BASE_URL } from "@/lib/apiConfig";
 
 // -------------------
-// Types from your API file (inline هنا عشان نفس الملف)
+// Types from API
 // -------------------
 export type ApiOptionTranslation = {
   id: number;
@@ -83,7 +83,7 @@ function toastApi(status: boolean, message: string) {
 }
 
 // -------------------
-// UI Model (same as your existing component needs)
+// UI Model
 // -------------------
 type GlobalAddonItem = {
   id: string;
@@ -139,12 +139,12 @@ function mapApiOptionToAddon(opt: ApiOption): GlobalAddon {
     required: !!opt.is_required,
     selectionType: opt.is_multiple_choice ? "multiple" : "single",
     items,
-    createdAt: undefined,
-    updatedAt: undefined,
   };
 }
 
-// fetch options (page)
+// -------------------
+// API fetch helpers
+// -------------------
 async function fetchOptionsPage(params: { lang: Locale; page: number; per_page: number }) {
   const res = await http.get<ApiOptionsResponse>(`${DASHBOARD_API_BASE_URL}/options`, {
     params: { page: params.page, per_page: params.per_page },
@@ -158,7 +158,6 @@ async function fetchOptionsPage(params: { lang: Locale; page: number; per_page: 
   return { rows: res.data.data.data, meta: res.data.data.meta };
 }
 
-// fetch all pages
 async function fetchAllOptions(params: { lang: Locale; per_page: number }) {
   const all: ApiOption[] = [];
   let page = 1;
@@ -171,7 +170,6 @@ async function fetchAllOptions(params: { lang: Locale; per_page: number }) {
     });
 
     all.push(...rows);
-
     if (!meta || page >= meta.last_page) break;
     page += 1;
   }
@@ -179,6 +177,71 @@ async function fetchAllOptions(params: { lang: Locale; per_page: number }) {
   return all;
 }
 
+// -------------------
+// CREATE option using FormData (same keys like screenshot)
+// -------------------
+function buildOptionFormData(form: Partial<GlobalAddon>) {
+  const fd = new FormData();
+
+  // option base fields
+  fd.append("is_required", String(form.required ? 1 : 0));
+  fd.append("is_multiple_choice", String(form.selectionType === "multiple" ? 1 : 0));
+  fd.append("sort_order", "1"); // لو عندك ترتيب من UI غيّره
+  fd.append("is_active", "1");
+
+  // translations (option)
+  fd.append("translations[0][language]", "ar");
+  fd.append("translations[0][title]", String(form.titleAr || ""));
+
+  fd.append("translations[1][language]", "en");
+  fd.append("translations[1][title]", String(form.titleEn || ""));
+
+  // values
+  const items = form.items || [];
+  items.forEach((it: any, idx: number) => {
+    fd.append(`values[${idx}][price]`, String(it.price ?? 0));
+    fd.append(`values[${idx}][is_default]`, idx === 0 ? "1" : "0");
+    fd.append(`values[${idx}][sort_order]`, String(idx + 1));
+    fd.append(`values[${idx}][is_active]`, "1");
+
+    // value translations (ar)
+    fd.append(`values[${idx}][translations][0][language]`, "ar");
+    fd.append(`values[${idx}][translations][0][name]`, String(it.labelAr || ""));
+    fd.append(`values[${idx}][translations][0][description]`, ""); // UI مش فيه description
+
+    // value translations (en)
+    fd.append(`values[${idx}][translations][1][language]`, "en");
+    fd.append(`values[${idx}][translations][1][name]`, String(it.labelEn || ""));
+    // لو لازم description للإنجليزي كمان:
+    // fd.append(`values[${idx}][translations][1][description]`, "");
+  });
+
+  return fd;
+}
+
+async function createOption(params: { lang: Locale; form: Partial<GlobalAddon> }) {
+  const fd = buildOptionFormData(params.form);
+
+  const res = await http.post(`${DASHBOARD_API_BASE_URL}/options`, fd, {
+    headers: {
+      lang: params.lang,
+      Accept: "application/json",
+      // ❗️لا تضيف Content-Type بنفسك مع FormData
+    },
+  });
+
+  const status = !!res?.data?.status;
+  const message = res?.data?.message || (status ? "Created" : "Failed");
+  toastApi(status, message);
+
+  if (!status) throw new Error(message);
+
+  return res.data;
+}
+
+// -------------------
+// Component
+// -------------------
 interface ServiceAddonsModuleProps {
   lang: Locale;
 }
@@ -186,18 +249,19 @@ interface ServiceAddonsModuleProps {
 const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
   const t = translations[lang];
 
-  // ✅ API state
+  // API state
   const [isLoading, setIsLoading] = useState(true);
   const [apiAddons, setApiAddons] = useState<GlobalAddon[]>([]);
   const [apiError, setApiError] = useState<string>("");
 
-  // ✅ Local overrides (for optimistic UI when user edits/creates without endpoints)
+  // Local overrides (edit/duplicate/delete local)
   const [localAddons, setLocalAddons] = useState<GlobalAddon[] | null>(null);
   const addons = localAddons ?? apiAddons;
 
-  // modal + form state (same idea as your code)
+  // modal + form state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingAddon, setEditingAddon] = useState<GlobalAddon | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState<Partial<GlobalAddon>>({
     titleEn: "",
@@ -207,7 +271,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
     items: [{ id: "1", labelEn: "", labelAr: "", price: 0 }],
   });
 
-  // ✅ Load from API
+  // Load from API
   useEffect(() => {
     let mounted = true;
 
@@ -216,9 +280,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
         setIsLoading(true);
         setApiError("");
 
-        // مهم: خليه كبير عشان يقلّل عدد الصفحات
         const per_page = 50;
-
         const options = await fetchAllOptions({ lang, per_page });
 
         const mapped = options
@@ -227,9 +289,8 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
           .map(mapApiOptionToAddon);
 
         if (!mounted) return;
-
         setApiAddons(mapped);
-        setLocalAddons(null); // reset local override when lang changes
+        setLocalAddons(null); // reset local override on lang change
       } catch (e: any) {
         if (!mounted) return;
         setApiError(e?.message || "Failed to load options");
@@ -285,8 +346,8 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
     setForm({ ...form, items: nextItems });
   };
 
-  // ✅ save locally (until endpoints exist)
-  const handleSave = () => {
+  // Save: Create via API, Edit local (until endpoints exist)
+  const handleSave = async () => {
     if (!form.titleEn || !form.titleAr || (form.items?.length || 0) === 0) {
       toast(lang === "ar" ? "لازم تدخل عنوان + عنصر واحد على الأقل" : "Title + at least 1 item required", {
         style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
@@ -294,33 +355,45 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
       return;
     }
 
-    setLocalAddons((prev) => {
-      const base = prev ?? addons;
+    // EDIT: local only
+    if (editingAddon) {
+      setLocalAddons((prev) => {
+        const base = prev ?? addons;
+        return base.map((x) => (x.id === editingAddon.id ? ({ ...x, ...(form as any) } as any) : x));
+      });
 
-      if (editingAddon) {
-        const next = base.map((x) => (x.id === editingAddon.id ? ({ ...x, ...(form as any) } as any) : x));
-        toast(lang === "ar" ? "تم تحديث العنصر (محليًا)" : "Updated (local)", {
-          style: { background: "#198754", color: "#fff", borderRadius: "10px" },
-        });
-        return next;
-      }
-
-      const newId = `local_${Date.now()}`;
-      const newAddon: GlobalAddon = {
-        ...(form as GlobalAddon),
-        id: newId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      toast(lang === "ar" ? "تمت الإضافة (محليًا)" : "Created (local)", {
+      toast(lang === "ar" ? "تم تحديث العنصر (محليًا)" : "Updated (local)", {
         style: { background: "#198754", color: "#fff", borderRadius: "10px" },
       });
 
-      return [newAddon, ...base];
-    });
+      setModalOpen(false);
+      return;
+    }
 
-    setModalOpen(false);
+    // CREATE: API
+    try {
+      setSaving(true);
+
+      await createOption({ lang, form });
+
+      // refresh list from API
+      const per_page = 50;
+      const options = await fetchAllOptions({ lang, per_page });
+      const mapped = options
+        .slice()
+        .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
+        .map(mapApiOptionToAddon);
+
+      setApiAddons(mapped);
+      setLocalAddons(null);
+      setModalOpen(false);
+    } catch (e: any) {
+      toast(e?.message || (lang === "ar" ? "فشل إنشاء الخيار" : "Failed to create option"), {
+        style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDuplicate = (addon: GlobalAddon) => {
@@ -341,7 +414,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
   };
 
   const handleDelete = (id: string) => {
-    // ⚠️ no DELETE endpoint provided, so local only
+    // no DELETE endpoint provided => local only
     if (!confirm(t.confirmDelete)) return;
 
     setLocalAddons((prev) => (prev ?? addons).filter((x) => x.id !== id));
@@ -514,6 +587,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                     onChange={(e) => setForm({ ...form, titleEn: e.target.value })}
                   />
                 </div>
+
                 <div className="space-y-2 text-right">
                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                     {t.titleAr}
@@ -567,9 +641,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                     </button>
                     <button
                       onClick={() => setForm({ ...form, selectionType: "multiple" })}
-                      className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${form.selectionType === "multiple"
-                        ? "bg-[#483383] text-white"
-                        : "text-gray-400"
+                      className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${form.selectionType === "multiple" ? "bg-[#483383] text-white" : "text-gray-400"
                         }`}
                     >
                       {t.multipleChoice}
@@ -665,6 +737,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
               </button>
               <button
                 onClick={handleSave}
+
                 className="flex-1 py-4 font-bold text-white bg-[#483383] rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
               >
                 <Save size={20} />

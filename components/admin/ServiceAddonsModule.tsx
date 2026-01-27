@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { translations, Locale } from "../../services/i18n";
 import { toast } from "sonner";
-import { http } from "../services/http"; // ✅ عدّل المسار لو مختلف عندك
+import { http } from "../services/http";
 import { DASHBOARD_API_BASE_URL } from "@/lib/apiConfig";
 
 // -------------------
@@ -145,18 +145,18 @@ function mapApiOptionToAddon(opt: ApiOption): GlobalAddon {
 // -------------------
 // API fetch helpers
 // -------------------
-async function fetchOptionsPage(params: { lang: Locale; page: number; per_page: number }) {
+async function fetchOptionsPage(params: {
+  lang: Locale;
+  page: number;
+  per_page: number;
+}) {
   const res = await http.get<ApiOptionsResponse>(`${DASHBOARD_API_BASE_URL}/options`, {
     params: { page: params.page, per_page: params.per_page },
     headers: { lang: params.lang },
   });
 
-  // لو ما تحبش toast لكل صفحة شيل السطر ده
-  // toastApi(!!res?.data?.status, res?.data?.message);
-
   if (!res?.data?.status) throw new Error(res?.data?.message || "Failed to load options");
-
-  return { rows: res.data.data.data, meta: res.data.data.meta, message: res.data.message };
+  return { rows: res.data.data.data, meta: res.data.data.meta };
 }
 
 async function fetchAllOptions(params: { lang: Locale; per_page: number }) {
@@ -181,30 +181,24 @@ async function fetchAllOptions(params: { lang: Locale; per_page: number }) {
 // -------------------
 // CREATE / EDIT FormData (same keys like screenshot)
 // -------------------
-function buildOptionFormData(args: {
-  form: Partial<GlobalAddon>;
-  mode: "create" | "edit";
-}) {
+function buildOptionFormData(args: { form: Partial<GlobalAddon>; mode: "create" | "edit" }) {
   const { form, mode } = args;
   const fd = new FormData();
 
-  // For Laravel style update with multipart:
-  // if your backend accepts PUT directly, you can remove this.
+  // Laravel update with multipart
   if (mode === "edit") fd.append("_method", "PUT");
 
   fd.append("is_required", String(form.required ? 1 : 0));
   fd.append("is_multiple_choice", String(form.selectionType === "multiple" ? 1 : 0));
-  fd.append("sort_order", "1"); // لو عندك ترتيب من UI غيّره
+  fd.append("sort_order", "1");
   fd.append("is_active", "1");
 
-  // translations (option)
   fd.append("translations[0][language]", "ar");
   fd.append("translations[0][title]", String(form.titleAr || ""));
 
   fd.append("translations[1][language]", "en");
   fd.append("translations[1][title]", String(form.titleEn || ""));
 
-  // values
   const items = form.items || [];
   items.forEach((it: any, idx: number) => {
     fd.append(`values[${idx}][price]`, String(it.price ?? 0));
@@ -212,16 +206,12 @@ function buildOptionFormData(args: {
     fd.append(`values[${idx}][sort_order]`, String(idx + 1));
     fd.append(`values[${idx}][is_active]`, "1");
 
-    // value translations (ar)
     fd.append(`values[${idx}][translations][0][language]`, "ar");
     fd.append(`values[${idx}][translations][0][name]`, String(it.labelAr || ""));
     fd.append(`values[${idx}][translations][0][description]`, "");
 
-    // value translations (en)
     fd.append(`values[${idx}][translations][1][language]`, "en");
     fd.append(`values[${idx}][translations][1][name]`, String(it.labelEn || ""));
-    // لو الـ API محتاج description للانجليزي كمان:
-    // fd.append(`values[${idx}][translations][1][description]`, "");
   });
 
   return fd;
@@ -231,38 +221,37 @@ async function createOption(params: { lang: Locale; form: Partial<GlobalAddon> }
   const fd = buildOptionFormData({ form: params.form, mode: "create" });
 
   const res = await http.post(`${DASHBOARD_API_BASE_URL}/options`, fd, {
-    headers: {
-      lang: params.lang,
-      Accept: "application/json",
-      // ❗️لا تضيف Content-Type مع FormData
-    },
+    headers: { lang: params.lang, Accept: "application/json" },
   });
 
-  const status = !!res?.data?.status;
-  const message = res?.data?.message || (status ? "Created" : "Failed");
-  toastApi(status, message);
-
-  if (!status) throw new Error(message);
+  const ok = !!res?.data?.status;
+  toastApi(ok, res?.data?.message || (ok ? "Created" : "Failed"));
+  if (!ok) throw new Error(res?.data?.message || "Failed");
   return res.data;
 }
 
-// ✅ Edit endpoint requested: {{url}}/options/:id (same payload)
-// We'll send POST + _method=PUT to be safe.
 async function updateOption(params: { lang: Locale; id: string | number; form: Partial<GlobalAddon> }) {
   const fd = buildOptionFormData({ form: params.form, mode: "edit" });
 
   const res = await http.post(`${DASHBOARD_API_BASE_URL}/options/${params.id}`, fd, {
-    headers: {
-      lang: params.lang,
-      Accept: "application/json",
-    },
+    headers: { lang: params.lang, Accept: "application/json" },
   });
 
-  const status = !!res?.data?.status;
-  const message = res?.data?.message || (status ? "Updated" : "Failed");
-  toastApi(status, message);
+  const ok = !!res?.data?.status;
+  toastApi(ok, res?.data?.message || (ok ? "Updated" : "Failed"));
+  if (!ok) throw new Error(res?.data?.message || "Failed");
+  return res.data;
+}
 
-  if (!status) throw new Error(message);
+// ✅ DELETE endpoint: {{url}}/options/:id
+async function deleteOption(params: { lang: Locale; id: string | number }) {
+  const res = await http.delete(`${DASHBOARD_API_BASE_URL}/options/${params.id}`, {
+    headers: { lang: params.lang, Accept: "application/json" },
+  });
+
+  const ok = !!res?.data?.status;
+  toastApi(ok, res?.data?.message || (ok ? "Deleted" : "Failed"));
+  if (!ok) throw new Error(res?.data?.message || "Failed");
   return res.data;
 }
 
@@ -280,7 +269,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
   const [apiAddons, setApiAddons] = useState<GlobalAddon[]>([]);
   const [apiError, setApiError] = useState<string>("");
 
-  // local only for duplicate/delete (until endpoints exist)
+  // local only for duplicate (delete now API)
   const [localAddons, setLocalAddons] = useState<GlobalAddon[] | null>(null);
   const addons = localAddons ?? apiAddons;
 
@@ -288,6 +277,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
   const [editingAddon, setEditingAddon] = useState<GlobalAddon | null>(null);
 
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [form, setForm] = useState<Partial<GlobalAddon>>({
     titleEn: "",
@@ -321,12 +311,10 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
 
   useEffect(() => {
     let mounted = true;
-
     (async () => {
       await reload();
       if (!mounted) return;
     })();
-
     return () => {
       mounted = false;
     };
@@ -377,8 +365,6 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
   const validateForm = () => {
     if (!form.titleEn || !form.titleAr) return false;
     if ((form.items?.length || 0) === 0) return false;
-
-    // validate items names at least
     for (const it of form.items || []) {
       if (!it.labelEn || !it.labelAr) return false;
     }
@@ -400,20 +386,17 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
       setSaving(true);
 
       if (editingAddon) {
-        // ✅ UPDATE via API
         await updateOption({ lang, id: editingAddon.id, form });
       } else {
-        // ✅ CREATE via API
         await createOption({ lang, form });
       }
 
       await reload();
       setModalOpen(false);
     } catch (e: any) {
-      toast(
-        e?.message || (lang === "ar" ? "حدث خطأ" : "Something went wrong"),
-        { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } }
-      );
+      toast(e?.message || (lang === "ar" ? "حدث خطأ" : "Something went wrong"), {
+        style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
+      });
     } finally {
       setSaving(false);
     }
@@ -436,14 +419,32 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
     });
   };
 
-  const handleDelete = (id: string) => {
-    // ⚠️ Delete endpoint not provided -> local only
+  const handleDelete = async (addonId: string) => {
     if (!confirm(t.confirmDelete)) return;
 
-    setLocalAddons((prev) => (prev ?? addons).filter((x) => x.id !== id));
-    toast(lang === "ar" ? "تم الحذف (محليًا)" : "Deleted (local)", {
-      style: { background: "#198754", color: "#fff", borderRadius: "10px" },
-    });
+    try {
+      setDeletingId(addonId);
+
+      // ✅ delete from API (real id only)
+      // If this is a local duplicated item (id starts with "local_"), delete locally only
+      if (String(addonId).startsWith("local_") || String(addonId).startsWith("local_copy_")) {
+        setLocalAddons((prev) => (prev ?? addons).filter((x) => x.id !== addonId));
+        toast(lang === "ar" ? "تم الحذف (محليًا)" : "Deleted (local)", {
+          style: { background: "#198754", color: "#fff", borderRadius: "10px" },
+        });
+        return;
+      }
+
+      await deleteOption({ lang, id: addonId });
+
+      await reload();
+    } catch (e: any) {
+      toast(e?.message || (lang === "ar" ? "فشل الحذف" : "Delete failed"), {
+        style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
+      });
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const renderSkeleton = () => (
@@ -510,8 +511,8 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                   <div className="flex flex-wrap gap-2 mt-2">
                     <span
                       className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-lg border ${addon.required
-                        ? "bg-red-50 text-red-500 border-red-100"
-                        : "bg-green-50 text-green-600 border-green-100"
+                          ? "bg-red-50 text-red-500 border-red-100"
+                          : "bg-green-50 text-green-600 border-green-100"
                         }`}
                     >
                       {addon.required ? t.required : t.optional}
@@ -530,6 +531,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                   >
                     <Copy size={16} />
                   </button>
+
                   <button
                     onClick={() => handleOpenModal(addon)}
                     className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
@@ -537,12 +539,14 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                   >
                     <Edit size={16} />
                   </button>
+
                   <button
                     onClick={() => handleDelete(addon.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all disabled:opacity-60"
                     title={t.delete}
+                    disabled={deletingId === addon.id}
                   >
-                    <Trash2 size={16} />
+                    {deletingId === addon.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
                   </button>
                 </div>
               </div>
@@ -591,18 +595,16 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
               <button
                 onClick={() => setModalOpen(false)}
                 className="p-3 hover:bg-gray-100 rounded-full transition-colors"
+                disabled={saving}
               >
                 <X size={24} />
               </button>
             </div>
 
             <div className="p-10 overflow-y-auto no-scrollbar space-y-10">
-              {/* Headers */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                    {t.titleEn}
-                  </label>
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t.titleEn}</label>
                   <input
                     type="text"
                     className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all"
@@ -612,9 +614,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                 </div>
 
                 <div className="space-y-2 text-right">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                    {t.titleAr}
-                  </label>
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t.titleAr}</label>
                   <input
                     type="text"
                     className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all text-right"
@@ -624,26 +624,23 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                 </div>
               </div>
 
-              {/* Toggles */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">
-                    {t.required}
-                  </label>
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">{t.required}</label>
                   <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl w-fit">
                     <button
                       onClick={() => setForm({ ...form, required: true })}
                       className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${form.required ? "bg-[#483383] text-white" : "text-gray-400"
                         }`}
+                      disabled={saving}
                     >
                       {t.required}
                     </button>
                     <button
                       onClick={() => setForm({ ...form, required: false })}
-                      className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${!form.required
-                        ? "bg-white shadow-sm text-gray-900 border border-gray-100"
-                        : "text-gray-400"
+                      className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${!form.required ? "bg-white shadow-sm text-gray-900 border border-gray-100" : "text-gray-400"
                         }`}
+                      disabled={saving}
                     >
                       {t.optional}
                     </button>
@@ -651,14 +648,13 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">
-                    {t.selectionType}
-                  </label>
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">{t.selectionType}</label>
                   <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl w-fit">
                     <button
                       onClick={() => setForm({ ...form, selectionType: "single" })}
                       className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${form.selectionType === "single" ? "bg-[#483383] text-white" : "text-gray-400"
                         }`}
+                      disabled={saving}
                     >
                       {t.singleChoice}
                     </button>
@@ -666,6 +662,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                       onClick={() => setForm({ ...form, selectionType: "multiple" })}
                       className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${form.selectionType === "multiple" ? "bg-[#483383] text-white" : "text-gray-400"
                         }`}
+                      disabled={saving}
                     >
                       {t.multipleChoice}
                     </button>
@@ -673,7 +670,6 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                 </div>
               </div>
 
-              {/* Items */}
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h4 className="text-base font-bold text-gray-900 flex items-center gap-2">
@@ -683,6 +679,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                   <button
                     onClick={handleAddItem}
                     className="text-xs font-bold text-[#483383] flex items-center gap-1 hover:underline"
+                    disabled={saving}
                   >
                     <Plus size={14} /> {t.addItem}
                   </button>
@@ -701,6 +698,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                           className="w-full bg-white border border-gray-100 rounded-xl p-3 text-xs outline-none focus:border-[#483383]"
                           value={item.labelEn || ""}
                           onChange={(e) => handleItemChange(idx, "labelEn", e.target.value)}
+                          disabled={saving}
                         />
                       </div>
 
@@ -711,6 +709,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                           className="w-full bg-white border border-gray-100 rounded-xl p-3 text-xs outline-none focus:border-[#483383] text-right"
                           value={item.labelAr || ""}
                           onChange={(e) => handleItemChange(idx, "labelAr", e.target.value)}
+                          disabled={saving}
                         />
                       </div>
 
@@ -724,25 +723,21 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                           className="w-full bg-white border border-gray-100 rounded-xl p-3 text-xs outline-none focus:border-[#483383]"
                           value={Number(item.price || 0)}
                           onChange={(e) => handleItemChange(idx, "price", Number(e.target.value))}
+                          disabled={saving}
                         />
                       </div>
 
                       <div className="md:pt-5">
                         <button
                           onClick={() => handleRemoveItem(idx)}
-                          className="p-3 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                          className="p-3 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all disabled:opacity-60"
+                          disabled={saving}
                         >
                           <Trash size={18} />
                         </button>
                       </div>
                     </div>
                   ))}
-                </div>
-
-                <div className="text-[11px] text-gray-400 font-semibold">
-                  {lang === "ar"
-                    ? "ملاحظة: النسخ/الحذف ما زال محليًا لأن Endpoints delete غير مذكورة."
-                    : "Note: Duplicate/Delete are still local because delete endpoint wasn't provided."}
                 </div>
               </div>
             </div>

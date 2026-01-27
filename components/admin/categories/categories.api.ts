@@ -107,16 +107,22 @@ export async function createCategory(
     lang: Locale
 ) {
     try {
+        const fd = new FormData();
+        fd.append("name_ar", input.name_ar);
+        fd.append("name_en", input.name_en);
+        fd.append("position", String(input.position));
+        fd.append("is_active", String(input.is_active ? 1 : 0));
+        fd.append("image", input.imageUrl || "");
+
         const res = await http.post<ApiSimpleResponse>(
             `${DASHBOARD_API_BASE_URL}/categories`,
+            fd,
             {
-                name_ar: input.name_ar,
-                name_en: input.name_en,
-                position: input.position,
-                is_active: input.is_active ? 1 : 0,
-                image: input.imageUrl || "",
-            },
-            { headers: { lang } }
+                headers: {
+                    lang,
+                    Accept: "application/json",
+                },
+            }
         );
 
         toastApi(!!res?.data?.status, res?.data?.message);
@@ -146,18 +152,23 @@ export async function updateCategoryPatch(
     lang: Locale
 ) {
     try {
-        const body: any = {
-            name_ar: input.name_ar,
-            name_en: input.name_en,
-            position: input.position,
-            is_active: input.is_active ? 1 : 0,
-        };
-        if (input.imageUrl) body.image = input.imageUrl;
+        const fd = new FormData();
+        fd.append("_method", "PATCH");
+        fd.append("name_ar", input.name_ar);
+        fd.append("name_en", input.name_en);
+        fd.append("position", String(input.position));
+        fd.append("is_active", String(input.is_active ? 1 : 0));
+        if (input.imageUrl) fd.append("image", input.imageUrl);
 
-        const res = await http.patch<ApiSimpleResponse>(
+        const res = await http.post<ApiSimpleResponse>(
             `${DASHBOARD_API_BASE_URL}/categories/${id}`,
-            body,
-            { headers: { lang } }
+            fd,
+            {
+                headers: {
+                    lang,
+                    Accept: "application/json",
+                },
+            }
         );
 
         toastApi(!!res?.data?.status, res?.data?.message);

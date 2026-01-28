@@ -51,6 +51,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   const [notFound, setNotFound] = useState(false);
   const [showExitPrompt, setShowExitPrompt] = useState(false);
   const [isAddonsExpanded, setIsAddonsExpanded] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   const [mainImagePreview, setMainImagePreview] = useState<string>("");
@@ -525,6 +526,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     }
 
     try {
+      setSaving(true);
       if (isEdit && id) {
         await updateService(id);
         localStorage.removeItem('editServiceData');
@@ -535,6 +537,8 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -563,6 +567,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
         t={t}
         onCancel={handleCancel}
         onSave={handleSave}
+        saving={saving}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Save, X } from "lucide-react";
+import { ArrowLeft, Save, X, Loader2 } from "lucide-react";
 import { Locale } from "../../../../services/i18n";
 
 export default function PageHeader({
@@ -9,6 +9,7 @@ export default function PageHeader({
     t,
     onCancel,
     onSave,
+    saving,
 }: {
     lang: Locale;
     isEdit: boolean;
@@ -16,6 +17,7 @@ export default function PageHeader({
     t: any;
     onCancel: () => void;
     onSave: () => void;
+    saving?: boolean;
 }) {
     const handleCancel = () => {
         if (isEdit) {
@@ -54,7 +56,8 @@ export default function PageHeader({
             <div className="flex gap-3">
                 <button
                     onClick={handleCancel}
-                    className="px-6 py-3 bg-white border border-gray-100 rounded-2xl font-semibold text-gray-400 hover:bg-gray-50 transition-all flex items-center gap-2"
+                    disabled={saving}
+                    className="px-6 py-3 bg-white border border-gray-100 rounded-2xl font-semibold text-gray-400 hover:bg-gray-50 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                     <X size={18} />
                     <span>{t.cancel}</span>
@@ -62,10 +65,11 @@ export default function PageHeader({
 
                 <button
                     onClick={handleSave}
-                    className="px-8 py-3 bg-[#483383] text-white rounded-2xl font-semibold shadow-lg shadow-[#483383]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
+                    disabled={saving}
+                    className="px-8 py-3 bg-[#483383] text-white rounded-2xl font-semibold shadow-lg shadow-[#483383]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                    <Save size={18} />
-                    <span>{t.save}</span>
+                    {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                    <span>{saving ? (lang === "ar" ? "جاري الحفظ..." : "Saving...") : t.save}</span>
                 </button>
             </div>
         </header>

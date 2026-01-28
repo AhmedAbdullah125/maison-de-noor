@@ -213,7 +213,6 @@ const HairProfilePage: React.FC = () => {
                 const last = lastSubmittedTextRef.current[q.id] ?? "";
 
                 if (!txt) return;
-                if (!txt) return;
                 if (txt === last) return;
 
                 submitAnswer(q, next);

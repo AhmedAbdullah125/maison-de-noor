@@ -23,6 +23,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const wasSwipe = useRef(false);
+  console.log(product);
 
   // ✅ local favourite state (overrides parent)
   const [localFav, setLocalFav] = useState<boolean>(isFavourite);
@@ -97,16 +98,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
             touchStartX.current = null;
           }}
         >
-          {images.map((src, idx) => (
-            <div key={idx} className="min-w-full h-full relative shrink-0">
-              <AppImage
-                src={src}
-                alt={`${product.name} ${idx + 1}`}
-                className="w-full h-full object-cover"
-                draggable={false}
-              />
-            </div>
-          ))}
+
+          <div className="min-w-full h-full relative shrink-0">
+            <AppImage
+              src={product?.image}
+              alt={`${product.name}`}
+              className="w-full h-full object-cover"
+              draggable={false}
+            />
+          </div>
         </div>
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/90 to-transparent z-10" />

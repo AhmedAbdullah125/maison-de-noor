@@ -108,7 +108,7 @@ const HairProfilePage: React.FC = () => {
 
     if (q.type === "text") {
       const txt = String(value ?? "").trim();
-      if (q.is_required === 1 && !txt) return;
+      if (!txt) return;
       if (!txt) return;
 
       const res = await postQuestionnaireAnswer(
@@ -145,7 +145,7 @@ const HairProfilePage: React.FC = () => {
     const newErrors = new Set<number>();
 
     for (const q of questions) {
-      if (q.is_required !== 1) continue;
+      // if (q.is_required !== 1) continue;
 
       const v = answers[q.id];
 
@@ -181,7 +181,7 @@ const HairProfilePage: React.FC = () => {
   };
 
   const QuestionCard: React.FC<{ q: ApiQuestion }> = ({ q }) => {
-    const required = q.is_required === 1;
+    const required = 1;
     const hasError = errors.has(q.id);
 
     if (q.type === "text") {
@@ -212,7 +212,7 @@ const HairProfilePage: React.FC = () => {
                 const txt = String(next ?? "").trim();
                 const last = lastSubmittedTextRef.current[q.id] ?? "";
 
-                if (q.is_required === 1 && !txt) return;
+                if (!txt) return;
                 if (!txt) return;
                 if (txt === last) return;
 
@@ -233,7 +233,7 @@ const HairProfilePage: React.FC = () => {
                   const current = String(answers[q.id] ?? "").trim();
                   const last = lastSubmittedTextRef.current[q.id] ?? "";
 
-                  if (q.is_required === 1 && !current) return;
+                  if (!current) return;
                   if (!current) return;
                   if (current === last) return;
 
@@ -249,7 +249,7 @@ const HairProfilePage: React.FC = () => {
               const current = String(answers[q.id] ?? "").trim();
               const last = lastSubmittedTextRef.current[q.id] ?? "";
 
-              if (q.is_required === 1 && !current) return;
+              if (!current) return;
               if (!current) return;
               if (current === last) return;
 

@@ -68,10 +68,16 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
   const handleCancel = () => {
     if (hasUnsavedChanges()) setShowExitPrompt(true);
-    else navigate("/admin/services");
+    else {
+      if (isEdit) localStorage.removeItem('editServiceData');
+      navigate("/admin/services");
+    }
   };
 
-  const confirmExit = () => navigate("/admin/services");
+  const confirmExit = () => {
+    if (isEdit) localStorage.removeItem('editServiceData');
+    navigate("/admin/services");
+  };
 
   const handleToggleGlobalAddon = (optionId: number) => {
     const current = normalizeIds(form.globalAddonIds as any);
@@ -172,15 +178,10 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     const res = await http.get(`${DASHBOARD_API_BASE_URL}/services/${serviceId}`, {
       headers: { lang },
     });
-
-    console.log("🔍 Service API Response:", res?.data);
-
     const ok = !!res?.data?.status;
     if (!ok) throw new Error(res?.data?.message || "Failed to load service");
 
     const item = res.data.items || res.data.data?.data || res.data.data;
-    console.log("📦 Extracted item:", item);
-
     return item;
   }
 
@@ -195,14 +196,17 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
         setNotFound(false);
 
         if (isEdit && id) {
-          const item = await fetchServiceById(id);
+          const storedData = localStorage.getItem('editServiceData');
 
-          // ✅ remote gallery (لو موجودة)
-          // (افتراضات محتملة: item.images OR item.gallery OR item.media.images)
-          const apiGalleryUrls: string[] =
-            (item?.images || item?.gallery || item?.media?.images || [])
-              .map((x: any) => (typeof x === "string" ? x : x?.image || x?.url))
-              .filter(Boolean);
+          if (!storedData) {
+            if (mounted) setNotFound(true);
+            return;
+          }
+
+          const item = JSON.parse(storedData);
+          const apiGalleryUrls: string[] = (item?.images || [])
+            .map((x: any) => (typeof x === "string" ? x : x?.image || x?.url))
+            .filter(Boolean);
 
           const remoteGallery: GalleryItem[] = apiGalleryUrls.map((url: string, i: number) => ({
             preview: url,
@@ -213,38 +217,25 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
           const data: Partial<Product> = {
             name: String(item?.name || ""),
-            nameEn: String(item?.name || ""), // مفيش en في response
+            nameEn: String(item?.nameEn || item?.name || ""),
             description: String(item?.description || ""),
             price: String(item?.price ?? ""),
-            image: String(item?.main_image || ""), // ✅ main image url
-            images: apiGalleryUrls,               // optional للـ UI
-            duration: "60 mins",
-            category_id: item?.category?.id ?? undefined,
-
-            // ✅ options => IDs
-            globalAddonIds: normalizeIds((item?.options || []).map((o: any) => o.id)),
-
-            // ✅ subscriptions mapping
-            subscriptions: (item?.subscriptions || []).map((s: any) => ({
-              id: `sub_${s.id}`,
-              title: s.name || "",
-              sessionsCount: Number(s.session_count || 0),
-              pricePercent: Number(parseFloat(String(s.price_percentage || 0))),
-              validityDays: Number(s.validity_days || 0),
-            })),
+            image: String(item?.image || ""),
+            images: apiGalleryUrls,
+            duration: String(item?.duration || "60 mins"),
+            globalAddonIds: item?.globalAddonIds || [],
+            subscriptions: item?.subscriptions || [],
           };
 
-          console.log("✅ Mapped form data:", data);
-
+          (data as any).category_id = item?.category_id || item?.category?.id;
           if (!mounted) return;
 
           setForm(data);
           setInitialForm(JSON.stringify(data));
 
-          // ✅ images fallback
-          setMainImagePreview(String(item?.main_image || ""));
-          setMainImageFile(null);    // edit: عندك preview url، file مش لازم
-          setGallery(remoteGallery); // remote gallery (لو متاح)
+          setMainImagePreview(String(item?.image || ""));
+          setMainImageFile(null);
+          setGallery(remoteGallery);
         } else {
           const empty: Partial<Product> = {
             name: "",
@@ -256,8 +247,9 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
             duration: "60 mins",
             globalAddonIds: [],
             subscriptions: [],
-            category_id: undefined as any,
           };
+
+          (empty as any).category_id = undefined;
 
           if (!mounted) return;
 
@@ -535,6 +527,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     try {
       if (isEdit && id) {
         await updateService(id);
+        localStorage.removeItem('editServiceData');
         navigate("/admin/services");
       } else {
         await createService();

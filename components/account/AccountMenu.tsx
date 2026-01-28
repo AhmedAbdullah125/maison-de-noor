@@ -54,9 +54,6 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
         isLoading: questionnaireLoading,
     } = useGetQuestionnaire(lang, !isGuest);
     const hairComplete = progress?.percentage === 100;
-    console.log(hairComplete);
-
-    // (اختياري) تقدر تعرض نسبة التقدم:
     const hairPercent = progress?.percentage ?? 0;
 
     return (

@@ -152,8 +152,6 @@ const AppContent: React.FC = () => {
   };
 
   const handleLogout = () => {
-    console.log("sasasasas");
-
     localStorage.removeItem(STORAGE_KEY_IS_LOGGED_IN);
     localStorage.removeItem(STORAGE_KEY_AUTH_MODE);
     localStorage.removeItem("mezo_auth_user_name");

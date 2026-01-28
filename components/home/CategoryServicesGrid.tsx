@@ -43,8 +43,6 @@ export default function CategoryServicesGrid({
 
     // ✅ اعتبر categoryId هو الـ serviceId اللي جاي من HomeDrawer (?id=...)
     const serviceId = Number(searchParams.get("id"));
-    console.log(serviceId);
-
     const {
         data: service,
         isLoading,

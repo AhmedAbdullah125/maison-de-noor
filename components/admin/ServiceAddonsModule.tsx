@@ -511,8 +511,8 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                   <div className="flex flex-wrap gap-2 mt-2">
                     <span
                       className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-lg border ${addon.required
-                          ? "bg-red-50 text-red-500 border-red-100"
-                          : "bg-green-50 text-green-600 border-green-100"
+                        ? "bg-red-50 text-red-500 border-red-100"
+                        : "bg-green-50 text-green-600 border-green-100"
                         }`}
                     >
                       {addon.required ? t.required : t.optional}

@@ -17,11 +17,25 @@ export default function PageHeader({
     onCancel: () => void;
     onSave: () => void;
 }) {
+    const handleCancel = () => {
+        if (isEdit) {
+            localStorage.removeItem('editServiceData');
+        }
+        onCancel();
+    };
+
+    const handleSave = () => {
+        if (isEdit) {
+            localStorage.removeItem('editServiceData');
+        }
+        onSave();
+    };
+
     return (
         <header className="flex items-center justify-between">
             <div className="flex items-center gap-4">
                 <button
-                    onClick={onCancel}
+                    onClick={handleCancel}
                     className="p-3 bg-white border border-gray-100 rounded-2xl text-gray-400 hover:text-[#483383] hover:shadow-sm transition-all"
                 >
                     <ArrowLeft size={20} className={lang === "ar" ? "rotate-180" : ""} />
@@ -39,7 +53,7 @@ export default function PageHeader({
 
             <div className="flex gap-3">
                 <button
-                    onClick={onCancel}
+                    onClick={handleCancel}
                     className="px-6 py-3 bg-white border border-gray-100 rounded-2xl font-semibold text-gray-400 hover:bg-gray-50 transition-all flex items-center gap-2"
                 >
                     <X size={18} />
@@ -47,7 +61,7 @@ export default function PageHeader({
                 </button>
 
                 <button
-                    onClick={onSave}
+                    onClick={handleSave}
                     className="px-8 py-3 bg-[#483383] text-white rounded-2xl font-semibold shadow-lg shadow-[#483383]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
                 >
                     <Save size={18} />

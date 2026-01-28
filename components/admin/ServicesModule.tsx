@@ -308,7 +308,10 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
                         }`}
                     >
                       <button
-                        onClick={() => navigate(`/admin/services/${svc.id}/edit`)}
+                        onClick={() => {
+                          localStorage.setItem('editServiceData', JSON.stringify(svc));
+                          navigate(`/admin/services/${svc.id}/edit`);
+                        }}
                         className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
                         title={t.edit}
                       >

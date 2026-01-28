@@ -1,9 +1,9 @@
-import { 
-  DEMO_PRODUCTS, 
-  BRANDS, 
-  INITIAL_SUBSCRIPTIONS, 
-  STORAGE_KEY_SUBSCRIPTIONS, 
-  STORAGE_KEY_APPOINTMENTS 
+import {
+  DEMO_PRODUCTS,
+  BRANDS,
+  INITIAL_SUBSCRIPTIONS,
+  STORAGE_KEY_SUBSCRIPTIONS,
+  STORAGE_KEY_APPOINTMENTS
 } from '../constants';
 import { Product, Brand, UserSubscription, Appointment } from '../types';
 
@@ -37,7 +37,7 @@ export const CacheKeys = {
   CATEGORIES: 'categories',
   SERVICES: 'services',
   BANNERS: 'banners',
-  SUBSCRIPTIONS: 'subscriptions', 
+  SUBSCRIPTIONS: 'subscriptions',
   APPOINTMENTS: 'appointments',
   PROFILE: 'profile'
 };
@@ -51,8 +51,6 @@ class CacheService {
   private checkVersion() {
     const storedVersion = localStorage.getItem(`${STORAGE_PREFIX}version`);
     if (storedVersion !== CACHE_VERSION) {
-      console.log('Cache version mismatch. Clearing old cache...');
-      
       // 1. Clear LocalStorage
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith(STORAGE_PREFIX)) {
@@ -60,11 +58,10 @@ class CacheService {
         }
       });
       localStorage.removeItem(STORAGE_KEY_SUBSCRIPTIONS);
-      
+
       // 2. Clear Cache Storage (Images)
       if ('caches' in window) {
         caches.delete(IMAGE_CACHE_NAME).then(() => {
-          console.log('Old image cache cleared.');
         });
       }
 
@@ -80,7 +77,7 @@ class CacheService {
 
   save<T>(key: string, data: T): void {
     const cacheKey = this.getKey(key);
-    
+
     if (key === CacheKeys.SUBSCRIPTIONS || key === CacheKeys.APPOINTMENTS) {
       localStorage.setItem(cacheKey, JSON.stringify(data));
       const metaKey = `${STORAGE_PREFIX}${key}_meta`;
@@ -102,7 +99,7 @@ class CacheService {
   load<T>(key: string): T | null {
     const cacheKey = this.getKey(key);
     const raw = localStorage.getItem(cacheKey);
-    
+
     if (!raw) return null;
 
     if (key === CacheKeys.SUBSCRIPTIONS || key === CacheKeys.APPOINTMENTS) {
@@ -128,10 +125,10 @@ class CacheService {
     let timestamp = 0;
 
     if (key === CacheKeys.SUBSCRIPTIONS || key === CacheKeys.APPOINTMENTS) {
-       const metaRaw = localStorage.getItem(`${STORAGE_PREFIX}${key}_meta`);
-       if (!metaRaw) return true;
-       const meta = JSON.parse(metaRaw) as CacheMetadata;
-       timestamp = meta.timestamp;
+      const metaRaw = localStorage.getItem(`${STORAGE_PREFIX}${key}_meta`);
+      if (!metaRaw) return true;
+      const meta = JSON.parse(metaRaw) as CacheMetadata;
+      timestamp = meta.timestamp;
     } else {
       const cacheKey = this.getKey(key);
       const raw = localStorage.getItem(cacheKey);
@@ -145,18 +142,18 @@ class CacheService {
   }
 
   // --- Image Caching Logic (Service Worker Strategy Mock) ---
-  
+
   /**
    * Prefetches banner images and stores them in the browser's Cache Storage.
    * This ensures next time the image is requested by <img src>, it serves from disk.
    */
-  async prefetchBanners(banners: {id: number, image: string}[]) {
+  async prefetchBanners(banners: { id: number, image: string }[]) {
     if (!('caches' in window)) return;
 
     try {
       const cache = await caches.open(IMAGE_CACHE_NAME);
       const urls = banners.map(b => b.image);
-      
+
       // Check which are already cached
       const promises = urls.map(async (url) => {
         const match = await cache.match(url);
@@ -164,13 +161,12 @@ class CacheService {
           // If not in cache, fetch and put
           try {
             await cache.add(url);
-            console.log(`Cached banner: ${url}`);
           } catch (err) {
             console.warn(`Failed to cache banner ${url}`, err);
           }
         }
       });
-      
+
       await Promise.all(promises);
     } catch (err) {
       console.error('Error accessing Cache Storage', err);
@@ -180,8 +176,7 @@ class CacheService {
   // --- Warmup Logic ---
 
   async warmup(): Promise<void> {
-    console.log('Starting Cache Warmup...');
-    
+
     // 1. Categories
     if (this.needsRefresh(CacheKeys.CATEGORIES)) {
       this.save(CacheKeys.CATEGORIES, BRANDS);
@@ -210,24 +205,23 @@ class CacheService {
 
     // 5. Banners (Metadata + Image Prefetching)
     if (this.needsRefresh(CacheKeys.BANNERS)) {
-       const banners = [
+      const banners = [
         { id: 1, image: 'https://raiyansoft.com/wp-content/uploads/2026/01/b2.jpg' },
         { id: 2, image: 'https://raiyansoft.com/wp-content/uploads/2026/01/b1.jpg' },
       ];
       // Save metadata to LocalStorage (lightweight)
       this.save(CacheKeys.BANNERS, banners);
-      
+
       // Save images to Cache Storage (heavyweight)
       this.prefetchBanners(banners);
     } else {
       // Even if metadata isn't expired, ensure images are in CacheStorage (re-verify)
-      const banners = this.load<{id: number, image: string}[]>(CacheKeys.BANNERS);
+      const banners = this.load<{ id: number, image: string }[]>(CacheKeys.BANNERS);
       if (banners) {
         this.prefetchBanners(banners);
       }
     }
 
-    console.log('Cache Warmup Complete.');
   }
 
   getInitialData() {
@@ -235,7 +229,7 @@ class CacheService {
       categories: this.load<Brand[]>(CacheKeys.CATEGORIES) || BRANDS,
       services: this.load<Product[]>(CacheKeys.SERVICES) || DEMO_PRODUCTS,
       subscriptions: this.load<UserSubscription[]>(CacheKeys.SUBSCRIPTIONS) || [],
-      banners: this.load<{id: number, image: string}[]>(CacheKeys.BANNERS) || [],
+      banners: this.load<{ id: number, image: string }[]>(CacheKeys.BANNERS) || [],
     };
   }
 }

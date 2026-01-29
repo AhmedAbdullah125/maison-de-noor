@@ -25,9 +25,10 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onLoginSuccess }) => {
     if (!formData.name || !formData.phone || !formData.password || !formData.confirmPassword) {
       setError("يرجى ملء جميع الحقول");
       return;
+
     }
-    if (!/^\+\d{8,15}$/.test(formData.phone)) {
-      setError("رقم الهاتف يجب أن يبدأ بـ + ويتكون من 8 إلى 15 رقم");
+    if (!/^\d{8}$/.test(formData.phone)) {
+      setError("رقم الهاتف يجب أن يتكون من 8 أرقام");
       return;
     }
 

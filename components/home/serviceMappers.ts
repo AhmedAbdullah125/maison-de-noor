@@ -3,10 +3,28 @@ import type { Brand, Product, ServiceAddonGroup, ServiceSubscription, } from "@/
 // غيّرها حسب مشروعك (مثلاً: https://maison-de-noor.com/storage/)
 const STORAGE_BASE = "https://maison-de-noor.com/storage/";
 
-function resolveAsset(path?: string) {
+function resolveAsset(path?: string, highQuality: boolean = true) {
     if (!path) return "";
-    if (path.startsWith("http")) return path;
-    return `${STORAGE_BASE}${path.replace(/^\/+/, "")}`;
+
+    let url = path;
+    if (!path.startsWith("http")) {
+        url = `${STORAGE_BASE}${path.replace(/^\/+/, "")}`;
+    }
+
+    // Remove thumbnail/compressed suffixes if present
+    // Common patterns: image-thumb.jpg, image_small.jpg, image-150x150.jpg
+    if (highQuality) {
+        url = url
+            .replace(/-thumb(\.[^.]+)$/, '$1')
+            .replace(/_thumb(\.[^.]+)$/, '$1')
+            .replace(/-small(\.[^.]+)$/, '$1')
+            .replace(/_small(\.[^.]+)$/, '$1')
+            .replace(/-medium(\.[^.]+)$/, '$1')
+            .replace(/_medium(\.[^.]+)$/, '$1')
+            .replace(/-\d+x\d+(\.[^.]+)$/, '$1');
+    }
+
+    return url;
 }
 
 export function mapLookupsToUI(items: any) {

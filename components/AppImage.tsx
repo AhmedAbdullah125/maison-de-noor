@@ -29,6 +29,8 @@ const AppImage: React.FC<AppImageProps> = ({ src, alt, onError, ...props }) => {
       src={currentSrc || FALLBACK_IMAGE_URL}
       alt={alt || ''}
       onError={handleError}
+      loading="lazy"
+      decoding="async"
       {...props}
     />
   );

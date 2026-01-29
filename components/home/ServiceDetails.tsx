@@ -427,7 +427,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                                         <div
                                             key={option.id}
                                             onClick={() => handleGroupOptionSelect(String(group.id), option.id, (group as any).type)}
-                                            className={`flex relative items-center justify-between p-3.5 pt-8 rounded-2xl border cursor-pointer transition-all active:scale-[0.99] ${isSelected ? "bg-app-gold/5 border-app-gold shadow-sm" : "bg-white border-app-card/30 hover:border-app-card"
+                                            className={`flex relative items-center justify-between p-3.5 pb-8 rounded-2xl border cursor-pointer transition-all active:scale-[0.99] ${isSelected ? "bg-app-gold/5 border-app-gold shadow-sm" : "bg-white border-app-card/30 hover:border-app-card"
                                                 }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -453,7 +453,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                                                 </div>
                                             </div>
 
-                                            <span className="text-[10px] absolute top-1 end-1 font-bold text-white bg-app-gold px-2.5 py-1 rounded-lg">
+                                            <span className="text-[10px] absolute bottom-1 end-1 font-bold text-white bg-app-gold px-2.5 py-1 rounded-lg">
                                                 +{parsePrice(option.price_kwd ?? option.price ?? 0).toFixed(3)} د.ك
                                             </span>
                                         </div>

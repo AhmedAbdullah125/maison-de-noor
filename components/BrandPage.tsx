@@ -6,6 +6,7 @@ import ProductCard from './ProductCard';
 import AppImage from './AppImage';
 import AppHeader from './AppHeader';
 import { useGetServiceByCategory } from './services/useGetServiceByCategory';
+import { useGetLookups } from './services/useGetLookups';
 
 interface BrandPageProps {
   onBook: (product: Product, quantity: number) => void;
@@ -23,6 +24,8 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
   const { data, isLoading, isError, isFetching, error } =
     useGetServiceByCategory("ar", brandId, page);
 
+  const lookupsQuery = useGetLookups("ar");
+
   const unauthorized = (error as any)?.isUnauthorized === true;
 
   // ✅ always run effect (no early return before hooks below)
@@ -37,13 +40,17 @@ const BrandPage: React.FC<BrandPageProps> = ({ onBook, favourites, onToggleFavou
   const pagination = data?.pagination;
 
   const brandInfo = useMemo(() => {
+    const categories = lookupsQuery.data?.categories ?? [];
+    const category = categories.find((cat: any) => cat.id === Number(brandId));
+
     const first = services?.[0];
     const cat = first?.category;
+
     return {
-      name: cat?.name ?? "القسم",
-      image: first?.main_image ?? "",
+      name: category?.name || cat?.name || "القسم",
+      image: category?.image || "",
     };
-  }, [services]);
+  }, [services, lookupsQuery.data, brandId]);
 
   const mappedProducts: Product[] = useMemo(() => {
     return services.map((s: any) => {

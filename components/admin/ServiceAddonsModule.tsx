@@ -372,15 +372,15 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
   };
 
   const handleSave = async () => {
-    if (!validateForm()) {
-      toast(
-        lang === "ar"
-          ? "لازم تدخل (عنوان عربي/إنجليزي) + عنصر واحد على الأقل (اسم عربي/إنجليزي)"
-          : "Title (AR/EN) + at least 1 item (name AR/EN) is required",
-        { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } }
-      );
-      return;
-    }
+    // if (!validateForm()) {
+    //   toast(
+    //     lang === "ar"
+    //       ? "لازم تدخل (عنوان عربي/إنجليزي) + عنصر واحد على الأقل (اسم عربي/إنجليزي)"
+    //       : "Title (AR/EN) + at least 1 item (name AR/EN) is required",
+    //     { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } }
+    //   );
+    //   return;
+    // }
 
     try {
       setSaving(true);

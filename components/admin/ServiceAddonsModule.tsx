@@ -402,21 +402,34 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
     }
   };
 
-  const handleDuplicate = (addon: GlobalAddon) => {
-    const newId = `local_copy_${Date.now()}`;
-    const duplicated: GlobalAddon = {
-      ...addon,
-      id: newId,
-      titleEn: `${addon.titleEn} (${t.copy})`,
-      titleAr: `${addon.titleAr} (${t.copy})`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  const handleDuplicate = async (addon: GlobalAddon) => {
+    try {
+      setDeletingId(addon.id);
 
-    setLocalAddons((prev) => [duplicated, ...(prev ?? addons)]);
-    toast(lang === "ar" ? "تم النسخ (محليًا)" : "Duplicated (local)", {
-      style: { background: "#198754", color: "#fff", borderRadius: "10px" },
-    });
+      const duplicatedForm: Partial<GlobalAddon> = {
+        titleEn: `${addon.titleEn} (${t.copy})`,
+        titleAr: `${addon.titleAr} (${t.copy})`,
+        required: addon.required,
+        selectionType: addon.selectionType,
+        items: addon.items.map(item => ({
+          ...item,
+          id: `temp_${Date.now()}_${Math.random()}`,
+        })),
+      };
+
+      await createOption({ lang, form: duplicatedForm });
+      await reload();
+
+      toast(lang === "ar" ? "تم النسخ بنجاح" : "Duplicated successfully", {
+        style: { background: "#198754", color: "#fff", borderRadius: "10px" },
+      });
+    } catch (e: any) {
+      toast(e?.message || (lang === "ar" ? "فشل النسخ" : "Duplicate failed"), {
+        style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
+      });
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const handleDelete = async (addonId: string) => {

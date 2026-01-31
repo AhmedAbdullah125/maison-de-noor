@@ -175,7 +175,7 @@ const AppContent: React.FC = () => {
     <div className={isAdminRoute ? "w-full min-h-screen" : "h-[100vh] flex flex-col bg-app-bg w-full max-w-[430px] mx-auto relative shadow-2xl overflow-hidden"}>
       <div className={isAdminRoute ? "w-full h-full" : "flex-1 overflow-hidden relative"}>
         <Routes>
-          <Route path="/" element={
+          {/* <Route path="/" element={
             <HomeTab
               onBook={handleBook}
               favourites={favourites}
@@ -239,11 +239,10 @@ const AppContent: React.FC = () => {
 
           <Route path="/hair-profile" element={<HairProfilePage />} />
 
-          {/* Auth Routes */}
-          <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+        <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/signup" element={<SignUpPage onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/verify" element={<OTPPage onLoginSuccess={handleLoginSuccess} />} />
-
+*/}
           {/* Admin Routes */}
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -251,7 +250,7 @@ const AppContent: React.FC = () => {
           {/* Placeholder for technician online */}
           <Route path="/technician/online" element={<PlaceholderTab title="Technician Online" />} />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </div>
 

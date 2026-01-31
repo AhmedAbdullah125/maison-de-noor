@@ -1,43 +1,81 @@
-import React, { useState } from 'react';
-import { Search, CheckCircle2, XCircle } from 'lucide-react';
-import { db } from '../../services/db';
-import { Appointment } from '../../types';
-import { translations, Locale } from '../../services/i18n';
+"use client";
+
+import React, { useMemo, useState } from "react";
+import { Search } from "lucide-react";
+import { translations, Locale } from "../../services/i18n";
+import {
+  BookingType,
+  BookingStatus,
+  changeBookingStatus,
+  toastApi,
+} from "./bookings/bookings.api";
+import { useBookings } from "./bookings/useBookings";
 
 interface BookingsModuleProps {
-  type: 'upcoming' | 'completed';
+  type: BookingType;
   lang: Locale;
 }
 
-const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
-  const [dbData, setDbData] = useState(db.getData());
-  const [searchTerm, setSearchTerm] = useState('');
-  const t = translations[lang];
+function statusLabel(status: BookingStatus, lang: Locale, t: any) {
+  // لو عندك keys جاهزة في translations استخدمها بدل ده
+  if (lang === "ar") {
+    if (status === "upcoming") return "قادمة";
+    if (status === "completed") return "مكتملة";
+    return "ملغاة";
+  }
+  if (status === "upcoming") return "Upcoming";
+  if (status === "completed") return "Completed";
+  return "Canceled";
+}
 
-  const filtered = dbData.appointments.filter(a =>
-    a.status === type &&
-    (a.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) || a.userId?.includes(searchTerm))
+function statusBadgeClass(status: BookingStatus) {
+  if (status === "completed") return "bg-green-50 text-green-600";
+  if (status === "canceled") return "bg-red-50 text-red-600";
+  return "bg-amber-50 text-amber-700"; // upcoming
+}
+
+const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
+  const t = translations[lang];
+  const perPage = 10;
+
+  const { isLoading, apiRows, meta, canPrev, canNext, setPage, refetch } =
+    useBookings(lang, type, perPage);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [changingId, setChangingId] = useState<number | null>(null);
+
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return apiRows;
+    return apiRows.filter((b) => {
+      const bn = (b.booking_number || "").toLowerCase();
+      const svc = (b.service || "").toLowerCase();
+      return bn.includes(q) || svc.includes(q);
+    });
+  }, [apiRows, searchTerm]);
+
+  const renderSkeleton = () => (
+    <div className="space-y-4">
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-auto">
+        <div className="h-12 bg-gray-50 border-b border-gray-100" />
+        <div className="p-6 space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-14 bg-gray-50 rounded-2xl animate-pulse" />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 
-  const handleStatusChange = (id: string, newStatus: Appointment['status']) => {
-    db.updateEntity('appointments', id, { status: newStatus });
-    if (newStatus === 'completed') {
-      const appt = dbData.appointments.find(a => a.id === id);
-      if (appt && appt.pricePaidNow) {
-        db.addEntity('accounting', {
-          id: `inc_${Date.now()}`,
-          type: 'income',
-          amount: appt.pricePaidNow,
-          date: new Date().toISOString(),
-          category: 'Service Booking',
-          note: `Completed: ${appt.serviceName}`,
-          linkedBookingId: id
-        });
-      }
-    }
-    // Fix: Provide all required arguments for db.addLog
-    db.addLog('Admin', 'admin', 'update', 'Booking', id, 'Status Updated', `Set to ${newStatus}`);
-    setDbData({ ...db.getData() });
+  const onChangeStatus = async (id: number, next: BookingStatus) => {
+    setChangingId(id);
+    const res = await changeBookingStatus(id, next, lang);
+    setChangingId(null);
+
+    if (!res.ok) return;
+
+    // ✅ ريّح دماغك: اعمل refetch علشان لو booking اتنقل من upcoming لـ completed يختفي من الجدول الحالي
+    await refetch();
   };
 
   return (
@@ -46,85 +84,152 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
         <div className="relative w-full md:w-96">
           <input
             type="text"
-            className={`w-full ${lang === 'ar' ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3 bg-white border border-gray-200 rounded-2xl outline-none`}
-            placeholder={t.service + '...'}
+            className={`w-full ${lang === "ar" ? "pr-11 pl-4" : "pl-11 pr-4"
+              } py-3 bg-white border border-gray-200 rounded-2xl outline-none`}
+            placeholder={`${t.service}...`}
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Search className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-gray-400`} size={18} />
+          <Search
+            className={`absolute ${lang === "ar" ? "right-4" : "left-4"
+              } top-1/2 -translate-y-1/2 text-gray-400`}
+            size={18}
+          />
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-auto">
-        <table className="w-full text-start">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.bookingId}</th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.service}</th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.schedule}</th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.staffAssigned}</th>
-              <th className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {filtered.map((appt) => {
-              const assignedStaff = dbData.staff.find(s => s.id === appt.staffId);
-              return (
-                <tr key={appt.id} className="hover:bg-gray-50/50">
-                  <td className="px-6 py-4 font-semibold text-gray-400 text-xs">#{appt.id.slice(-6)}</td>
-                  <td className="px-6 py-4 font-semibold text-gray-900">{appt.serviceName}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-gray-900" dir="ltr">{appt.dateISO}</span>
-                      <span className="text-[10px] text-gray-500 font-normal">{appt.time24}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {assignedStaff ? (
-                      <span className="text-xs font-semibold text-gray-900">{assignedStaff.name}</span>
-                    ) : (
-                      <select
-                        className="bg-gray-50 border border-gray-100 text-[10px] font-semibold rounded-lg p-1 outline-none"
-                        onChange={(e) => {
-                          db.updateEntity('appointments', appt.id, { staffId: e.target.value });
-                          setDbData({ ...db.getData() });
-                        }}
-                      >
-                        <option value="">{t.unassigned}</option>
-                        {dbData.staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                      </select>
-                    )}
-                  </td>
-                  <td className={`px-6 py-4 ${lang === 'ar' ? 'text-start' : 'text-end'}`}>
-                    {appt.status === 'upcoming' ? (
-                      <div className={`flex items-center gap-2 ${lang === 'ar' ? 'justify-start' : 'justify-end'}`}>
-                        <button
-                          onClick={() => handleStatusChange(appt.id, 'completed')}
-                          className="p-2 text-green-500 hover:bg-green-50 rounded-lg"
-                          title={t.markCompleted}
+      {isLoading ? (
+        renderSkeleton()
+      ) : (
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-auto">
+          <table className="w-full text-start">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                  {t.bookingId}
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                  {t.service}
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                  {t.schedule}
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                  {t.staffAssigned}
+                </th>
+                <th
+                  className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === "ar" ? "text-start" : "text-end"
+                    }`}
+                >
+                  {t.actions}
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-50">
+              {filtered.map((b) => {
+                const serviceName = b.service?.trim() ? b.service : "—";
+                const dateISO = b.start_date;
+                const time24 = b.start_time;
+
+                // ✅ لو API بيرجع status استخدمه، وإلا اشتقه من tab type
+                const currentStatus: BookingStatus =
+                  (b.status as BookingStatus) ||
+                  (type === "completed" ? "completed" : "upcoming");
+
+                return (
+                  <tr key={b.id} className="hover:bg-gray-50/50">
+                    <td className="px-6 py-4 font-semibold text-gray-400 text-xs">
+                      {b.booking_number ? b.booking_number : `#${b.id}`}
+                    </td>
+
+                    <td className="px-6 py-4 font-semibold text-gray-900">
+                      {serviceName}
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span
+                          className="text-sm font-semibold text-gray-900"
+                          dir="ltr"
                         >
-                          <CheckCircle2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleStatusChange(appt.id, 'canceled')}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                          title={t.cancelBooking}
-                        >
-                          <XCircle size={18} />
-                        </button>
+                          {dateISO}
+                        </span>
+                        <span className="text-[10px] text-gray-500 font-normal">
+                          {time24}
+                        </span>
                       </div>
-                    ) : (
-                      <span className={`text-[10px] font-semibold px-3 py-1 rounded-full ${appt.status === 'completed' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-                        {appt.status === 'completed' ? t.completed : t.canceled}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <span className="text-xs font-semibold text-gray-900">—</span>
+                    </td>
+
+                    <td
+                      className={`px-6 py-4 ${lang === "ar" ? "text-start" : "text-end"
+                        }`}
+                    >
+                      <div
+                        className={`flex items-center gap-2 ${lang === "ar" ? "justify-start" : "justify-end"
+                          }`}
+                      >
+                        {/* ✅ status badge */}
+                        <span
+                          className={`text-[10px] font-semibold px-3 py-1 rounded-full ${statusBadgeClass(
+                            currentStatus
+                          )}`}
+                        >
+                          {statusLabel(currentStatus, lang, t)}
+                        </span>
+
+                        {/* ✅ status select */}
+                        <select
+                          className="bg-gray-50 border border-gray-100 text-[10px] font-semibold rounded-lg px-2 py-2 outline-none disabled:opacity-60"
+                          value={currentStatus}
+                          disabled={changingId === b.id}
+                          onChange={(e) => {
+                            const next = e.target.value as BookingStatus;
+                            if (next === currentStatus) return;
+                            onChangeStatus(b.id, next);
+                          }}
+                        >
+                          <option value="upcoming">{statusLabel("upcoming", lang, t)}</option>
+                          <option value="completed">{statusLabel("completed", lang, t)}</option>
+                          <option value="cancelled">{statusLabel("canceled", lang, t)}</option>
+                        </select>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {!isLoading && meta && (
+        <div className="flex items-center justify-between">
+          <button
+            className="px-4 py-2 rounded-xl border border-gray-200 bg-white disabled:opacity-50"
+            disabled={!canPrev}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            {lang === "ar" ? "السابق" : "Prev"}
+          </button>
+
+          <div className="text-xs text-gray-500">
+            {meta.current_page} / {meta.last_page} — {meta.total}
+          </div>
+
+          <button
+            className="px-4 py-2 rounded-xl border border-gray-200 bg-white disabled:opacity-50"
+            disabled={!canNext}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            {lang === "ar" ? "التالي" : "Next"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

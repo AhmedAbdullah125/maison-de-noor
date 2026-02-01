@@ -70,13 +70,11 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   const handleCancel = () => {
     if (hasUnsavedChanges()) setShowExitPrompt(true);
     else {
-      if (isEdit) localStorage.removeItem('editServiceData');
       navigate("/admin/services");
     }
   };
 
   const confirmExit = () => {
-    if (isEdit) localStorage.removeItem('editServiceData');
     navigate("/admin/services");
   };
 
@@ -182,7 +180,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     const ok = !!res?.data?.status;
     if (!ok) throw new Error(res?.data?.message || "Failed to load service");
 
-    const item = res.data.items || res.data.data?.data || res.data.data;
+    const item = res.data.data;
     return item;
   }
 
@@ -197,16 +195,29 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
         setNotFound(false);
 
         if (isEdit && id) {
-          const storedData = localStorage.getItem('editServiceData');
+          // Fetch from API
+          const item = await fetchServiceById(id);
 
-          if (!storedData) {
+          if (!item) {
             if (mounted) setNotFound(true);
             return;
           }
 
-          const item = JSON.parse(storedData);
-          const apiGalleryUrls: string[] = (item?.images || [])
-            .map((x: any) => (typeof x === "string" ? x : x?.image || x?.url))
+          // Extract translations
+          const arTranslation = item.translations?.find((t: any) => t.language === "ar");
+          const enTranslation = item.translations?.find((t: any) => t.language === "en");
+
+          // Map images
+          const apiGalleryUrls: string[] = (item.images || [])
+            .map((x: any) => {
+              if (typeof x === "string") return x;
+              // Handle both 'image' and 'url' properties, and add base URL if needed
+              const imgPath = x?.image || x?.url;
+              if (!imgPath) return null;
+              // If path doesn't start with http, prepend base URL
+              if (imgPath.startsWith('http')) return imgPath;
+              return `https://maison-de-noor.com/${imgPath}`;
+            })
             .filter(Boolean);
 
           const remoteGallery: GalleryItem[] = apiGalleryUrls.map((url: string, i: number) => ({
@@ -216,25 +227,43 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
             file: null,
           }));
 
+          // Map subscriptions from API format to form format
+          const mappedSubscriptions = (item.subscriptions || []).map((sub: any) => {
+            const arSubTranslation = sub.translations?.find((t: any) => t.language === "ar");
+            return {
+              id: sub.id,
+              title: arSubTranslation?.name || "",
+              sessionsCount: sub.session_count || 2,
+              pricePercent: parseFloat(sub.price_percentage || "100"),
+              validityDays: sub.validity_days || 30,
+            };
+          });
+
+          // Handle main image URL
+          let mainImageUrl = item.main_image || "";
+          if (mainImageUrl && !mainImageUrl.startsWith('http')) {
+            mainImageUrl = `https://maison-de-noor.com/${mainImageUrl}`;
+          }
+
           const data: Partial<Product> = {
-            name: String(item?.name || ""),
-            nameEn: String(item?.nameEn || item?.name || ""),
-            description: String(item?.description || ""),
-            price: String(item?.price ?? ""),
-            image: String(item?.image || ""),
+            name: arTranslation?.name || "",
+            nameEn: enTranslation?.name || "",
+            description: arTranslation?.description || "",
+            price: String(item.price || ""),
+            image: mainImageUrl,
             images: apiGalleryUrls,
-            duration: String(item?.duration || "60 mins"),
-            globalAddonIds: item?.globalAddonIds || [],
-            subscriptions: item?.subscriptions || [],
+            duration: "60 mins",
+            globalAddonIds: item.option_ids || [],
+            subscriptions: mappedSubscriptions,
           };
 
-          (data as any).category_id = item?.category_id || item?.category?.id;
+          (data as any).category_id = item.category_id;
           if (!mounted) return;
 
           setForm(data);
           setInitialForm(JSON.stringify(data));
 
-          setMainImagePreview(String(item?.image || ""));
+          setMainImagePreview(mainImageUrl);
           setMainImageFile(null);
           setGallery(remoteGallery);
         } else {
@@ -529,7 +558,6 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
       setSaving(true);
       if (isEdit && id) {
         await updateService(id);
-        localStorage.removeItem('editServiceData');
         navigate("/admin/services");
       } else {
         await createService();

@@ -279,6 +279,10 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [addonToDelete, setAddonToDelete] = useState<GlobalAddon | null>(null);
+
   const [form, setForm] = useState<Partial<GlobalAddon>>({
     titleEn: "",
     titleAr: "",
@@ -432,25 +436,34 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
     }
   };
 
-  const handleDelete = async (addonId: string) => {
-    if (!confirm(t.confirmDelete)) return;
+  const handleDelete = (addon: GlobalAddon) => {
+    setAddonToDelete(addon);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!addonToDelete) return;
 
     try {
-      setDeletingId(addonId);
+      setDeletingId(addonToDelete.id);
 
       // ✅ delete from API (real id only)
       // If this is a local duplicated item (id starts with "local_"), delete locally only
-      if (String(addonId).startsWith("local_") || String(addonId).startsWith("local_copy_")) {
-        setLocalAddons((prev) => (prev ?? addons).filter((x) => x.id !== addonId));
+      if (String(addonToDelete.id).startsWith("local_") || String(addonToDelete.id).startsWith("local_copy_")) {
+        setLocalAddons((prev) => (prev ?? addons).filter((x) => x.id !== addonToDelete.id));
         toast(lang === "ar" ? "تم الحذف (محليًا)" : "Deleted (local)", {
           style: { background: "#198754", color: "#fff", borderRadius: "10px" },
         });
+        setDeleteModalOpen(false);
+        setAddonToDelete(null);
         return;
       }
 
-      await deleteOption({ lang, id: addonId });
+      await deleteOption({ lang, id: addonToDelete.id });
 
       await reload();
+      setDeleteModalOpen(false);
+      setAddonToDelete(null);
     } catch (e: any) {
       toast(e?.message || (lang === "ar" ? "فشل الحذف" : "Delete failed"), {
         style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
@@ -554,7 +567,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                   </button>
 
                   <button
-                    onClick={() => handleDelete(addon.id)}
+                    onClick={() => handleDelete(addon)}
                     className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all disabled:opacity-60"
                     title={t.delete}
                     disabled={deletingId === addon.id}
@@ -772,6 +785,67 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
               >
                 {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
                 <span>{saving ? (lang === "ar" ? "جارٍ الحفظ..." : "Saving...") : t.save}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && addonToDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden animate-scaleIn">
+            <div className="px-10 py-8 border-b border-gray-100">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
+                  <Trash2 size={32} className="text-red-500" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+                {lang === "ar" ? "تأكيد الحذف" : "Confirm Delete"}
+              </h3>
+              <p className="text-sm text-gray-500 text-center">
+                {lang === "ar"
+                  ? `هل أنت متأكد من حذف "${lang === "ar" ? addonToDelete.titleAr : addonToDelete.titleEn}"؟`
+                  : `Are you sure you want to delete "${lang === "ar" ? addonToDelete.titleAr : addonToDelete.titleEn}"?`
+                }
+              </p>
+              <p className="text-xs text-gray-400 text-center mt-2">
+                {lang === "ar"
+                  ? "لا يمكن التراجع عن هذا الإجراء"
+                  : "This action cannot be undone"
+                }
+              </p>
+            </div>
+
+            <div className="px-10 py-8 flex gap-4 bg-gray-50/30">
+              <button
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setAddonToDelete(null);
+                }}
+                className="flex-1 py-4 font-bold text-gray-700 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 active:scale-95 transition-all"
+                disabled={deletingId === addonToDelete.id}
+              >
+                {t.cancel}
+              </button>
+
+              <button
+                onClick={confirmDelete}
+                disabled={deletingId === addonToDelete.id}
+                className="flex-1 py-4 font-bold text-white bg-red-500 rounded-2xl shadow-lg hover:bg-red-600 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {deletingId === addonToDelete.id ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    <span>{lang === "ar" ? "جارٍ الحذف..." : "Deleting..."}</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={20} />
+                    <span>{t.delete}</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

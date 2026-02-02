@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Search, AlertCircle } from 'lucide-react';
+import { ArrowRight, Search, AlertCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Html5Qrcode } from 'html5-qrcode';
-import { teamData } from '../data/demoData';
+import { DASHBOARD_API_BASE_URL } from '@/lib/apiConfig';
+import { http } from '@/components/services/http';
 
 const ScanPage: React.FC = () => {
   const navigate = useNavigate();
@@ -11,13 +12,19 @@ const ScanPage: React.FC = () => {
   const [error, setError] = useState('');
   const [cameraError, setCameraError] = useState('');
   const [scanning, setScanning] = useState(false);
+  const [loading, setLoading] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [lastScan, setLastScan] = useState('');
 
-  // Parse QR code data to extract client ID
+  // Parse QR code data to extract user ID
   const parseQRData = (data: string): string | null => {
     try {
-      // Try parsing as JSON first
+      // Check for "noor://account/{id}" format
+      if (data.startsWith('noor://account/')) {
+        return data.replace('noor://account/', '').trim();
+      }
+
+      // Try parsing as JSON
       const parsed = JSON.parse(data);
       if (parsed.type === 'client' && parsed.id) {
         return parsed.id;
@@ -34,30 +41,46 @@ const ScanPage: React.FC = () => {
       return data.replace('client:', '').trim();
     }
 
-    // Assume it's a direct ID like "c1"
+    // Assume it's a direct ID
     return data.trim();
   };
 
-  const handleScanSuccess = (decodedText: string) => {
+  const handleScanSuccess = async (decodedText: string) => {
     // Prevent duplicate scans
     if (decodedText === lastScan) return;
     setLastScan(decodedText);
 
-    const clientId = parseQRData(decodedText);
+    const userId = parseQRData(decodedText);
 
-    if (clientId) {
-      const client = teamData.getClientById(clientId);
+    if (userId) {
+      try {
+        setLoading(true);
+        setError('');
 
-      if (client) {
-        // Stop scanning before navigation
-        stopScanning();
-        navigate(`/team/client/${client.id}`);
-      } else {
-        setError(`لم يتم العثور على عميلة بالكود: ${clientId}`);
+        // Fetch user profile from API
+        const response = await http.get(`${DASHBOARD_API_BASE_URL}/users/${userId}`);
+
+        if (response.data && response.data.data) {
+          // Stop scanning before navigation
+          stopScanning();
+          // Navigate to client profile with user ID
+          navigate(`/team/client/${userId}`);
+        } else {
+          setError(`لم يتم العثور على عميلة بالكود: ${userId}`);
+          setTimeout(() => {
+            setError('');
+            setLastScan('');
+          }, 3000);
+        }
+      } catch (err: any) {
+        console.error('Error fetching user profile:', err);
+        setError('حدث خطأ في تحميل بيانات العميلة');
         setTimeout(() => {
           setError('');
           setLastScan('');
         }, 3000);
+      } finally {
+        setLoading(false);
       }
     } else {
       setError('كود QR غير صالح');
@@ -121,17 +144,29 @@ const ScanPage: React.FC = () => {
     };
   }, []);
 
-  const handleManualSubmit = (e: React.FormEvent) => {
+  const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualCode.trim()) return;
 
-    const cleanCode = manualCode.replace('client:', '').trim();
-    const client = teamData.getClientById(cleanCode);
+    const userId = manualCode.replace('client:', '').trim();
 
-    if (client) {
-      navigate(`/team/client/${client.id}`);
-    } else {
+    try {
+      setLoading(true);
+      setError('');
+
+      // Fetch user profile from API
+      const response = await http.get(`${DASHBOARD_API_BASE_URL}/users/${userId}`);
+
+      if (response.data && response.data.data) {
+        navigate(`/team/client/${userId}`);
+      } else {
+        setError('لم يتم العثور على عميلة بهذا الكود');
+      }
+    } catch (err: any) {
+      console.error('Error fetching user profile:', err);
       setError('لم يتم العثور على عميلة بهذا الكود');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -198,6 +233,14 @@ const ScanPage: React.FC = () => {
         {error && (
           <div className="absolute bottom-40 z-20 bg-red-500/90 backdrop-blur-md text-white px-6 py-3 rounded-full text-xs font-bold animate-pulse">
             {error}
+          </div>
+        )}
+
+        {/* Loading Indicator */}
+        {loading && (
+          <div className="absolute bottom-40 z-20 bg-app-gold/90 backdrop-blur-md text-white px-6 py-3 rounded-full text-xs font-bold flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>جاري التحقق...</span>
           </div>
         )}
       </div>

@@ -570,7 +570,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                     <span className="text-gray-500 font-normal">
                       {lang === "ar" ? item.labelAr : item.labelEn}
                     </span>
-                    <span className="text-gray-900 font-semibold">
+                    <span className="text-gray-900 font-semibold text-nowrap">
                       {Number(item.price).toFixed(3)} {t.currency}
                     </span>
                   </div>

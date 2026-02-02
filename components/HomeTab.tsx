@@ -8,7 +8,7 @@ import AppImage from './AppImage';
 import ImageCarousel from './ImageCarousel';
 import { cacheService } from '../services/cacheService';
 import AppHeader from './AppHeader';
-import { db } from '../services/db'; // Unified Data Source
+import { db } from '../services/db';
 
 interface HomeTabProps {
   onBook: (product: Product, quantity: number, selectedAddons?: ServiceAddon[], packageOption?: ServicePackageOption, customFinalPrice?: number) => void;

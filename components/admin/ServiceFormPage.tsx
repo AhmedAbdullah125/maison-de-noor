@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { db } from "../../services/db";
 import { Product, ServiceSubscription } from "../../types";
 import { translations, Locale } from "../../services/i18n";
 import { useCategoriesOptions } from "./categories/useCategoriesOptions";

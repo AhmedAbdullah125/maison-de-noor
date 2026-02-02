@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
 import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid } from 'lucide-react';
-import { db } from '../../services/db';
 import { translations, getLang, setLang, Locale } from '../../services/i18n';
 import { Manager, ManagerPermissions } from '../../types';
 // Module Components

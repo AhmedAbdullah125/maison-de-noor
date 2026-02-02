@@ -94,7 +94,7 @@ export default function SubscriptionsCard({
                                 </label>
                                 <input
                                     type="number"
-                                    min="2"
+                                    min="1"
                                     className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-[#483383]"
                                     value={sub.sessionsCount}
                                     onChange={(e) =>

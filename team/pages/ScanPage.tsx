@@ -1,0 +1,256 @@
+
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowRight, Search, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Html5Qrcode } from 'html5-qrcode';
+import { teamData } from '../data/demoData';
+
+const ScanPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [manualCode, setManualCode] = useState('');
+  const [error, setError] = useState('');
+  const [cameraError, setCameraError] = useState('');
+  const [scanning, setScanning] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [lastScan, setLastScan] = useState('');
+
+  // Parse QR code data to extract client ID
+  const parseQRData = (data: string): string | null => {
+    try {
+      // Try parsing as JSON first
+      const parsed = JSON.parse(data);
+      if (parsed.type === 'client' && parsed.id) {
+        return parsed.id;
+      }
+      if (parsed.id) {
+        return parsed.id;
+      }
+    } catch {
+      // Not JSON, try other formats
+    }
+
+    // Check for "client:c1" format
+    if (data.startsWith('client:')) {
+      return data.replace('client:', '').trim();
+    }
+
+    // Assume it's a direct ID like "c1"
+    return data.trim();
+  };
+
+  const handleScanSuccess = (decodedText: string) => {
+    // Prevent duplicate scans
+    if (decodedText === lastScan) return;
+    setLastScan(decodedText);
+
+    const clientId = parseQRData(decodedText);
+
+    if (clientId) {
+      const client = teamData.getClientById(clientId);
+
+      if (client) {
+        // Stop scanning before navigation
+        stopScanning();
+        navigate(`/team/client/${client.id}`);
+      } else {
+        setError(`لم يتم العثور على عميلة بالكود: ${clientId}`);
+        setTimeout(() => {
+          setError('');
+          setLastScan('');
+        }, 3000);
+      }
+    } else {
+      setError('كود QR غير صالح');
+      setTimeout(() => {
+        setError('');
+        setLastScan('');
+      }, 3000);
+    }
+  };
+
+  const startScanning = async () => {
+    try {
+      const html5QrCode = new Html5Qrcode('qr-reader');
+      scannerRef.current = html5QrCode;
+
+      await html5QrCode.start(
+        { facingMode: 'environment' }, // Use back camera on mobile
+        {
+          fps: 10, // Frames per second to scan
+          qrbox: { width: 250, height: 250 }, // Scanning box size
+        },
+        handleScanSuccess,
+        () => {
+          // Error callback - ignore errors during scanning
+        }
+      );
+
+      setScanning(true);
+      setCameraError('');
+    } catch (err: any) {
+      console.error('Error starting scanner:', err);
+
+      if (err.toString().includes('NotAllowedError')) {
+        setCameraError('تم رفض الوصول إلى الكاميرا. الرجاء السماح بالوصول للكاميرا في إعدادات المتصفح.');
+      } else if (err.toString().includes('NotFoundError')) {
+        setCameraError('لم يتم العثور على كاميرا. الرجاء التأكد من توصيل الكاميرا.');
+      } else {
+        setCameraError('حدث خطأ في الكاميرا. حاول مرة أخرى.');
+      }
+    }
+  };
+
+  const stopScanning = () => {
+    if (scannerRef.current && scanning) {
+      scannerRef.current
+        .stop()
+        .then(() => {
+          setScanning(false);
+        })
+        .catch((err) => {
+          console.error('Error stopping scanner:', err);
+        });
+    }
+  };
+
+  useEffect(() => {
+    startScanning();
+
+    return () => {
+      stopScanning();
+    };
+  }, []);
+
+  const handleManualSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualCode.trim()) return;
+
+    const cleanCode = manualCode.replace('client:', '').trim();
+    const client = teamData.getClientById(cleanCode);
+
+    if (client) {
+      navigate(`/team/client/${client.id}`);
+    } else {
+      setError('لم يتم العثور على عميلة بهذا الكود');
+    }
+  };
+
+  const handleRetry = () => {
+    setCameraError('');
+    setError('');
+    setLastScan('');
+    startScanning();
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-black relative">
+      {/* Header Overlay */}
+      <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-between items-center">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white"
+        >
+          <ArrowRight size={20} />
+        </button>
+        <span className="text-white font-bold">مسح الكود</span>
+        <div className="w-10" />
+      </div>
+
+      {/* Scanner Viewport */}
+      <div className="flex-1 relative flex flex-col items-center justify-center">
+        {/* Camera Feed Container */}
+        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+          {cameraError ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <AlertCircle className="w-16 h-16 text-red-400 mb-4" />
+              <p className="text-white/90 text-sm leading-relaxed mb-6">{cameraError}</p>
+              <button
+                onClick={handleRetry}
+                className="bg-app-gold text-white px-6 py-3 rounded-full font-bold hover:scale-95 transition-transform"
+              >
+                إعادة المحاولة
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* QR Reader Element */}
+              <div id="qr-reader" className="w-full h-full"></div>
+            </>
+          )}
+        </div>
+
+        {/* Scan Frame Overlay */}
+        {scanning && !cameraError && (
+          <div className="relative z-10 w-64 h-64 border-2 border-app-gold/50 rounded-3xl flex items-center justify-center pointer-events-none">
+            <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-r-4 border-app-gold rounded-tr-xl -mt-1 -mr-1 rotate-[270deg]" />
+            <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-app-gold rounded-tr-xl -mt-1 -mr-1" />
+            <div className="absolute bottom-0 left-0 w-6 h-6 border-t-4 border-r-4 border-app-gold rounded-tr-xl -mt-1 -mr-1 rotate-[180deg]" />
+            <div className="absolute bottom-0 right-0 w-6 h-6 border-t-4 border-r-4 border-app-gold rounded-tr-xl -mt-1 -mr-1 rotate-[90deg]" />
+
+            {/* Scanning Line Animation */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-app-gold shadow-[0_0_8px_rgba(197,179,88,0.8)] animate-[scan_2s_infinite_linear]" />
+
+            <p className="text-white/70 text-xs font-bold mt-32 animate-pulse">جاري البحث عن كود...</p>
+          </div>
+        )}
+
+        {/* Error Messages */}
+        {error && (
+          <div className="absolute bottom-40 z-20 bg-red-500/90 backdrop-blur-md text-white px-6 py-3 rounded-full text-xs font-bold animate-pulse">
+            {error}
+          </div>
+        )}
+      </div>
+
+      {/* Manual Entry Sheet */}
+      <div className="bg-white rounded-t-[32px] p-8 pb-12 z-20 -mt-6">
+        <h3 className="text-lg font-bold text-app-text mb-4 text-center">أو ادخال يدوي</h3>
+        <form onSubmit={handleManualSubmit} className="relative">
+          <input
+            type="text"
+            placeholder="رقم العميل / الكود"
+            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-app-gold focus:bg-white transition-all text-center font-mono font-bold text-lg"
+            value={manualCode}
+            onChange={(e) => {
+              setManualCode(e.target.value);
+              setError('');
+            }}
+          />
+          <button
+            type="submit"
+            className="absolute left-2 top-2 bottom-2 aspect-square bg-app-gold text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-95 transition-transform"
+          >
+            <Search size={20} />
+          </button>
+        </form>
+        {error && <p className="text-red-500 text-xs font-bold text-center mt-3">{error}</p>}
+      </div>
+
+      <style>{`
+        @keyframes scan {
+          0% { top: 10%; opacity: 0; }
+          50% { opacity: 1; }
+          100% { top: 90%; opacity: 0; }
+        }
+        
+        /* Hide html5-qrcode default UI elements */
+        #qr-reader__dashboard_section {
+          display: none !important;
+        }
+        
+        #qr-reader__dashboard_section_csr {
+          display: none !important;
+        }
+        
+        /* Make video fill the container */
+        #qr-reader video {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover !important;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default ScanPage;

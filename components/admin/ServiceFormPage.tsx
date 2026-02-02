@@ -596,23 +596,27 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
       <div className="flex flex-col gap-8">
         <div className="flex flex-col md:flex-row gap-2">
-          <BasicInfoCard
-            lang={lang}
-            t={t}
-            form={form}
-            setForm={setForm}
-            catsLoading={catsLoading}
-            categories={categories}
-          />
-          <MediaCard
-            mainImagePreview={mainImagePreview}
-            onMainImageUpload={handleMainImageUpload}
-            onRemoveMainImage={handleRemoveMainImage}
-            gallery={gallery}
-            onGalleryUpload={handleGalleryUpload}
-            onSetAsMain={handleSetAsMain}
-            onRemoveGalleryImage={handleRemoveGalleryImage}
-          />
+          <div className="w-full md:w-1/2 shrink-0">
+            <BasicInfoCard
+              lang={lang}
+              t={t}
+              form={form}
+              setForm={setForm}
+              catsLoading={catsLoading}
+              categories={categories}
+            />
+          </div>
+          <div className="w-full md:w-1/2 shrink-0">
+            <MediaCard
+              mainImagePreview={mainImagePreview}
+              onMainImageUpload={handleMainImageUpload}
+              onRemoveMainImage={handleRemoveMainImage}
+              gallery={gallery}
+              onGalleryUpload={handleGalleryUpload}
+              onSetAsMain={handleSetAsMain}
+              onRemoveGalleryImage={handleRemoveGalleryImage}
+            />
+          </div>
 
         </div>
 

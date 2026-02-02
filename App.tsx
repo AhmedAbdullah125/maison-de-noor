@@ -21,6 +21,7 @@ import HairProfilePage from './components/HairProfilePage';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminLogin from './components/admin/AdminLogin';
 import PlaceholderTab from './components/PlaceholderTab';
+import TeamAppLayout from './team/TeamAppLayout';
 import { TabId, Product, ServiceAddon, ServicePackageOption, BookingItem } from './types';
 import { cacheService } from './services/cacheService';
 
@@ -167,15 +168,39 @@ const AppContent: React.FC = () => {
     !location.pathname.startsWith('/login') &&
     !location.pathname.startsWith('/signup') &&
     !location.pathname.startsWith('/verify') &&
-    !location.pathname.startsWith('/technician/online');
+    !location.pathname.startsWith('/technician/online') &&
+    !location.pathname.startsWith('/team'); // Exclude Team App
 
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isTeamRoute = location.pathname.startsWith('/team');
+
+  // If Admin or Team route, render without the main app container wrapper style
+  if (isAdminRoute) {
+    return (
+      <div className="w-full min-h-screen">
+        <Routes>
+          <Route path="/admin/*" element={<AdminDashboard />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+        </Routes>
+      </div>
+    );
+  }
+
+  if (isTeamRoute) {
+    return (
+      <div className="w-full min-h-screen bg-gray-50 flex justify-center">
+        <Routes>
+          <Route path="/team/*" element={<TeamAppLayout />} />
+        </Routes>
+      </div>
+    );
+  }
 
   return (
-    <div className={isAdminRoute ? "w-full min-h-screen" : "h-[100vh] flex flex-col bg-app-bg w-full max-w-[430px] mx-auto relative shadow-2xl overflow-hidden"}>
-      <div className={isAdminRoute ? "w-full h-full" : "flex-1 overflow-hidden relative"}>
+    <div className="h-full flex flex-col bg-app-bg w-full max-w-[430px] mx-auto relative shadow-2xl overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         <Routes>
-          {/* <Route path="/" element={
+          {/*<Route path="/" element={
             <HomeTab
               onBook={handleBook}
               favourites={favourites}
@@ -239,10 +264,10 @@ const AppContent: React.FC = () => {
 
           <Route path="/hair-profile" element={<HairProfilePage />} />
 
-        <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+          <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/signup" element={<SignUpPage onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/verify" element={<OTPPage onLoginSuccess={handleLoginSuccess} />} />
-*/}
+          */}
           {/* Admin Routes */}
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />

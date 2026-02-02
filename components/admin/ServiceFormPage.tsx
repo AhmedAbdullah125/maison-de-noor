@@ -45,7 +45,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [showExitPrompt, setShowExitPrompt] = useState(false);
-  const [isAddonsExpanded, setIsAddonsExpanded] = useState(false);
+  const [isAddonsExpanded, setIsAddonsExpanded] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
@@ -54,6 +54,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
   const { isLoading: catsLoading, rows: categories } = useCategoriesOptions(lang);
   const { isLoading: optionsLoading, rows: options } = useOptionsOptions(lang);
+
 
   const selectedOptionIds = useMemo(
     () => normalizeIds(form.globalAddonIds as any),
@@ -593,8 +594,8 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
         saving={saving}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col md:flex-row gap-2">
           <BasicInfoCard
             lang={lang}
             t={t}
@@ -603,6 +604,20 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
             catsLoading={catsLoading}
             categories={categories}
           />
+          <MediaCard
+            mainImagePreview={mainImagePreview}
+            onMainImageUpload={handleMainImageUpload}
+            onRemoveMainImage={handleRemoveMainImage}
+            gallery={gallery}
+            onGalleryUpload={handleGalleryUpload}
+            onSetAsMain={handleSetAsMain}
+            onRemoveGalleryImage={handleRemoveGalleryImage}
+          />
+
+        </div>
+
+        <div className="flex flex-col gap-8">
+
 
           <AddonsCard
             lang={lang}
@@ -613,6 +628,10 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
             options={options}
             selectedOptionIds={selectedOptionIds}
             onToggleOption={handleToggleGlobalAddon}
+            onReload={async () => {
+              // Force re-fetch by reloading the page
+              window.location.reload();
+            }}
           />
 
           <SubscriptionsCard
@@ -627,17 +646,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
           />
         </div>
 
-        <div className="space-y-6">
-          <MediaCard
-            mainImagePreview={mainImagePreview}
-            onMainImageUpload={handleMainImageUpload}
-            onRemoveMainImage={handleRemoveMainImage}
-            gallery={gallery}
-            onGalleryUpload={handleGalleryUpload}
-            onSetAsMain={handleSetAsMain}
-            onRemoveGalleryImage={handleRemoveGalleryImage}
-          />
-        </div>
+
       </div>
 
       <ExitPrompt

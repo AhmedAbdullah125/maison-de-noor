@@ -18,6 +18,8 @@ export default function BasicInfoCard({
     catsLoading: boolean;
     categories: any[];
 }) {
+
+
     return (
         <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
             <h3 className="text-base font-semibold text-gray-900 border-b border-gray-50 pb-4 flex items-center gap-2">

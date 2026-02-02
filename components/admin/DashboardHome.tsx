@@ -89,7 +89,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ lang }) => {
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
           <h3 className="text-base font-semibold text-gray-900 mb-6">{t.activityLog}</h3>
           <div className="space-y-6">
-            {data.logs.slice(0, 6).map((log) => (
+            {data.logs.map((log) => (
               <div key={log.id} className="flex gap-4">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#483383] mt-1.5 shrink-0" />
                 <div>

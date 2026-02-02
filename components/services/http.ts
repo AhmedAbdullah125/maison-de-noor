@@ -1,6 +1,6 @@
 // src/services/http/http.ts
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import { API_BASE_URL } from "@/lib/apiConfig";
+import { API_BASE_URL, DASHBOARD_API_BASE_URL } from "@/lib/apiConfig";
 import { refreshToken } from "./refreshToken";
 import { getAccessToken, getRefreshToken, clearAuth } from "../auth/authStorage";
 
@@ -27,7 +27,7 @@ function isAuthEndpoint(url?: string) {
     return url.includes("/login") || url.includes("/refresh-token");
 }
 
-export const http: AxiosInstance = axios.create({ baseURL: API_BASE_URL });
+export const http: AxiosInstance = axios.create({ baseURL: DASHBOARD_API_BASE_URL });
 
 http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const skipAuth = (config.headers as any)?.["x-skip-auth"];

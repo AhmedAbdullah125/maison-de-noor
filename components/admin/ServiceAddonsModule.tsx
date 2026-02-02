@@ -689,13 +689,7 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                     <ListPlus size={20} className="text-[#483383]" />
                     {t.items}
                   </h4>
-                  <button
-                    onClick={handleAddItem}
-                    className="text-xs font-bold text-[#483383] flex items-center gap-1 hover:underline"
-                    disabled={saving}
-                  >
-                    <Plus size={14} /> {t.addItem}
-                  </button>
+
                 </div>
 
                 <div className="space-y-3">
@@ -751,6 +745,13 @@ const ServiceAddonsModule: React.FC<ServiceAddonsModuleProps> = ({ lang }) => {
                       </div>
                     </div>
                   ))}
+                  <button
+                    onClick={handleAddItem}
+                    className="text-xs font-bold text-[#483383] flex items-center gap-1 hover:underline"
+                    disabled={saving}
+                  >
+                    <Plus size={14} /> {t.addItem}
+                  </button>
                 </div>
               </div>
             </div>

@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
 import { db } from "../../services/db";
 import { Product, ServiceSubscription } from "../../types";
 import { translations, Locale } from "../../services/i18n";
-
 import { useCategoriesOptions } from "./categories/useCategoriesOptions";
 import { useOptionsOptions } from "./services/useOptionsOptions";
 
@@ -18,10 +16,8 @@ import AddonsCard from "./ServiceFormPage/components/AddonsCard";
 import SubscriptionsCard from "./ServiceFormPage/components/SubscriptionsCard";
 import MediaCard from "./ServiceFormPage/components/MediaCard";
 import ExitPrompt from "./ServiceFormPage/components/ExitPrompt";
-
 import { GalleryItem } from "./ServiceFormPage/types";
 import { normalizeIds, parsePrice } from "./ServiceFormPage/utils";
-
 
 interface ServiceFormPageProps {
   lang: Locale;

@@ -91,7 +91,7 @@ export interface UserSubscription {
   status: 'active' | 'expired' | 'paused';
   sessionsTotal: number;
   sessionsUsed: number;
-  expiryDate: string; 
+  expiryDate: string;
   purchaseDate: string;
   validityDays?: number;
   minGapDays?: number;
@@ -223,7 +223,7 @@ export interface Appointment {
   dateISO: string;
   time24: string;
   pricePaidNow?: number;
-  status: "upcoming" | "completed" | "canceled";
+  status: "upcoming" | "completed" | "cancelled";
   createdAt: string;
   staffId?: string;
   notes?: string;

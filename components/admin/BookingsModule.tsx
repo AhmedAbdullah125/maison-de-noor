@@ -30,7 +30,7 @@ function statusLabel(status: BookingStatus, lang: Locale, t: any) {
 
 function statusBadgeClass(status: BookingStatus) {
   if (status === "completed") return "bg-green-50 text-green-600";
-  if (status === "canceled") return "bg-red-50 text-red-600";
+  if (status === "cancelled") return "bg-red-50 text-red-600";
   return "bg-amber-50 text-amber-700"; // upcoming
 }
 
@@ -43,6 +43,11 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [changingId, setChangingId] = useState<number | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    show: boolean;
+    bookingId: number | null;
+    action: "confirm" | "cancel" | null;
+  }>({ show: false, bookingId: null, action: null });
 
   const filtered = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -66,6 +71,24 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
       </div>
     </div>
   );
+
+  const handleActionClick = (bookingId: number, action: "confirm" | "cancel") => {
+    setConfirmDialog({ show: true, bookingId, action });
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmDialog.bookingId || !confirmDialog.action) return;
+
+    const newStatus: BookingStatus =
+      confirmDialog.action === "confirm" ? "completed" : "cancelled";
+
+    setConfirmDialog({ show: false, bookingId: null, action: null });
+    await onChangeStatus(confirmDialog.bookingId, newStatus);
+  };
+
+  const handleCancelDialog = () => {
+    setConfirmDialog({ show: false, bookingId: null, action: null });
+  };
 
   const onChangeStatus = async (id: number, next: BookingStatus) => {
     setChangingId(id);
@@ -182,21 +205,27 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                           {statusLabel(currentStatus, lang, t)}
                         </span>
 
-                        {/* ✅ status select */}
-                        <select
-                          className="bg-gray-50 border border-gray-100 text-[10px] font-semibold rounded-lg px-2 py-2 outline-none disabled:opacity-60"
-                          value={currentStatus}
-                          disabled={changingId === b.id}
-                          onChange={(e) => {
-                            const next = e.target.value as BookingStatus;
-                            if (next === currentStatus) return;
-                            onChangeStatus(b.id, next);
-                          }}
-                        >
-                          <option value="upcoming">{statusLabel("upcoming", lang, t)}</option>
-                          <option value="completed">{statusLabel("completed", lang, t)}</option>
-                          <option value="cancelled">{statusLabel("canceled", lang, t)}</option>
-                        </select>
+                        {/* ✅ action buttons */}
+                        <div className="flex items-center gap-2">
+                          {currentStatus === "upcoming" && (
+                            <button
+                              className="bg-green-500 hover:bg-green-600 text-white text-[10px] font-semibold rounded-lg px-3 py-2 outline-none disabled:opacity-60 transition-colors"
+                              disabled={changingId === b.id}
+                              onClick={() => handleActionClick(b.id, "confirm")}
+                            >
+                              تأكيد الحجز
+                            </button>
+                          )}
+                          {currentStatus !== "cancelled" && (
+                            <button
+                              className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-semibold rounded-lg px-3 py-2 outline-none disabled:opacity-60 transition-colors"
+                              disabled={changingId === b.id}
+                              onClick={() => handleActionClick(b.id, "cancel")}
+                            >
+                              الغاء الحجز
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -228,6 +257,49 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
           >
             {lang === "ar" ? "التالي" : "Next"}
           </button>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {confirmDialog.show && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full mx-4 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              {confirmDialog.action === "confirm"
+                ? lang === "ar"
+                  ? "تأكيد الحجز"
+                  : "Confirm Booking"
+                : lang === "ar"
+                  ? "إلغاء الحجز"
+                  : "Cancel Booking"}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {confirmDialog.action === "confirm"
+                ? lang === "ar"
+                  ? "هل أنت متأكد من تأكيد هذا الحجز؟"
+                  : "Are you sure you want to confirm this booking?"
+                : lang === "ar"
+                  ? "هل أنت متأكد من إلغاء هذا الحجز؟"
+                  : "Are you sure you want to cancel this booking?"}
+            </p>
+            <div className="flex items-center gap-3 justify-end">
+              <button
+                className="px-4 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold transition-colors"
+                onClick={handleCancelDialog}
+              >
+                {lang === "ar" ? "تراجع" : "Cancel"}
+              </button>
+              <button
+                className={`px-4 py-2 rounded-xl font-semibold text-white transition-colors ${confirmDialog.action === "confirm"
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "bg-red-500 hover:bg-red-600"
+                  }`}
+                onClick={handleConfirmAction}
+              >
+                {lang === "ar" ? "تأكيد" : "Confirm"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

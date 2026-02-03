@@ -6,7 +6,7 @@ import { Locale } from "../../../services/i18n";
 export type BookingType = "upcoming" | "completed";
 
 // ✅ statuses اللي هنشتغل بيها في الـ UI
-export type BookingStatus = "upcoming" | "completed" | "canceled";
+export type BookingStatus = "upcoming" | "completed" | "cancelled";
 
 export type ApiBooking = {
     id: number;
@@ -67,7 +67,7 @@ export async function getBookings(params: {
                     page: params.page,
                     per_page: params.per_page,
                 },
-                headers: { lang: params.lang, Accept: "application/json" },
+                headers: { "Accept-Language": params.lang, Accept: "application/json" },
             }
         );
 

@@ -40,11 +40,9 @@ const AdminDashboard: React.FC = () => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   }, [navigate, lang, currentManager]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('salon_admin_session');
-    // Also clear auth tokens
-    const { clearAuth } = require('../auth/authStorage');
-    clearAuth();
+  const handleLogout = async () => {
+    const { adminLogout } = await import('./auth/logout.api');
+    await adminLogout();
     navigate('/admin/login');
   };
 

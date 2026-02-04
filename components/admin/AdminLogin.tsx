@@ -1,40 +1,38 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User } from 'lucide-react';
-import { db } from '../../services/db';
 import { translations, getLang, Locale } from '../../services/i18n';
+import { useAdminLogin } from './auth/useAdminLogin';
+import { isLoggedIn } from '../auth/authStorage';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
-  // Auto-fill demo credentials by default
-  const [credentials, setCredentials] = useState({ username: 'admin', password: '000000' });
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const lang: Locale = getLang();
   const t = translations[lang];
+  const { login, isLoading } = useAdminLogin(lang);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isLoggedIn()) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = db.getData();
-    const manager = data.managers.find(m =>
-      m.username === credentials.username &&
-      m.password === credentials.password
-    );
+    setError('');
 
-    if (manager) {
-      if (manager.status === 'disabled') {
-        setError(lang === 'ar' ? 'حسابك معطل حالياً.' : 'Your account is currently disabled.');
-        return;
-      }
+    const result = await login(credentials);
 
-      // Update last login
-      db.updateEntity('managers', manager.id, { lastLoginAt: new Date().toISOString() });
-
-      localStorage.setItem('salon_admin_session', JSON.stringify(manager));
-      db.addLog(manager.fullName, 'admin', 'login', 'Manager', manager.id, 'Manager Login', `Logged into dashboard`);
-      navigate('/admin');
+    if (result.ok) {
+      // Navigate to home page on successful login
+      navigate('/', { replace: true });
     } else {
-      setError(lang === 'ar' ? 'بيانات الدخول غير صحيحة.' : 'Invalid credentials.');
+      // Display error message
+      setError(result.error || (lang === 'ar' ? 'بيانات الدخول غير صحيحة.' : 'Invalid credentials.'));
     }
   };
 
@@ -80,9 +78,10 @@ const AdminLogin: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full bg-[#483383] text-white font-semibold py-4 rounded-xl shadow-lg hover:bg-[#352C48] transition-all"
+            disabled={isLoading}
+            className="w-full bg-[#483383] text-white font-semibold py-4 rounded-xl shadow-lg hover:bg-[#352C48] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t.signIn}
+            {isLoading ? (lang === 'ar' ? 'جاري تسجيل الدخول...' : 'Logging in...') : t.signIn}
           </button>
         </form>
       </div>

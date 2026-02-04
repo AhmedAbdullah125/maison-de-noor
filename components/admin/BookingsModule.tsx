@@ -17,15 +17,9 @@ interface BookingsModuleProps {
 }
 
 function statusLabel(status: BookingStatus, lang: Locale, t: any) {
-  // لو عندك keys جاهزة في translations استخدمها بدل ده
-  if (lang === "ar") {
-    if (status === "upcoming") return "قادمة";
-    if (status === "completed") return "مكتملة";
-    return "ملغاة";
-  }
-  if (status === "upcoming") return "Upcoming";
-  if (status === "completed") return "Completed";
-  return "Canceled";
+  if (status === "upcoming") return t.upcomingStatus;
+  if (status === "completed") return t.completedStatus;
+  return t.canceledStatus;
 }
 
 function statusBadgeClass(status: BookingStatus) {
@@ -213,7 +207,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                               disabled={changingId === b.id}
                               onClick={() => handleActionClick(b.id, "confirm")}
                             >
-                              تأكيد الحجز
+                              {t.confirmBooking}
                             </button>
                           )}
                           {currentStatus !== "cancelled" && (
@@ -222,7 +216,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                               disabled={changingId === b.id}
                               onClick={() => handleActionClick(b.id, "cancel")}
                             >
-                              الغاء الحجز
+                              {t.cancelBookingAction}
                             </button>
                           )}
                         </div>
@@ -243,7 +237,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
             disabled={!canPrev}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
-            {lang === "ar" ? "السابق" : "Prev"}
+            {t.prev}
           </button>
 
           <div className="text-xs text-gray-500">
@@ -255,7 +249,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
             disabled={!canNext}
             onClick={() => setPage((p) => p + 1)}
           >
-            {lang === "ar" ? "التالي" : "Next"}
+            {t.next}
           </button>
         </div>
       )}
@@ -266,28 +260,20 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
           <div className="bg-white rounded-3xl p-6 max-w-md w-full mx-4 shadow-xl">
             <h3 className="text-lg font-bold text-gray-900 mb-4">
               {confirmDialog.action === "confirm"
-                ? lang === "ar"
-                  ? "تأكيد الحجز"
-                  : "Confirm Booking"
-                : lang === "ar"
-                  ? "إلغاء الحجز"
-                  : "Cancel Booking"}
+                ? t.confirmBooking
+                : t.cancelBookingAction}
             </h3>
             <p className="text-gray-600 mb-6">
               {confirmDialog.action === "confirm"
-                ? lang === "ar"
-                  ? "هل أنت متأكد من تأكيد هذا الحجز؟"
-                  : "Are you sure you want to confirm this booking?"
-                : lang === "ar"
-                  ? "هل أنت متأكد من إلغاء هذا الحجز؟"
-                  : "Are you sure you want to cancel this booking?"}
+                ? t.confirmBookingQuestion
+                : t.cancelBookingQuestion}
             </p>
             <div className="flex items-center gap-3 justify-end">
               <button
                 className="px-4 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold transition-colors"
                 onClick={handleCancelDialog}
               >
-                {lang === "ar" ? "تراجع" : "Cancel"}
+                {t.back}
               </button>
               <button
                 className={`px-4 py-2 rounded-xl font-semibold text-white transition-colors ${confirmDialog.action === "confirm"
@@ -296,7 +282,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   }`}
                 onClick={handleConfirmAction}
               >
-                {lang === "ar" ? "تأكيد" : "Confirm"}
+                {t.confirmBookingAction}
               </button>
             </div>
           </div>

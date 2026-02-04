@@ -9,20 +9,20 @@ export async function refreshToken(lang: string) {
     const formData = new FormData();
     formData.append("grant_type", "refresh_token");
     formData.append("refresh_token", refresh_token);
-    formData.append("client_id", "a0ebbcdd-f4d7-4b9b-9ac0-752d55d6d2be");
-    formData.append("client_secret", "ZsifN3q9uKXTLPDIIUnMVFQVAFP7umZ7pGCc8VUF");
+    formData.append("client_id", "a0f9c982-62a4-491f-9368-386ee80dc9ec");
+    formData.append("client_secret", "4dPG6KXX3GAZVuw2NNEyJbCYsgh7T1uu3Pk7xand");
 
     try {
-        const res = await http.post("/refresh-token", formData, {
+        const res = await http.post("/auth/refresh-token", formData, {
             headers: { lang, "x-skip-auth": "1" }, // ✅ مهم
         });
 
-        if (!res?.data?.status) {
+        if (!res?.data?.status || !res?.data?.items) {
             return { ok: false as const, error: res?.data?.message || "Refresh failed" };
         }
 
-        const t = res?.data?.items;
-        if (!t?.access_token || !t?.refresh_token) {
+        const items = res.data.items;
+        if (!items.access_token || !items.refresh_token) {
             return { ok: false as const, error: "Invalid refresh response" };
         }
 
@@ -30,10 +30,10 @@ export async function refreshToken(lang: string) {
 
         setAuth(
             {
-                access_token: t.access_token,
-                refresh_token: t.refresh_token,
-                token_type: t.token_type,
-                expires_in: t.expires_in,
+                access_token: items.access_token,
+                refresh_token: items.refresh_token,
+                token_type: items.token_type,
+                expires_in: items.expires_in,
             },
             existingUser
         );

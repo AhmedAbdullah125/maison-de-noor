@@ -206,7 +206,31 @@ export const translations = {
     sessionsCount: 'Sessions Count',
     pricePercent: 'Price Percent %',
     validityDays: 'Validity (Days)',
-    estimatedTotal: 'Estimated total (no add-ons)'
+    estimatedTotal: 'Estimated total (no add-ons)',
+    // Booking Actions & Status
+    confirmBooking: 'Confirm Booking',
+    confirmBookingAction: 'Confirm',
+    cancelBookingAction: 'Cancel Booking',
+    confirmBookingQuestion: 'Are you sure you want to confirm this booking?',
+    cancelBookingQuestion: 'Are you sure you want to cancel this booking?',
+    back: 'Back',
+    prev: 'Prev',
+    next: 'Next',
+    upcomingStatus: 'Upcoming',
+    completedStatus: 'Completed',
+    canceledStatus: 'Canceled',
+    // Subscriptions Module
+    orderNumber: 'Order #',
+    subscription: 'Subscription',
+    sessions: 'Sessions',
+    finalPrice: 'Final Price',
+    completedSessions: 'Completed',
+    remainingSessions: 'Remaining',
+    outOf: 'out of',
+    paid: 'Paid',
+    pending: 'Pending',
+    page: 'Page',
+    of: 'of'
   },
   ar: {
     dashboard: 'لوحة التحكم',
@@ -408,7 +432,31 @@ export const translations = {
     sessionsCount: 'عدد الجلسات',
     pricePercent: 'نسبة السعر %',
     validityDays: 'الصلاحية (يوم)',
-    estimatedTotal: 'الإجمالي التقريبي (بدون إضافات)'
+    estimatedTotal: 'الإجمالي التقريبي (بدون إضافات)',
+    // Booking Actions & Status
+    confirmBooking: 'تأكيد الحجز',
+    confirmBookingAction: 'تأكيد',
+    cancelBookingAction: 'إلغاء الحجز',
+    confirmBookingQuestion: 'هل أنت متأكد من تأكيد هذا الحجز؟',
+    cancelBookingQuestion: 'هل أنت متأكد من إلغاء هذا الحجز؟',
+    back: 'تراجع',
+    prev: 'السابق',
+    next: 'التالي',
+    upcomingStatus: 'قادمة',
+    completedStatus: 'مكتملة',
+    canceledStatus: 'ملغاة',
+    // Subscriptions Module
+    orderNumber: 'رقم الطلب',
+    subscription: 'الاشتراك',
+    sessions: 'الجلسات',
+    finalPrice: 'السعر النهائي',
+    completedSessions: 'مكتملة',
+    remainingSessions: 'متبقية',
+    outOf: 'من',
+    paid: 'مدفوع',
+    pending: 'قيد الانتظار',
+    page: 'صفحة',
+    of: 'من'
   }
 };
 

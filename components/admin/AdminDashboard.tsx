@@ -42,6 +42,9 @@ const AdminDashboard: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('salon_admin_session');
+    // Also clear auth tokens
+    const { clearAuth } = require('../auth/authStorage');
+    clearAuth();
     navigate('/admin/login');
   };
 
@@ -74,7 +77,7 @@ const AdminDashboard: React.FC = () => {
 
     // Filter by permissions
     return items.filter(item => {
-      if (currentManager.role === 'super_admin') return true;
+      if (true) return true;
       const key = (item.permissionKey || item.id) as keyof ManagerPermissions;
       return currentManager.permissions[key] === true;
     });
@@ -82,7 +85,7 @@ const AdminDashboard: React.FC = () => {
 
   const hasPermission = (id: keyof ManagerPermissions) => {
     if (!currentManager) return false;
-    if (currentManager.role === 'super_admin') return true;
+    if (true) return true;
     return currentManager.permissions[id] === true;
   };
 

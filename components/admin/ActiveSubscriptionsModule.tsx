@@ -64,13 +64,13 @@ const ActiveSubscriptionsModule: React.FC<ActiveSubscriptionsModuleProps> = ({ l
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-right py-4 px-4 text-sm font-semibold text-gray-700">رقم الطلب</th>
-                <th className="text-right py-4 px-4 text-sm font-semibold text-gray-700">الخدمة</th>
-                <th className="text-right py-4 px-4 text-sm font-semibold text-gray-700">الاشتراك</th>
-                <th className="text-right py-4 px-4 text-sm font-semibold text-gray-700">الجلسات</th>
-                <th className="text-right py-4 px-4 text-sm font-semibold text-gray-700">التاريخ</th>
-                <th className="text-right py-4 px-4 text-sm font-semibold text-gray-700">السعر النهائي</th>
-                <th className="text-right py-4 px-4 text-sm font-semibold text-gray-700">الحالة</th>
+                <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.orderNumber}</th>
+                <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.service}</th>
+                <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.subscription}</th>
+                <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.sessions}</th>
+                <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.date}</th>
+                <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.finalPrice}</th>
+                <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.status}</th>
               </tr>
             </thead>
             <tbody>
@@ -88,9 +88,9 @@ const ActiveSubscriptionsModule: React.FC<ActiveSubscriptionsModuleProps> = ({ l
                   </td>
                   <td className="py-4 px-4 text-sm text-gray-900">
                     <div className="flex flex-col gap-1">
-                      <span className="text-green-600">{subscription.completed_sessions} مكتملة</span>
-                      <span className="text-orange-600">{subscription.remaining_sessions} متبقية</span>
-                      <span className="text-gray-500 text-xs">من {subscription.session_count}</span>
+                      <span className="text-green-600">{subscription.completed_sessions} {t.completedSessions}</span>
+                      <span className="text-orange-600">{subscription.remaining_sessions} {t.remainingSessions}</span>
+                      <span className="text-gray-500 text-xs">{t.outOf} {subscription.session_count}</span>
                     </div>
                   </td>
                   <td className="py-4 px-4 text-sm text-gray-900">
@@ -103,7 +103,7 @@ const ActiveSubscriptionsModule: React.FC<ActiveSubscriptionsModuleProps> = ({ l
                       ? 'bg-green-100 text-green-800'
                       : 'bg-orange-100 text-orange-800'
                       }`}>
-                      {subscription.payment_status === 'paid' ? 'مدفوع' : 'قيد الانتظار'}
+                      {subscription.payment_status === 'paid' ? t.paid : t.pending}
                     </span>
                   </td>
                 </tr>
@@ -119,17 +119,17 @@ const ActiveSubscriptionsModule: React.FC<ActiveSubscriptionsModuleProps> = ({ l
               disabled={currentPage === 1}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              السابق
+              {t.prev}
             </button>
             <span className="text-sm text-gray-700">
-              صفحة {currentPage} من {totalPages}
+              {t.page} {currentPage} {t.of} {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              التالي
+              {t.next}
             </button>
           </div>
         )}

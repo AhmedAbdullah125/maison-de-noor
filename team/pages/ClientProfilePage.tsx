@@ -144,7 +144,8 @@ const ClientProfilePage: React.FC = () => {
     }
   };
 
-  const getServiceName = (service: Service, lang: string = 'ar'): string => {
+  const getServiceName = (service: Service | null | undefined, lang: string = 'ar'): string => {
+    if (!service || !service.translations) return 'خدمة';
     const translation = service.translations.find(t => t.language === lang);
     return translation?.name || 'خدمة';
   };
@@ -309,9 +310,9 @@ const ClientProfilePage: React.FC = () => {
                       <p className="text-xs text-gray-400 mt-1">رقم الطلب: {request.request_number}</p>
                     </div>
                     <span className={`text-[10px] px-2 py-1 rounded-lg font-bold ${request.status === 'completed' ? 'bg-green-50 text-green-600' :
-                        request.status === 'active' ? 'bg-blue-50 text-blue-600' :
-                          request.status === 'pending' ? 'bg-orange-50 text-orange-600' :
-                            'bg-gray-100 text-gray-400'
+                      request.status === 'active' ? 'bg-blue-50 text-blue-600' :
+                        request.status === 'pending' ? 'bg-orange-50 text-orange-600' :
+                          'bg-gray-100 text-gray-400'
                       }`}>
                       {request.status === 'completed' ? 'مكتمل' :
                         request.status === 'active' ? 'نشط' :
@@ -387,9 +388,9 @@ const ClientProfilePage: React.FC = () => {
                     </div>
                   </div>
                   <span className={`text-[10px] px-2 py-1 rounded-lg font-bold ${session.status === 'completed' ? 'bg-green-50 text-green-600' :
-                      session.status === 'scheduled' ? 'bg-blue-50 text-blue-600' :
-                        session.status === 'pending' ? 'bg-orange-50 text-orange-600' :
-                          session.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'
+                    session.status === 'scheduled' ? 'bg-blue-50 text-blue-600' :
+                      session.status === 'pending' ? 'bg-orange-50 text-orange-600' :
+                        session.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'
                     }`}>
                     {session.status === 'completed' ? 'مكتملة' :
                       session.status === 'scheduled' ? 'مجدولة' :

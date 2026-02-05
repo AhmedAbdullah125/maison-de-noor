@@ -63,6 +63,10 @@ const ScanPage: React.FC = () => {
         if (response.data && response.data.data) {
           // Stop scanning before navigation
           stopScanning();
+          // Reset all state before navigation
+          setLastScan('');
+          setError('');
+          setLoading(false);
           // Navigate to client profile with user ID
           navigate(`/team/client/${userId}`);
         } else {

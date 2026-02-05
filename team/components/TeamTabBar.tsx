@@ -15,12 +15,16 @@ const TeamTabBar: React.FC = () => {
 
   const currentPath = location.pathname;
 
+  // Only show scan button on appointments page
+  const showScanButton = currentPath === '/team/appointments';
+  const visibleTabs = showScanButton ? tabs : tabs.filter(tab => !tab.isCenter);
+
   return (
     <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 pb-safe pt-2 px-6 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] z-50">
       <div className="flex justify-between items-end pb-2">
-        {tabs.map((tab) => {
+        {visibleTabs.map((tab) => {
           const isActive = currentPath === tab.path;
-          
+
           if (tab.isCenter) {
             return (
               <button
@@ -28,9 +32,8 @@ const TeamTabBar: React.FC = () => {
                 onClick={() => navigate(tab.path)}
                 className="relative -top-6 flex flex-col items-center group"
               >
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all ${
-                  isActive ? 'bg-app-gold text-white scale-110' : 'bg-app-text text-white'
-                }`}>
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all ${isActive ? 'bg-app-gold text-white scale-110' : 'bg-app-text text-white'
+                  }`}>
                   {tab.icon}
                 </div>
                 <span className={`text-[10px] font-bold mt-1 ${isActive ? 'text-app-gold' : 'text-gray-400'}`}>

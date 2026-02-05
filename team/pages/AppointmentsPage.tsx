@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, X, Phone, Mail, User, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBookings } from '../../components/admin/bookings/useBookings';
-import { BookingStatus } from '../../components/admin/bookings/bookings.api';
+import { BookingStatus, ApiBooking } from '../../components/admin/bookings/bookings.api';
 import { translations, Locale } from '@/services/i18n';
 
 interface AppointmentsPageProps {
@@ -17,6 +17,7 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
   const { isLoading, apiRows } = useBookings(lang, 'upcoming', perPage);
 
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedBooking, setSelectedBooking] = useState<ApiBooking | null>(null);
 
   // Filter appointments by selected date
   const appointments = useMemo(() => {
@@ -40,6 +41,16 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
     return date.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+  const handleBookingClick = (booking: ApiBooking) => {
+    if (booking.user) {
+      setSelectedBooking(booking);
+    }
+  };
+
+  const closePopup = () => {
+    setSelectedBooking(null);
+  };
+
   const renderSkeleton = () => (
     <div className="space-y-4 pb-24">
       {[1, 2, 3, 4].map((i) => (
@@ -52,7 +63,7 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
   );
 
   return (
-    <div className="min-h-full bg-app-bg pt-6 px-6">
+    <div className="min-h-full bg-app-bg pt-6 px-6 relative">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -90,14 +101,35 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
               const isCompleted = status === 'completed';
 
               return (
-                <div key={booking.id} className="bg-white p-5 rounded-[24px] shadow-sm border border-gray-100 relative overflow-hidden group">
+                <div
+                  key={booking.id}
+                  className="bg-white p-5 rounded-[24px] shadow-sm border border-gray-100 relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all"
+                  onClick={() => handleBookingClick(booking)}
+                >
                   <div className={`absolute top-0 right-0 w-1.5 h-full ${isCompleted ? 'bg-green-500' : 'bg-app-gold'}`} />
 
                   <div className="flex justify-between items-start mb-4 pr-3">
-                    <div>
-                      <h3 className="font-bold text-app-text text-lg">{booking.booking_number || `#${booking.id}`}</h3>
-                      <p className="text-xs text-gray-400 font-medium mt-1">{booking.service || '—'}</p>
+                    <div className="flex items-start gap-3">
+                      {/* User Info */}
+                      {booking.user && (
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
+                          <img
+                            src={booking.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.user.name)}&background=random`}
+                            alt={booking.user.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.user?.name || 'User')}&background=random`;
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="font-bold text-app-text text-lg">{booking.user?.name || booking.booking_number || `#${booking.id}`}</h3>
+                        <p className="text-xs text-app-textSec font-medium mt-1 line-clamp-1">{booking.service || '—'}</p>
+                        {booking.booking_number && <p className="text-[10px] text-gray-400 mt-0.5">{booking.booking_number}</p>}
+                      </div>
                     </div>
+
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-1.5 text-app-gold bg-app-gold/5 px-2 py-1 rounded-lg">
                         <Clock size={14} />
@@ -111,12 +143,81 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
                       }`}>
                       {isCompleted ? t.completed : t.upcoming}
                     </span>
-
                   </div>
                 </div>
               );
             })
           )}
+        </div>
+      )}
+
+      {/* User Details Popup */}
+      {selectedBooking && selectedBooking.user && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-fadeIn" onClick={closePopup}>
+          <div
+            className="bg-white w-full max-w-[340px] rounded-[32px] shadow-2xl overflow-hidden animate-scaleIn relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={closePopup}
+              className="absolute top-4 right-4 w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors z-10"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Content */}
+            <div className="p-8 flex flex-col items-center text-center">
+              {/* Avatar */}
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-50 border-4 border-white shadow-lg mb-4">
+                <img
+                  src={selectedBooking.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user.name)}&background=random`}
+                  alt={selectedBooking.user.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user?.name || 'User')}&background=random`;
+                  }}
+                />
+              </div>
+
+              {/* Name & ID */}
+              <h2 className="text-xl font-bold text-app-text mb-1">{selectedBooking.user.name}</h2>
+              <span className="text-xs font-medium text-app-gold bg-app-gold/10 px-3 py-1 rounded-full mb-6">
+                ID: {selectedBooking.user.id}
+              </span>
+
+              {/* Contact Info */}
+              <div className="w-full space-y-3 mb-8">
+                {selectedBooking.user.phone && (
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm">
+                      <Phone size={14} />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600" dir="ltr">{selectedBooking.user.phone}</span>
+                  </div>
+                )}
+
+                {selectedBooking.user.email && (
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm">
+                      <Mail size={14} />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600 truncate">{selectedBooking.user.email}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <button
+                onClick={() => navigate(`/team/client/${selectedBooking.user!.id}`)}
+                className="w-full py-4 bg-app-primary text-white text-white rounded-2xl font-bold text-sm shadow-lg shadow-app-primary/20 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity active:scale-[0.98]"
+                style={{ backgroundColor: '#483383' }}
+              >
+                <span>{t.clientProfile}</span>
+                <ArrowRight size={18} className={lang === 'ar' ? 'rotate-180' : ''} />
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

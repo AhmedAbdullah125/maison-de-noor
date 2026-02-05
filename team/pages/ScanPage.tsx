@@ -15,6 +15,7 @@ const ScanPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [lastScan, setLastScan] = useState('');
+  const isMountedRef = useRef(true); // Track if component is mounted
 
   // Parse QR code data to extract user ID
   const parseQRData = (data: string): string | null => {
@@ -46,6 +47,9 @@ const ScanPage: React.FC = () => {
   };
 
   const handleScanSuccess = async (decodedText: string) => {
+    // Don't process if component has unmounted
+    if (!isMountedRef.current) return;
+
     // Prevent duplicate scans
     if (decodedText === lastScan) return;
     setLastScan(decodedText);
@@ -60,14 +64,16 @@ const ScanPage: React.FC = () => {
         // Fetch user profile from API
         const response = await http.get(`${DASHBOARD_API_BASE_URL}/users/${userId}`);
 
+        // Check again before navigation in case component unmounted during API call
+        if (!isMountedRef.current) return;
+
         if (response.data && response.data.data) {
           // Stop scanning before navigation
           stopScanning();
-          // Reset all state before navigation
           setLastScan('');
           setError('');
           setLoading(false);
-          // Navigate to client profile with user ID
+
           navigate(`/team/client/${userId}`);
         } else {
           setError(`لم يتم العثور على عميلة بالكود: ${userId}`);
@@ -128,14 +134,17 @@ const ScanPage: React.FC = () => {
   };
 
   const stopScanning = () => {
-    if (scannerRef.current && scanning) {
+    if (scannerRef.current) {
       scannerRef.current
         .stop()
         .then(() => {
           setScanning(false);
+          scannerRef.current = null; // Clear the reference
         })
         .catch((err) => {
           console.error('Error stopping scanner:', err);
+          setScanning(false);
+          scannerRef.current = null; // Clear even on error
         });
     }
   };
@@ -149,7 +158,11 @@ const ScanPage: React.FC = () => {
     startScanning();
 
     return () => {
-      stopScanning();
+      // Ensure scanner is stopped on unmount
+      if (scannerRef.current) {
+        scannerRef.current.stop().catch(err => console.error('Cleanup error:', err));
+        scannerRef.current = null;
+      }
     };
   }, []);
 

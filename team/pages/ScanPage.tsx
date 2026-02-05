@@ -93,25 +93,6 @@ const ScanPage: React.FC = () => {
 
   const startScanning = async () => {
     try {
-      // First, explicitly request camera permissions (important for Android WebView)
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
-        });
-        // Stop the stream immediately - we just needed to get permission
-        stream.getTracks().forEach(track => track.stop());
-      } catch (permErr: any) {
-        console.error('Permission error:', permErr);
-        if (permErr.name === 'NotAllowedError' || permErr.name === 'PermissionDeniedError') {
-          setCameraError('تم رفض الوصول إلى الكاميرا. الرجاء السماح بالوصول للكاميرا في إعدادات المتصفح.');
-          return;
-        } else if (permErr.name === 'NotFoundError' || permErr.name === 'DevicesNotFoundError') {
-          setCameraError('لم يتم العثور على كاميرا. الرجاء التأكد من توصيل الكاميرا.');
-          return;
-        }
-        throw permErr;
-      }
-
       const html5QrCode = new Html5Qrcode('qr-reader');
       scannerRef.current = html5QrCode;
 
@@ -132,9 +113,9 @@ const ScanPage: React.FC = () => {
     } catch (err: any) {
       console.error('Error starting scanner:', err);
 
-      if (err.toString().includes('NotAllowedError') || err.name === 'NotAllowedError') {
+      if (err.toString().includes('NotAllowedError')) {
         setCameraError('تم رفض الوصول إلى الكاميرا. الرجاء السماح بالوصول للكاميرا في إعدادات المتصفح.');
-      } else if (err.toString().includes('NotFoundError') || err.name === 'NotFoundError') {
+      } else if (err.toString().includes('NotFoundError')) {
         setCameraError('لم يتم العثور على كاميرا. الرجاء التأكد من توصيل الكاميرا.');
       } else {
         setCameraError('حدث خطأ في الكاميرا. حاول مرة أخرى.');
@@ -156,6 +137,11 @@ const ScanPage: React.FC = () => {
   };
 
   useEffect(() => {
+    // Reset lastScan when component mounts to prevent auto-navigation
+    setLastScan('');
+    setError('');
+    setCameraError('');
+
     startScanning();
 
     return () => {

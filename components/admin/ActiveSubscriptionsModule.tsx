@@ -33,7 +33,7 @@ const ActiveSubscriptionsModule: React.FC<ActiveSubscriptionsModuleProps> = ({ l
   if (loading) {
     return (
       <div className="space-y-6 animate-fadeIn">
-        <h2 className="text-xl font-bold text-gray-900">{t.activeSubscriptions}</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{t.activeSubscriptions}</h2>
         <div className="bg-white rounded-[2.5rem] p-12 border border-gray-100 shadow-sm flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-green-500" />
         </div>
@@ -44,7 +44,7 @@ const ActiveSubscriptionsModule: React.FC<ActiveSubscriptionsModuleProps> = ({ l
   if (subscriptions.length === 0) {
     return (
       <div className="space-y-6 animate-fadeIn">
-        <h2 className="text-xl font-bold text-gray-900">{t.activeSubscriptions}</h2>
+        <h2 className="text-xl font-semibold text-gray-900">{t.activeSubscriptions}</h2>
         <div className="bg-white rounded-[2.5rem] p-12 border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center">
           <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center text-green-500 mb-6">
             <Ticket size={40} />
@@ -57,7 +57,7 @@ const ActiveSubscriptionsModule: React.FC<ActiveSubscriptionsModuleProps> = ({ l
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      <h2 className="text-xl font-bold text-gray-900">{t.activeSubscriptions}</h2>
+      <h2 className="text-xl font-semibold text-gray-900">{t.activeSubscriptions}</h2>
 
       <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">

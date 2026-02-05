@@ -51,7 +51,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ lang }) => {
             </div>
             <div>
               <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{stat.label}</p>
-              <h3 className="text-lg font-bold text-gray-900">{stat.value}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{stat.value}</h3>
             </div>
           </div>
         ))}

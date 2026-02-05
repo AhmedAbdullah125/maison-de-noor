@@ -78,7 +78,7 @@ const NotificationsTab: React.FC = () => {
                       href={n.linkUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-1 text-[10px] font-bold text-app-gold underline decoration-dotted"
+                      className="flex items-center gap-1 text-[10px] font-semibold text-app-gold underline decoration-dotted"
                       onClick={e => e.stopPropagation()}
                     >
                       <ExternalLink size={12} />
@@ -87,7 +87,7 @@ const NotificationsTab: React.FC = () => {
                   ) : <div />}
 
                   {!n.isRead && (
-                    <span className="flex items-center gap-1 text-[9px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                    <span className="flex items-center gap-1 text-[9px] font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
                       <Check size={10} strokeWidth={3} />
                       جديد
                     </span>

@@ -44,7 +44,7 @@ export default function PageHeader({
                 </button>
 
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-semibold text-gray-900">
                         {isEdit ? t.edit : t.addService}
                     </h2>
                     <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">

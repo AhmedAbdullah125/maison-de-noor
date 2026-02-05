@@ -453,7 +453,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                                                 </div>
                                             </div>
 
-                                            <span className="text-[10px] absolute bottom-1 end-1 font-bold text-white bg-app-gold px-2.5 py-1 rounded-lg">
+                                            <span className="text-[10px] absolute bottom-1 end-1 font-semibold text-white bg-app-gold px-2.5 py-1 rounded-lg">
                                                 +{parsePrice(option.price_kwd ?? option.price ?? 0).toFixed(3)} د.ك
                                             </span>
                                         </div>

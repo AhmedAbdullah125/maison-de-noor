@@ -215,7 +215,7 @@ const StaffModule: React.FC<StaffModuleProps> = ({ lang }) => {
                     <span className="block text-[10px] font-semibold text-gray-400 uppercase">
                       {lang === 'ar' ? 'معرف الدور' : 'Role ID'}
                     </span>
-                    <span className="text-base font-bold text-[#483383]">#{role.id}</span>
+                    <span className="text-base font-semibold text-[#483383]">#{role.id}</span>
                   </div>
                 </div>
               </div>

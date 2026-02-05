@@ -28,7 +28,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <Lock className="text-white" size={32} />
       </div>
 
-      <h1 className="text-2xl font-bold text-app-text mb-2">تسجيل دخول الموظفين</h1>
+      <h1 className="text-2xl font-semibold text-app-text mb-2">تسجيل دخول الموظفين</h1>
       <p className="text-sm text-gray-400 mb-8">يرجى ادخال بيانات حسابك</p>
 
       <form onSubmit={handleSubmit} className="w-full space-y-4">
@@ -55,14 +55,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         </div>
 
         {error && (
-          <div className="text-red-500 text-xs font-bold text-center bg-red-50 py-2 rounded-xl">
+          <div className="text-red-500 text-xs font-semibold text-center bg-red-50 py-2 rounded-xl">
             {error}
           </div>
         )}
 
         <button
           type="submit"
-          className="w-full bg-app-gold text-white font-bold py-4 rounded-2xl shadow-lg shadow-app-gold/20 active:scale-[0.98] transition-transform mt-4"
+          className="w-full bg-app-gold text-white font-semibold py-4 rounded-2xl shadow-lg shadow-app-gold/20 active:scale-[0.98] transition-transform mt-4"
         >
           دخول
         </button>
@@ -70,7 +70,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
       <div className="mt-8 text-center">
         <p className="text-xs text-gray-400">بيانات تجريبية:</p>
-        <p className="text-xs font-bold text-app-gold mt-1">user: staff / pass: 1234</p>
+        <p className="text-xs font-semibold text-app-gold mt-1">user: staff / pass: 1234</p>
       </div>
     </div>
   );

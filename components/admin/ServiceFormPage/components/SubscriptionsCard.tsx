@@ -35,7 +35,7 @@ export default function SubscriptionsCard({
 
                 <button
                     onClick={onAdd}
-                    className="bg-[#483383]/10 text-[#483383] px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-[#483383] hover:text-white transition-all"
+                    className="bg-[#483383]/10 text-[#483383] px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 hover:bg-[#483383] hover:text-white transition-all"
                 >
                     <Plus size={16} />
                     <span>{t.addSubscription}</span>
@@ -56,7 +56,7 @@ export default function SubscriptionsCard({
                     >
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex-1">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">
                                     {t.subscriptionTitle}
                                 </label>
                                 <input
@@ -89,7 +89,7 @@ export default function SubscriptionsCard({
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">
                                     {t.sessionsCount}
                                 </label>
                                 <input
@@ -104,7 +104,7 @@ export default function SubscriptionsCard({
                             </div>
 
                             <div>
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">
                                     {t.pricePercent}
                                 </label>
                                 <input
@@ -120,7 +120,7 @@ export default function SubscriptionsCard({
                             </div>
 
                             <div>
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">
                                     {t.validityDays}
                                 </label>
                                 <input

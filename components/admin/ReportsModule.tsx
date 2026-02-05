@@ -175,7 +175,7 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                   <BarChart3 size={24} />
                </div>
                <div>
-                  <h2 className="text-lg font-bold text-gray-900">{t.salesReports}</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">{t.salesReports}</h2>
                   <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">{filteredBookings.length} {t.completed}</p>
                </div>
             </div>
@@ -223,12 +223,12 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
             <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
                <div className="flex justify-between items-start mb-4">
                   <div className="p-3 bg-violet-50 text-[#483383] rounded-2xl"><TrendingUp size={20} /></div>
-                  <span className="flex items-center text-green-500 text-[10px] font-bold bg-green-50 px-2 py-0.5 rounded-lg">
+                  <span className="flex items-center text-green-500 text-[10px] font-semibold bg-green-50 px-2 py-0.5 rounded-lg">
                      <ArrowUpRight size={10} /> 12%
                   </span>
                </div>
                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1">{t.totalRevenue}</p>
-               <h3 className="text-xl font-bold text-gray-900">{stats.revenue.toFixed(3)} <span className="text-xs font-semibold text-gray-400">{t.currency}</span></h3>
+               <h3 className="text-xl font-semibold text-gray-900">{stats.revenue.toFixed(3)} <span className="text-xs font-semibold text-gray-400">{t.currency}</span></h3>
             </div>
 
             <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
@@ -236,7 +236,7 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                   <div className="p-3 bg-blue-50 text-blue-500 rounded-2xl"><ShoppingBag size={20} /></div>
                </div>
                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1">{t.totalCompletedBookings}</p>
-               <h3 className="text-xl font-bold text-gray-900">{stats.bookings}</h3>
+               <h3 className="text-xl font-semibold text-gray-900">{stats.bookings}</h3>
             </div>
 
             <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
@@ -244,7 +244,7 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                   <div className="p-3 bg-orange-50 text-orange-500 rounded-2xl"><Users size={20} /></div>
                </div>
                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1">{t.uniqueClients}</p>
-               <h3 className="text-xl font-bold text-gray-900">{stats.clients}</h3>
+               <h3 className="text-xl font-semibold text-gray-900">{stats.clients}</h3>
             </div>
 
             <div className="bg-[#100F19] p-6 rounded-[2rem] shadow-xl text-white">
@@ -252,7 +252,7 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                   <div className="p-3 bg-white/10 text-white rounded-2xl"><TrendingUp size={20} /></div>
                </div>
                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1">{t.averageOrderValue}</p>
-               <h3 className="text-xl font-bold">{stats.aov.toFixed(3)} <span className="text-xs font-semibold text-gray-500">{t.currency}</span></h3>
+               <h3 className="text-xl font-semibold">{stats.aov.toFixed(3)} <span className="text-xs font-semibold text-gray-500">{t.currency}</span></h3>
             </div>
          </div>
 
@@ -262,7 +262,7 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
             {/* Trend Chart - 2 columns span */}
             <div className="lg:col-span-2 space-y-8">
                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                  <h3 className="text-base font-bold text-gray-900 mb-8 flex items-center justify-between">
+                  <h3 className="text-base font-semibold text-gray-900 mb-8 flex items-center justify-between">
                      {t.dailyRevenueTrend}
                      <span className="text-[10px] text-gray-400 uppercase font-semibold">{customRange.from} - {customRange.to}</span>
                   </h3>
@@ -292,23 +292,23 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                {/* Top Selling Services Table */}
                <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
                   <div className="p-8 border-b border-gray-50 flex items-center justify-between">
-                     <h3 className="text-base font-bold text-gray-900">{t.topSellingServices}</h3>
+                     <h3 className="text-base font-semibold text-gray-900">{t.topSellingServices}</h3>
                      <button className="text-xs font-semibold text-[#483383] hover:underline flex items-center gap-1">{t.viewAll} <ChevronRight size={14} /></button>
                   </div>
                   <table className="w-full text-start">
                      <thead className="bg-gray-50/50">
                         <tr>
-                           <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-start">{t.service}</th>
-                           <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-start">{t.categories}</th>
-                           <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-center">{t.salesCount}</th>
-                           <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-end">{t.totalRevenue}</th>
+                           <th className="px-8 py-4 text-[10px] font-semibold text-gray-400 uppercase text-start">{t.service}</th>
+                           <th className="px-8 py-4 text-[10px] font-semibold text-gray-400 uppercase text-start">{t.categories}</th>
+                           <th className="px-8 py-4 text-[10px] font-semibold text-gray-400 uppercase text-center">{t.salesCount}</th>
+                           <th className="px-8 py-4 text-[10px] font-semibold text-gray-400 uppercase text-end">{t.totalRevenue}</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-gray-50">
                         {topServices.map((s, i) => (
                            <tr key={i} className="hover:bg-gray-50 transition-colors">
                               <td className="px-8 py-4">
-                                 <span className="text-xs font-bold text-gray-900">{s.name}</span>
+                                 <span className="text-xs font-semibold text-gray-900">{s.name}</span>
                               </td>
                               <td className="px-8 py-4">
                                  <span className="text-[10px] font-semibold text-gray-400 uppercase">{s.category}</span>
@@ -317,7 +317,7 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                                  <span className="text-xs font-semibold text-gray-700">{s.count}</span>
                               </td>
                               <td className="px-8 py-4 text-end">
-                                 <span className="text-xs font-bold text-[#483383]">{s.revenue.toFixed(3)}</span>
+                                 <span className="text-xs font-semibold text-[#483383]">{s.revenue.toFixed(3)}</span>
                               </td>
                            </tr>
                         ))}
@@ -331,7 +331,7 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                {/* Most Requested Category */}
                <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
                   <div className="p-8 border-b border-gray-50">
-                     <h3 className="text-base font-bold text-gray-900">{t.mostRequestedCategories}</h3>
+                     <h3 className="text-base font-semibold text-gray-900">{t.mostRequestedCategories}</h3>
                   </div>
                   <div className="p-6 space-y-4">
                      {topCategories.map((c, i) => {
@@ -339,7 +339,7 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                         return (
                            <div key={i} className="space-y-2">
                               <div className="flex justify-between items-end">
-                                 <span className="text-xs font-bold text-gray-900">{c.name}</span>
+                                 <span className="text-xs font-semibold text-gray-900">{c.name}</span>
                                  <span className="text-[10px] font-semibold text-gray-400">{c.revenue.toFixed(2)} {t.currency}</span>
                               </div>
                               <div className="w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
@@ -354,7 +354,7 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                {/* Most Active Clients */}
                <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
                   <div className="p-8 border-b border-gray-50">
-                     <h3 className="text-base font-bold text-gray-900">{t.mostActiveClients}</h3>
+                     <h3 className="text-base font-semibold text-gray-900">{t.mostActiveClients}</h3>
                   </div>
                   <div className="divide-y divide-gray-50">
                      {topClients.map((u, i) => (
@@ -364,11 +364,11 @@ const ReportsModule: React.FC<ReportsModuleProps> = ({ lang }) => {
                                  {u.name.charAt(0)}
                               </div>
                               <div className="flex flex-col">
-                                 <span className="text-xs font-bold text-gray-900">{u.name}</span>
+                                 <span className="text-xs font-semibold text-gray-900">{u.name}</span>
                                  <span className="text-[9px] font-semibold text-gray-400 uppercase">{u.count} {t.bookings}</span>
                               </div>
                            </div>
-                           <span className="text-xs font-bold text-green-600">
+                           <span className="text-xs font-semibold text-green-600">
                               {u.spend.toFixed(2)} <span className="text-[8px] opacity-60">KWD</span>
                            </span>
                         </div>

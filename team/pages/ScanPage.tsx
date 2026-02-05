@@ -209,7 +209,7 @@ const ScanPage: React.FC = () => {
         >
           <ArrowRight size={20} />
         </button>
-        <span className="text-white font-bold">مسح الكود</span>
+        <span className="text-white font-semibold">مسح الكود</span>
         <div className="w-10" />
       </div>
 
@@ -223,7 +223,7 @@ const ScanPage: React.FC = () => {
               <p className="text-white/90 text-sm leading-relaxed mb-6">{cameraError}</p>
               <button
                 onClick={handleRetry}
-                className="bg-app-gold text-white px-6 py-3 rounded-full font-bold hover:scale-95 transition-transform"
+                className="bg-app-gold text-white px-6 py-3 rounded-full font-semibold hover:scale-95 transition-transform"
               >
                 إعادة المحاولة
               </button>
@@ -247,20 +247,20 @@ const ScanPage: React.FC = () => {
             {/* Scanning Line Animation */}
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-app-gold shadow-[0_0_8px_rgba(197,179,88,0.8)] animate-[scan_2s_infinite_linear]" />
 
-            <p className="text-white/70 text-xs font-bold mt-32 animate-pulse">جاري البحث عن كود...</p>
+            <p className="text-white/70 text-xs font-semibold mt-32 animate-pulse">جاري البحث عن كود...</p>
           </div>
         )}
 
         {/* Error Messages */}
         {error && (
-          <div className="absolute bottom-40 z-20 bg-red-500/90 backdrop-blur-md text-white px-6 py-3 rounded-full text-xs font-bold animate-pulse">
+          <div className="absolute bottom-40 z-20 bg-red-500/90 backdrop-blur-md text-white px-6 py-3 rounded-full text-xs font-semibold animate-pulse">
             {error}
           </div>
         )}
 
         {/* Loading Indicator */}
         {loading && (
-          <div className="absolute bottom-40 z-20 bg-app-gold/90 backdrop-blur-md text-white px-6 py-3 rounded-full text-xs font-bold flex items-center gap-2">
+          <div className="absolute bottom-40 z-20 bg-app-gold/90 backdrop-blur-md text-white px-6 py-3 rounded-full text-xs font-semibold flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>جاري التحقق...</span>
           </div>
@@ -269,12 +269,12 @@ const ScanPage: React.FC = () => {
 
       {/* Manual Entry Sheet */}
       <div className="bg-white rounded-t-[32px] p-8 pb-12 z-20 -mt-6">
-        <h3 className="text-lg font-bold text-app-text mb-4 text-center">أو ادخال يدوي</h3>
+        <h3 className="text-lg font-semibold text-app-text mb-4 text-center">أو ادخال يدوي</h3>
         <form onSubmit={handleManualSubmit} className="relative">
           <input
             type="text"
             placeholder="رقم العميل / الكود"
-            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-app-gold focus:bg-white transition-all text-center font-mono font-bold text-lg"
+            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-app-gold focus:bg-white transition-all text-center font-mono font-semibold text-lg"
             value={manualCode}
             onChange={(e) => {
               setManualCode(e.target.value);
@@ -288,7 +288,7 @@ const ScanPage: React.FC = () => {
             <Search size={20} />
           </button>
         </form>
-        {error && <p className="text-red-500 text-xs font-bold text-center mt-3">{error}</p>}
+        {error && <p className="text-red-500 text-xs font-semibold text-center mt-3">{error}</p>}
       </div>
 
       <style>{`

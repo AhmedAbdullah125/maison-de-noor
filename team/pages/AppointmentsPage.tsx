@@ -3,11 +3,16 @@ import { Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBookings } from '../../components/admin/bookings/useBookings';
 import { BookingStatus } from '../../components/admin/bookings/bookings.api';
+import { translations, Locale } from '@/services/i18n';
 
-const AppointmentsPage: React.FC = () => {
+interface AppointmentsPageProps {
+  lang?: Locale;
+}
+
+const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
   const navigate = useNavigate();
-  const lang = 'ar'; // You can get this from context or props if needed
   const perPage = 100; // Fetch more to filter by date locally
+  const t = translations[lang];
 
   const { isLoading, apiRows } = useBookings(lang, 'upcoming', perPage);
 
@@ -32,7 +37,7 @@ const AppointmentsPage: React.FC = () => {
   };
 
   const formatDateDisplay = (date: Date) => {
-    return date.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return date.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   };
 
   const renderSkeleton = () => (
@@ -51,8 +56,8 @@ const AppointmentsPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-app-text">المواعيد</h1>
-          <p className="text-xs text-gray-400 font-medium mt-1">جدول اليوم</p>
+          <h1 className="text-2xl font-bold text-app-text">{t.appointments}</h1>
+          <p className="text-xs text-gray-400 font-medium mt-1">{t.todaysSchedule}</p>
         </div>
         <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-app-gold">
           <Calendar size={20} />
@@ -62,11 +67,11 @@ const AppointmentsPage: React.FC = () => {
       {/* Date Navigation */}
       <div className="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between mb-6">
         <button onClick={handlePrevDay} className="p-2 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-app-text transition-colors">
-          <ChevronRight size={20} />
+          <ChevronRight size={20} className={lang === 'ar' ? '' : 'rotate-180'} />
         </button>
         <span className="text-sm font-bold text-app-text">{formatDateDisplay(currentDate)}</span>
         <button onClick={handleNextDay} className="p-2 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-app-text transition-colors">
-          <ChevronLeft size={20} />
+          <ChevronLeft size={20} className={lang === 'ar' ? '' : 'rotate-180'} />
         </button>
       </div>
 
@@ -77,7 +82,7 @@ const AppointmentsPage: React.FC = () => {
         <div className="space-y-4 pb-24">
           {appointments.length === 0 ? (
             <div className="text-center py-12 text-gray-400">
-              <p className="font-medium">لا توجد مواعيد لهذا اليوم</p>
+              <p className="font-medium">{t.noAppointmentsToday}</p>
             </div>
           ) : (
             appointments.map((booking) => {
@@ -104,7 +109,7 @@ const AppointmentsPage: React.FC = () => {
                   <div className="flex items-center justify-between pr-3 pt-2 border-t border-gray-50">
                     <span className={`text-[10px] font-bold px-2 py-1 rounded-lg ${isCompleted ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'
                       }`}>
-                      {isCompleted ? 'مكتمل' : 'قادم'}
+                      {isCompleted ? t.completed : t.upcoming}
                     </span>
 
                   </div>

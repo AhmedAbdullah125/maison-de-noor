@@ -199,7 +199,7 @@ const ActivityLogModule: React.FC<ActivityLogModuleProps> = ({ lang }) => {
                                     </div>
                                     <div className="flex flex-col">
                                        <span className="text-xs font-semibold text-gray-900 whitespace-nowrap">{log.actorName}</span>
-                                       <span className="text-[10px] text-gray-400 uppercase font-bold">{t[log.actorType as keyof typeof t] || log.actorType}</span>
+                                       <span className="text-[10px] text-gray-400 uppercase font-semibold">{t[log.actorType as keyof typeof t] || log.actorType}</span>
                                     </div>
                                  </div>
                               </td>
@@ -262,7 +262,7 @@ const ActivityLogModule: React.FC<ActivityLogModuleProps> = ({ lang }) => {
                   >
                      {lang === 'ar' ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
                   </button>
-                  <span className="text-xs font-bold text-gray-900 px-4 min-w-[100px] text-center">
+                  <span className="text-xs font-semibold text-gray-900 px-4 min-w-[100px] text-center">
                      {currentPage} / {totalPages || 1}
                   </span>
                   <button
@@ -288,7 +288,7 @@ const ActivityLogModule: React.FC<ActivityLogModuleProps> = ({ lang }) => {
                   onClick={e => e.stopPropagation()}
                >
                   <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                     <h3 className="text-lg font-bold text-gray-900">{t.logDetails}</h3>
+                     <h3 className="text-lg font-semibold text-gray-900">{t.logDetails}</h3>
                      <button onClick={() => setSelectedLog(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                         <X size={24} />
                      </button>
@@ -301,7 +301,7 @@ const ActivityLogModule: React.FC<ActivityLogModuleProps> = ({ lang }) => {
                               {getSeverityIcon(selectedLog.severity)}
                            </div>
                            <div>
-                              <h4 className="text-base font-bold text-gray-900">{selectedLog.shortTitle}</h4>
+                              <h4 className="text-base font-semibold text-gray-900">{selectedLog.shortTitle}</h4>
                               <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest" dir="ltr">
                                  {selectedLog.id}
                               </span>
@@ -316,28 +316,28 @@ const ActivityLogModule: React.FC<ActivityLogModuleProps> = ({ lang }) => {
                         <div className="space-y-1">
                            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">{t.time}</span>
                            <div className="flex flex-col" dir="ltr">
-                              <span className="text-sm font-bold text-gray-900">{formatTimestamp(selectedLog.timestamp).date}</span>
+                              <span className="text-sm font-semibold text-gray-900">{formatTimestamp(selectedLog.timestamp).date}</span>
                               <span className="text-xs text-gray-500">{formatTimestamp(selectedLog.timestamp).time}</span>
                            </div>
                         </div>
                         <div className="space-y-1">
                            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">{t.actor}</span>
                            <div className="flex flex-col">
-                              <span className="text-sm font-bold text-gray-900">{selectedLog.actorName}</span>
+                              <span className="text-sm font-semibold text-gray-900">{selectedLog.actorName}</span>
                               <span className="text-[10px] text-gray-500 uppercase font-semibold">{t[selectedLog.actorType as keyof typeof t] || selectedLog.actorType}</span>
                            </div>
                         </div>
                         <div className="space-y-1">
                            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">{t.entity}</span>
                            <div className="flex flex-col">
-                              <span className="text-sm font-bold text-[#483383]">{selectedLog.entityType}</span>
+                              <span className="text-sm font-semibold text-[#483383]">{selectedLog.entityType}</span>
                               <span className="text-xs text-gray-500">{selectedLog.entityName || '-'}</span>
                            </div>
                         </div>
                         <div className="space-y-1">
                            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">{t.action}</span>
                            <div className="flex flex-col">
-                              <span className="text-sm font-bold text-gray-900 capitalize">{selectedLog.actionType.replace('-', ' ')}</span>
+                              <span className="text-sm font-semibold text-gray-900 capitalize">{selectedLog.actionType.replace('-', ' ')}</span>
                               <span className="text-[10px] text-gray-500 uppercase font-semibold">Operation Code</span>
                            </div>
                         </div>
@@ -348,14 +348,14 @@ const ActivityLogModule: React.FC<ActivityLogModuleProps> = ({ lang }) => {
                            <Globe size={20} className="text-gray-400" />
                            <div className="flex flex-col">
                               <span className="text-[10px] font-semibold text-gray-400 uppercase">{t.ip}</span>
-                              <span className="text-xs font-bold text-gray-900" dir="ltr">{selectedLog.ip}</span>
+                              <span className="text-xs font-semibold text-gray-900" dir="ltr">{selectedLog.ip}</span>
                            </div>
                         </div>
                         <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                            <Monitor size={20} className="text-gray-400" />
                            <div className="flex flex-col">
                               <span className="text-[10px] font-semibold text-gray-400 uppercase">{t.device}</span>
-                              <span className="text-xs font-bold text-gray-900 leading-tight" dir="ltr">{selectedLog.device}</span>
+                              <span className="text-xs font-semibold text-gray-900 leading-tight" dir="ltr">{selectedLog.device}</span>
                            </div>
                         </div>
                      </div>
@@ -364,7 +364,7 @@ const ActivityLogModule: React.FC<ActivityLogModuleProps> = ({ lang }) => {
                   <div className="p-8 border-t border-gray-100 shrink-0">
                      <button
                         onClick={() => setSelectedLog(null)}
-                        className="w-full py-4 bg-gray-100 text-gray-900 font-bold rounded-2xl hover:bg-gray-200 transition-colors"
+                        className="w-full py-4 bg-gray-100 text-gray-900 font-semibold rounded-2xl hover:bg-gray-200 transition-colors"
                      >
                         {t.close}
                      </button>

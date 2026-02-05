@@ -32,7 +32,7 @@ const TeamTabBar: React.FC = () => {
                   }`}>
                   {tab.icon}
                 </div>
-                <span className={`text-[10px] font-bold mt-1 ${isActive ? 'text-app-gold' : 'text-gray-400'}`}>
+                <span className={`text-[10px] font-semibold mt-1 ${isActive ? 'text-app-gold' : 'text-gray-400'}`}>
                   {tab.label}
                 </span>
               </button>
@@ -48,7 +48,7 @@ const TeamTabBar: React.FC = () => {
               <div className={`p-1 ${isActive ? 'text-app-gold' : 'text-gray-400'}`}>
                 {tab.icon}
               </div>
-              <span className={`text-[10px] font-medium ${isActive ? 'text-app-gold font-bold' : 'text-gray-400'}`}>
+              <span className={`text-[10px] font-medium ${isActive ? 'text-app-gold font-semibold' : 'text-gray-400'}`}>
                 {tab.label}
               </span>
             </button>

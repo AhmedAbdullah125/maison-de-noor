@@ -13,12 +13,25 @@ const TeamAppLayout: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
+  const [lang, setLang] = useState<'ar' | 'en'>(() => {
+    return (localStorage.getItem('salon_team_lang') as 'ar' | 'en') || 'ar';
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('salon_team_token');
     setIsAuthenticated(!!token);
     setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+    localStorage.setItem('salon_team_lang', lang);
+  }, [lang]);
+
+  const toggleLang = () => {
+    setLang(prev => prev === 'ar' ? 'en' : 'ar');
+  };
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -35,13 +48,7 @@ const TeamAppLayout: React.FC = () => {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-  // Show TabBar on main pages only, hide on detail pages if needed, 
-  // but for simplicity we keep it on main nav pages.
-  // We'll hide it on Client Profile to give more space? 
-  // Let's keep it consistent with the customer app approach: 
-  // TabBar is always visible unless specific routes.
-  // For MVP, let's keep it visible everywhere except scan maybe? 
-  // Let's hide it on Scan page to focus on camera.
+  // Show TabBar on main pages only, hide on detail pages if needed
   const showTabBar = location.pathname !== '/team/scan';
 
   return (
@@ -49,10 +56,10 @@ const TeamAppLayout: React.FC = () => {
       <div className="flex-1 overflow-y-auto no-scrollbar relative pb-20">
         <Routes>
           <Route path="/" element={<Navigate to="/team/appointments" replace />} />
-          <Route path="appointments" element={<AppointmentsPage />} />
+          <Route path="appointments" element={<AppointmentsPage lang={lang} />} />
           <Route path="scan" element={<ScanPage />} />
-          <Route path="more" element={<MorePage onLogout={handleLogout} />} />
-          <Route path="client/:clientId" element={<ClientProfilePage />} />
+          <Route path="more" element={<MorePage onLogout={handleLogout} lang={lang} toggleLang={toggleLang} />} />
+          <Route path="client/:clientId" element={<ClientProfilePage lang={lang} />} />
           <Route path="*" element={<Navigate to="/team/appointments" replace />} />
         </Routes>
       </div>

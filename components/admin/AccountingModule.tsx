@@ -41,21 +41,21 @@ const AccountingModule: React.FC<AccountingModuleProps> = ({ lang }) => {
             <div className="p-3 bg-green-50 text-green-500 rounded-xl"><TrendingUp size={24} /></div>
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{t.totalIncome}</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">{income.toFixed(3)} {t.currency}</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{income.toFixed(3)} {t.currency}</h2>
         </div>
         <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-red-50 text-red-500 rounded-xl"><TrendingDown size={24} /></div>
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{t.totalExpense}</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">{expense.toFixed(3)} {t.currency}</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{expense.toFixed(3)} {t.currency}</h2>
         </div>
         <div className="bg-[#100F19] p-8 rounded-[2.5rem] shadow-xl text-white">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-white/10 text-white rounded-xl"><Wallet size={24} /></div>
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{t.netProfit}</span>
           </div>
-          <h2 className="text-xl font-bold">{(income - expense).toFixed(3)} {t.currency}</h2>
+          <h2 className="text-xl font-semibold">{(income - expense).toFixed(3)} {t.currency}</h2>
         </div>
       </div>
 

@@ -52,7 +52,7 @@ const NotificationsModule: React.FC<NotificationsModuleProps> = ({ lang }) => {
 
          {/* 1. Send Notification Form */}
          <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-3">
                <Send size={24} className="text-[#483383]" />
                {t.sendNotification}
             </h3>
@@ -81,7 +81,7 @@ const NotificationsModule: React.FC<NotificationsModuleProps> = ({ lang }) => {
                   <button
                      onClick={handleSend}
                      disabled={!isValid || isSending}
-                     className="w-full bg-[#483383] text-white font-bold py-4 rounded-2xl shadow-lg shadow-[#483383]/20 active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                     className="w-full bg-[#483383] text-white font-semibold py-4 rounded-2xl shadow-lg shadow-[#483383]/20 active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
                   >
                      {isSending ? (
                         <>
@@ -104,19 +104,19 @@ const NotificationsModule: React.FC<NotificationsModuleProps> = ({ lang }) => {
                         <div className="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
                            <CheckCircle2 size={32} />
                         </div>
-                        <h4 className="text-lg font-bold text-green-700 mb-2">{t.results}</h4>
+                        <h4 className="text-lg font-semibold text-green-700 mb-2">{t.results}</h4>
                         <div className="grid grid-cols-3 gap-4 mt-6">
                            <div className="bg-white p-4 rounded-2xl shadow-sm">
                               <span className="block text-[10px] font-semibold text-gray-400 uppercase">{t.successful}</span>
-                              <span className="text-base font-bold text-green-600">{lastSent.successCount}</span>
+                              <span className="text-base font-semibold text-green-600">{lastSent.successCount}</span>
                            </div>
                            <div className="bg-white p-4 rounded-2xl shadow-sm">
                               <span className="block text-[10px] font-semibold text-gray-400 uppercase">{t.failed}</span>
-                              <span className="text-base font-bold text-red-500">{lastSent.failCount}</span>
+                              <span className="text-base font-semibold text-red-500">{lastSent.failCount}</span>
                            </div>
                            <div className="bg-white p-4 rounded-2xl shadow-sm">
                               <span className="block text-[10px] font-semibold text-gray-400 uppercase">{t.total}</span>
-                              <span className="text-base font-bold text-gray-900">{lastSent.totalUsers}</span>
+                              <span className="text-base font-semibold text-gray-900">{lastSent.totalUsers}</span>
                            </div>
                         </div>
                      </div>
@@ -135,7 +135,7 @@ const NotificationsModule: React.FC<NotificationsModuleProps> = ({ lang }) => {
          {/* 2. History Table */}
          <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-100 flex flex-col">
             <div className="p-8 border-b border-gray-100 flex items-center justify-between">
-               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-3">
+               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-3">
                   <History size={24} className="text-[#483383]" />
                   {t.history}
                </h3>
@@ -145,12 +145,12 @@ const NotificationsModule: React.FC<NotificationsModuleProps> = ({ lang }) => {
                <table className="w-full text-start">
                   <thead className="bg-gray-50 border-b border-gray-100">
                      <tr>
-                        <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.time}</th>
-                        <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.notificationText}</th>
-                        <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.hasLink}</th>
-                        <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.sentBy}</th>
-                        <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase text-start">{t.results}</th>
-                        <th className={`px-8 py-4 text-xs font-bold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
+                        <th className="px-8 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.time}</th>
+                        <th className="px-8 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.notificationText}</th>
+                        <th className="px-8 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.hasLink}</th>
+                        <th className="px-8 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.sentBy}</th>
+                        <th className="px-8 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.results}</th>
+                        <th className={`px-8 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
@@ -170,8 +170,8 @@ const NotificationsModule: React.FC<NotificationsModuleProps> = ({ lang }) => {
                            </td>
                            <td className="px-8 py-4">
                               <div className="flex gap-2">
-                                 <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded">{n.successCount}</span>
-                                 <span className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded">{n.failCount}</span>
+                                 <span className="text-[10px] font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">{n.successCount}</span>
+                                 <span className="text-[10px] font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded">{n.failCount}</span>
                               </div>
                            </td>
                            <td className={`px-8 py-4 ${lang === 'ar' ? 'text-start' : 'text-end'}`}>
@@ -195,7 +195,7 @@ const NotificationsModule: React.FC<NotificationsModuleProps> = ({ lang }) => {
             <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-fadeIn">
                <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-scaleIn flex flex-col max-h-[85vh]">
                   <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between shrink-0">
-                     <h3 className="text-lg font-bold text-gray-900">{t.outboxDetails}</h3>
+                     <h3 className="text-lg font-semibold text-gray-900">{t.outboxDetails}</h3>
                      <button onClick={() => setSelectedOutbox(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} /></button>
                   </div>
 
@@ -215,24 +215,24 @@ const NotificationsModule: React.FC<NotificationsModuleProps> = ({ lang }) => {
                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
                            <span className="block text-[10px] font-semibold text-gray-400 uppercase mb-1">{t.total}</span>
-                           <span className="text-base font-bold text-gray-900">{selectedOutbox.totalUsers}</span>
+                           <span className="text-base font-semibold text-gray-900">{selectedOutbox.totalUsers}</span>
                         </div>
                         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
                            <span className="block text-[10px] font-semibold text-gray-400 uppercase mb-1">{t.successful}</span>
-                           <span className="text-base font-bold text-green-600">{selectedOutbox.successCount}</span>
+                           <span className="text-base font-semibold text-green-600">{selectedOutbox.successCount}</span>
                         </div>
                         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
                            <span className="block text-[10px] font-semibold text-gray-400 uppercase mb-1">{t.failed}</span>
-                           <span className="text-base font-bold text-red-500">{selectedOutbox.failCount}</span>
+                           <span className="text-base font-semibold text-red-500">{selectedOutbox.failCount}</span>
                         </div>
                         <div className="bg-[#100F19] p-4 rounded-2xl shadow-sm text-center">
                            <span className="block text-[10px] font-semibold text-gray-400 uppercase mb-1">{t.successRate}</span>
-                           <span className="text-base font-bold text-white">{((selectedOutbox.successCount / selectedOutbox.totalUsers) * 100).toFixed(0)}%</span>
+                           <span className="text-base font-semibold text-white">{((selectedOutbox.successCount / selectedOutbox.totalUsers) * 100).toFixed(0)}%</span>
                         </div>
                      </div>
 
                      <div>
-                        <h4 className="text-sm font-bold text-gray-900 mb-4">{t.deliveryStatus}</h4>
+                        <h4 className="text-sm font-semibold text-gray-900 mb-4">{t.deliveryStatus}</h4>
                         <div className="space-y-2">
                            {selectedOutbox.results.map((r, idx) => (
                               <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
@@ -255,7 +255,7 @@ const NotificationsModule: React.FC<NotificationsModuleProps> = ({ lang }) => {
                   </div>
 
                   <div className="p-8 border-t border-gray-100 shrink-0">
-                     <button onClick={() => setSelectedOutbox(null)} className="w-full py-4 bg-gray-100 text-gray-900 font-bold rounded-2xl hover:bg-gray-200 transition-colors">{t.close}</button>
+                     <button onClick={() => setSelectedOutbox(null)} className="w-full py-4 bg-gray-100 text-gray-900 font-semibold rounded-2xl hover:bg-gray-200 transition-colors">{t.close}</button>
                   </div>
                </div>
             </div>

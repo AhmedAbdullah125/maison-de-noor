@@ -22,7 +22,7 @@ export default function ExitPrompt({
                     <AlertTriangle size={32} />
                 </div>
 
-                <h2 className="text-lg font-bold text-gray-900 mb-2">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">
                     {lang === "ar" ? "تنبيه: تغييرات غير محفوظة" : "Unsaved Changes"}
                 </h2>
 

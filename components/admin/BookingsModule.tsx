@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, X, Phone, Mail, User, Check, AlertCircle } from "lucide-react";
 import { translations, Locale } from "../../services/i18n";
 import {
@@ -30,6 +31,7 @@ function statusBadgeClass(status: BookingStatus) {
 }
 
 const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
+  const navigate = useNavigate();
   const t = translations[lang];
   const perPage = 10;
 
@@ -405,6 +407,18 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   </div>
                 )}
               </div>
+              {/* show more */}
+              <button
+                className="px-4 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold transition-colors"
+                onClick={() => {
+                  // navigate to user details page
+                  if (selectedBooking) {
+                    navigate(`/admin/users/${selectedBooking.user.id}`);
+                  }
+                }}
+              >
+                {t.showMore}
+              </button>
             </div>
           </div>
         </div>

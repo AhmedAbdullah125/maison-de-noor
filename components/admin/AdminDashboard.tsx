@@ -20,6 +20,7 @@ import ManagersModule from './ManagersModule';
 import ReportsModule from './ReportsModule';
 import ActiveSubscriptionsModule from './ActiveSubscriptionsModule';
 import ExpiredSubscriptionsModule from './ExpiredSubscriptionsModule';
+import AdminClientProfilePage from './users/AdminClientProfilePage';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -164,7 +165,9 @@ const AdminDashboard: React.FC = () => {
             <Route path="services/new" element={hasPermission('services') ? <ServiceFormPage lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="services/:id/edit" element={hasPermission('services') ? <ServiceFormPage lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="service-addons" element={hasPermission('serviceAddons') ? <ServiceAddonsModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="service-addons" element={hasPermission('serviceAddons') ? <ServiceAddonsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="users" element={hasPermission('users') ? <UsersModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="users/:userId" element={hasPermission('users') ? <AdminClientProfilePage lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="bookings/upcoming" element={hasPermission('upcomingBookings') ? <BookingsModule type="upcoming" lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="bookings/completed" element={hasPermission('completedBookings') ? <BookingsModule type="completed" lang={lang} /> : <Navigate to="/admin" />} />
 

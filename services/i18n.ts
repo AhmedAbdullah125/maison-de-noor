@@ -265,7 +265,8 @@ export const translations = {
     house: 'House',
     apartment: 'Apartment',
     call: 'Call',
-    whatsapp: 'WhatsApp'
+    whatsapp: 'WhatsApp',
+    showMore: 'Show Profile'
   },
   ar: {
     dashboard: 'لوحة التحكم',
@@ -526,7 +527,8 @@ export const translations = {
     house: 'منزل',
     apartment: 'شقة',
     call: 'اتصال',
-    whatsapp: 'واتساب'
+    whatsapp: 'واتساب',
+    showMore: 'عرض الملف الشخصي'
   }
 };
 

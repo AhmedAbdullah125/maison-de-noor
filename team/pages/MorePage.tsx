@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LogOut, User, Settings, HelpCircle, ChevronLeft, Languages } from 'lucide-react';
+import { LogOut, User, Settings, HelpCircle, ChevronLeft, Languages, ChevronRight } from 'lucide-react';
 import { translations, Locale } from '@/services/i18n';
 
 interface MorePageProps {
@@ -40,7 +40,13 @@ const MorePage: React.FC<MorePageProps> = ({ onLogout, lang, toggleLang }) => {
               {lang === 'ar' ? 'English' : 'العربية'}
             </span>
           </div>
-          <ChevronLeft size={18} className="text-gray-300" />
+          {
+            lang === 'ar' ? (
+              <ChevronLeft size={18} className="text-gray-300" />
+            ) : (
+              <ChevronRight size={18} className="text-gray-300" />
+            )
+          }
         </button>
 
         {[

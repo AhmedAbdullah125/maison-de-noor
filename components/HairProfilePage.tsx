@@ -350,7 +350,7 @@ const HairProfilePage: React.FC = () => {
   }, [isLoading, isFetching, questionnaireId, serverProgress, answeredRequiredLocal, requiredIds.length]);
 
   return (
-    <div className="flex flex-col h-full bg-app-bg relative font-amiri overflow-hidden min-h-screen">
+    <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen">
       <AppHeader title="ملف العناية بالفروة و الشعر" onBack={() => navigate("/account")} />
 
       <main className="flex-1 overflow-y-auto no-scrollbar p-6 pt-24 pb-32 overscroll-contain">

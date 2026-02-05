@@ -145,7 +145,7 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
                                     </div>
 
                                     <div className="flex items-baseline gap-1 mb-2">
-                                        <span className="text-xl font-semibold text-app-gold font-amiri tracking-tight">{wallet}</span>
+                                        <span className="text-xl font-semibold text-app-gold font-alexandria tracking-tight">{wallet}</span>
                                         <span className="text-[10px] font-normal text-app-textSec">د.ك</span>
                                     </div>
 
@@ -175,7 +175,7 @@ export default function AccountMenu({ isGuest, profile, profileLoading, isHairPr
                     <div className="flex justify-center items-center py-4 mb-4">
                         <button
                             onClick={onOpenDelete}
-                            className="text-[10px] font-semibold text-red-400/80 hover:text-red-500 underline underline-offset-4 active:opacity-60 transition-all font-amiri"
+                            className="text-[10px] font-semibold text-red-400/80 hover:text-red-500 underline underline-offset-4 active:opacity-60 transition-all font-alexandria"
                         >
                             حذف الحساب
                         </button>

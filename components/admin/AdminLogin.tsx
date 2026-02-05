@@ -37,7 +37,7 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 font-amiri" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 font-alexandria" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-[#483383] text-white rounded-2xl flex items-center justify-center mx-auto mb-4">

@@ -134,7 +134,7 @@ export default function HomeLanding({
                             if (query.trim().length > 0) setShowResults(true);
                         }}
                         placeholder="بحث عن خدمة"
-                        className="w-full bg-white border border-app-card  rounded-full py-2 pr-10 pl-8 text-right focus:outline-none focus:border-app-gold shadow-sm font-amiri text-xs"
+                        className="w-full bg-white border border-app-card  rounded-full py-2 pr-10 pl-8 text-right focus:outline-none focus:border-app-gold shadow-sm font-alexandria text-xs"
                     />
 
                     <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-app-textSec" size={20} />

@@ -36,7 +36,7 @@ export default function HomeTab({ onBook, favourites, onToggleFavourite }: Props
     const activeCategory = categoryName || null;
 
     return (
-        <div className="flex flex-col h-[100vh] bg-app-bg relative font-amiri overflow-hidden">
+        <div className="flex flex-col h-[100vh] bg-app-bg relative font-alexandria overflow-hidden">
             <HomeDrawer
                 open={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
@@ -56,7 +56,7 @@ export default function HomeTab({ onBook, favourites, onToggleFavourite }: Props
                 title={
                     <div className="flex items-center justify-center gap-2 px-2 cursor-pointer w-full" onClick={() => navigate("/")}>
                         <AppImage src="https://raiyansoft.com/wp-content/uploads/2025/12/fav.png" alt="Mezo Do Noor logo" className="h-7 w-7 object-contain" />
-                        <span className="text-lg font-semibold text-app-text font-amiri truncate">ميزو دو نور</span>
+                        <span className="text-lg font-semibold text-app-text font-alexandria truncate">ميزو دو نور</span>
                     </div>
                 }
             />

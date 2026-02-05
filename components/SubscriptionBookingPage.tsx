@@ -6,7 +6,7 @@ const SubscriptionBookingPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col h-full bg-app-bg relative font-amiri overflow-hidden min-h-screen">
+    <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen">
       <header className="sticky top-0 z-30 flex items-center gap-4 px-6 pt-6 pb-4 bg-app-bg shadow-sm border-b border-app-card/30 flex-shrink-0">
         <button
           onClick={() => navigate(-1)}

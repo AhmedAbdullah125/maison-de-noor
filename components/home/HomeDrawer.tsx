@@ -23,7 +23,7 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar", cat
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="p-6 flex items-center justify-between border-b border-app-card/30 bg-white z-10">
-                    <span className="text-base font-semibold text-app-text font-amiri">الأقسام</span>
+                    <span className="text-base font-semibold text-app-text font-alexandria">الأقسام</span>
                     <button onClick={onClose} className="p-2 hover:bg-app-bg rounded-full transition-colors text-app-text">
                         <X size={24} />
                     </button>
@@ -45,7 +45,7 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar", cat
                                         onClose();
                                     }}
                                 >
-                                    <span className="text-sm font-normal text-app-text font-amiri">{cat.name}</span>
+                                    <span className="text-sm font-normal text-app-text font-alexandria">{cat.name}</span>
                                     <ChevronLeft size={18} className="text-app-gold opacity-50 group-hover:opacity-100 transition-opacity" />
                                 </button>
                             ))
@@ -93,7 +93,7 @@ export default function HomeDrawer({ open, onClose, onNavigate, lang = "ar", cat
                         href="https://raiyansoft.net"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[10px] text-app-textSec text-center font-amiri block hover:opacity-70 active:opacity-50 transition-opacity"
+                        className="text-[10px] text-app-textSec text-center font-alexandria block hover:opacity-70 active:opacity-50 transition-opacity"
                     >
                         powered by raiyansoft
                     </a>

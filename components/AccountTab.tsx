@@ -344,7 +344,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                     </div>
 
                     <div className="flex items-baseline gap-1 mb-2">
-                      <span className="text-xl font-semibold text-app-gold font-amiri tracking-tight">{wallet}</span>
+                      <span className="text-xl font-semibold text-app-gold font-alexandria tracking-tight">{wallet}</span>
                       <span className="text-[10px] font-normal text-app-textSec">د.ك</span>
                     </div>
 
@@ -450,7 +450,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
             <div className="flex justify-center items-center py-4 mb-4">
               <button
                 onClick={() => setShowDeleteModal(true)}
-                className="text-[10px] font-semibold text-red-400/80 hover:text-red-500 underline underline-offset-4 active:opacity-60 transition-all font-amiri"
+                className="text-[10px] font-semibold text-red-400/80 hover:text-red-500 underline underline-offset-4 active:opacity-60 transition-all font-alexandria"
               >
                 حذف الحساب
               </button>
@@ -689,8 +689,8 @@ const AccountTab: React.FC<AccountTabProps> = ({
             <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
               <AlertTriangle size={32} />
             </div>
-            <h2 className="text-sm font-semibold text-app-text mb-2 font-amiri">تأكيد حذف الحساب</h2>
-            <p className="text-xs text-app-textSec leading-loose mb-6 font-amiri">
+            <h2 className="text-sm font-semibold text-app-text mb-2 font-alexandria">تأكيد حذف الحساب</h2>
+            <p className="text-xs text-app-textSec leading-loose mb-6 font-alexandria">
               هل أنتِ متأكدة من حذف حسابك؟ لا يمكن التراجع عن هذه الخطوة.
             </p>
 
@@ -698,14 +698,14 @@ const AccountTab: React.FC<AccountTabProps> = ({
               <button
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="w-full py-3.5 bg-red-50 text-red-500 font-semibold rounded-xl text-xs active:scale-95 transition-transform font-amiri disabled:opacity-70"
+                className="w-full py-3.5 bg-red-50 text-red-500 font-semibold rounded-xl text-xs active:scale-95 transition-transform font-alexandria disabled:opacity-70"
               >
                 {isDeleting ? "جاري الحذف..." : "تأكيد الحذف"}
               </button>
 
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="w-full py-3.5 bg-app-bg text-app-text font-semibold rounded-xl text-xs active:scale-95 transition-transform font-amiri"
+                className="w-full py-3.5 bg-app-bg text-app-text font-semibold rounded-xl text-xs active:scale-95 transition-transform font-alexandria"
               >
                 إلغاء
               </button>

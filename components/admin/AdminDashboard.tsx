@@ -90,7 +90,7 @@ const AdminDashboard: React.FC = () => {
   if (!currentManager) return null;
 
   return (
-    <div className={`min-h-screen bg-gray-50 flex overflow-hidden font-amiri`}>
+    <div className={`min-h-screen bg-gray-50 flex overflow-hidden font-alexandria`}>
       <aside
         className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#100F19] text-white transition-all duration-300 flex flex-col fixed h-full z-50 ${lang === 'ar' ? 'right-0' : 'left-0'}`}
       >

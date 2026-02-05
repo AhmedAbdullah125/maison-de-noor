@@ -78,7 +78,7 @@ const SubscriptionDetailsPage: React.FC = () => {
    }));
 
    return (
-      <div className="flex flex-col h-full bg-app-bg relative font-amiri overflow-hidden min-h-screen animate-fadeIn">
+      <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen animate-fadeIn">
          <AppHeader
             title="تفاصيل الاشتراك"
             onBack={() => navigate('/subscriptions')}

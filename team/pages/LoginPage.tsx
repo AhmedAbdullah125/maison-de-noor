@@ -23,7 +23,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="w-full max-w-[430px] bg-white min-h-screen flex flex-col items-center justify-center p-8 mx-auto font-amiri">
+    <div className="w-full max-w-[430px] bg-white min-h-screen flex flex-col items-center justify-center p-8 mx-auto font-alexandria">
       <div className="w-20 h-20 bg-app-gold rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-app-gold/20">
         <Lock className="text-white" size={32} />
       </div>

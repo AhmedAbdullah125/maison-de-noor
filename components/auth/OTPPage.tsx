@@ -75,7 +75,7 @@ const OTPPage: React.FC<OTPPageProps> = ({ onLoginSuccess, lang = "ar" }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-app-bg relative font-amiri overflow-hidden min-h-screen">
+    <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen">
       <header className="absolute top-0 left-0 right-0 p-6 flex items-center">
         <button
           onClick={() => navigate("/signup")}

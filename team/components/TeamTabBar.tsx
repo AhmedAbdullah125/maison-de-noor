@@ -15,14 +15,10 @@ const TeamTabBar: React.FC = () => {
 
   const currentPath = location.pathname;
 
-  // Only show scan button on appointments page
-  const showScanButton = currentPath === '/team/appointments';
-  const visibleTabs = showScanButton ? tabs : tabs.filter(tab => !tab.isCenter);
-
   return (
     <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 pb-safe pt-2 px-6 shadow-[0_-4px_12px_rgba(0,0,0,0.03)] z-50">
       <div className="flex justify-between items-end pb-2">
-        {visibleTabs.map((tab) => {
+        {tabs.map((tab) => {
           const isActive = currentPath === tab.path;
 
           if (tab.isCenter) {

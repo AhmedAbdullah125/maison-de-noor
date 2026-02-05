@@ -45,7 +45,7 @@ const TeamAppLayout: React.FC = () => {
   const showTabBar = location.pathname !== '/team/scan';
 
   return (
-    <div className="w-full max-w-[430px] bg-app-bg min-h-screen shadow-2xl relative flex flex-col overflow-hidden font-alexandria mx-auto">
+    <div className="w-full max-w-[430px] bg-app-bg min-h-screen shadow-2xl relative flex flex-col overflow-hidden font-amiri mx-auto">
       <div className="flex-1 overflow-y-auto no-scrollbar relative pb-20">
         <Routes>
           <Route path="/" element={<Navigate to="/team/appointments" replace />} />

@@ -23,11 +23,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="w-full max-w-[430px] bg-white min-h-screen flex flex-col items-center justify-center p-8 mx-auto font-alexandria">
+    <div className="w-full max-w-[430px] bg-white min-h-screen flex flex-col items-center justify-center p-8 mx-auto font-amiri">
       <div className="w-20 h-20 bg-app-gold rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-app-gold/20">
         <Lock className="text-white" size={32} />
       </div>
-      
+
       <h1 className="text-2xl font-bold text-app-text mb-2">تسجيل دخول الموظفين</h1>
       <p className="text-sm text-gray-400 mb-8">يرجى ادخال بيانات حسابك</p>
 
@@ -67,7 +67,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           دخول
         </button>
       </form>
-      
+
       <div className="mt-8 text-center">
         <p className="text-xs text-gray-400">بيانات تجريبية:</p>
         <p className="text-xs font-bold text-app-gold mt-1">user: staff / pass: 1234</p>

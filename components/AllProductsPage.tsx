@@ -28,7 +28,7 @@ const AllProductsPage: React.FC<AllProductsPageProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden">
+    <div className="flex flex-col h-full bg-app-bg relative font-amiri overflow-hidden">
       {/* Header */}
       <AppHeader
         title="جميع الخدمات"

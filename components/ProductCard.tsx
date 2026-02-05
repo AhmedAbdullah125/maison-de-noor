@@ -96,7 +96,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/90 to-transparent z-10" />
 
         <div className="absolute inset-x-0 bottom-0 px-3 pb-7 pt-4 z-20 pointer-events-none">
-          <h3 className="text-xs font-semibold text-app-text text-right w-full line-clamp-2 font-alexandria leading-relaxed">
+          <h3 className="text-xs font-semibold text-app-text text-right w-full line-clamp-2 font-amiri leading-relaxed">
             {product.name}
           </h3>
           {/* <LazyLoadImage src={product?.image || FALLBACK_IMAGE_URL} alt={`${product.name}`} className="w-full h-full object-cover" /> */}
@@ -128,11 +128,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
       <div className="p-3 pt-2 mt-auto flex items-center justify-between bg-white relative z-10">
         <div className="flex flex-col items-start">
-          <span className="text-sm font-semibold text-app-gold font-alexandria leading-none">
+          <span className="text-sm font-semibold text-app-gold font-amiri leading-none">
             {product.price}
           </span>
           {product.oldPrice && (
-            <span className="text-[9px] text-app-textSec line-through font-alexandria opacity-60 mt-0.5">
+            <span className="text-[9px] text-app-textSec line-through font-amiri opacity-60 mt-0.5">
               {product.oldPrice}
             </span>
           )}

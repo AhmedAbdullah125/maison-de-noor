@@ -79,7 +79,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, lang = "ar" }) =>
 
   if (checkingSession) {
     return (
-      <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen items-center justify-center">
+      <div className="flex flex-col h-full bg-app-bg relative font-amiri overflow-hidden min-h-screen items-center justify-center">
         <div className="bg-white border border-app-card/50 rounded-2xl px-6 py-4 shadow-sm text-app-text">
           جاري التحقق من الجلسة...
         </div>
@@ -88,7 +88,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, lang = "ar" }) =>
   }
 
   return (
-    <div className="flex flex-col h-full bg-app-bg relative font-alexandria overflow-hidden min-h-screen">
+    <div className="flex flex-col h-full bg-app-bg relative font-amiri overflow-hidden min-h-screen">
       <div className="flex-1 overflow-y-auto no-scrollbar px-6 pt-12 pb-10 flex flex-col justify-center">
         <div className="text-center mb-10">
           <h1 className="text-xl font-semibold text-app-text mb-2">تسجيل الدخول</h1>

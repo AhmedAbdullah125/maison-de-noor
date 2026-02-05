@@ -284,7 +284,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
   };
 
   return (
-    <div className="flex flex-col h-[100vh] bg-app-bg relative font-alexandria overflow-hidden">
+    <div className="flex flex-col h-[100vh] bg-app-bg relative font-amiri overflow-hidden">
 
       {/* Menu Overlay */}
       {isMenuOpen && (
@@ -298,7 +298,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
           >
             {/* Drawer Header */}
             <div className="p-6 flex items-center justify-between border-b border-app-card/30 bg-white z-10">
-              <span className="text-base font-bold text-app-text font-alexandria">الأقسام</span>
+              <span className="text-base font-bold text-app-text font-amiri">الأقسام</span>
               <button onClick={toggleMenu} className="p-2 hover:bg-app-bg rounded-full transition-colors text-app-text">
                 <X size={24} />
               </button>
@@ -316,7 +316,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                       setIsMenuOpen(false);
                     }}
                   >
-                    <span className="text-sm font-normal text-app-text font-alexandria">{brand.name}</span>
+                    <span className="text-sm font-normal text-app-text font-amiri">{brand.name}</span>
                     <ChevronLeft size={18} className="text-app-gold opacity-50 group-hover:opacity-100 transition-opacity" />
                   </button>
                 ))}
@@ -356,7 +356,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                 href="https://raiyansoft.net"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[10px] text-app-textSec text-center font-alexandria block hover:opacity-70 active:opacity-50 transition-opacity"
+                className="text-[10px] text-app-textSec text-center font-amiri block hover:opacity-70 active:opacity-50 transition-opacity"
               >
                 powered by raiyansoft
               </a>
@@ -429,7 +429,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
               alt="Mezo Do Noor logo"
               className="h-7 w-7 object-contain"
             />
-            <span className="text-lg font-bold text-app-text font-alexandria truncate">
+            <span className="text-lg font-bold text-app-text font-amiri truncate">
               ميزو دو نور
             </span>
           </div>
@@ -463,7 +463,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
 
             {/* Title & Price */}
             <div className="px-8 mb-4">
-              <h2 className="text-xl font-bold text-app-text font-alexandria leading-tight">
+              <h2 className="text-xl font-bold text-app-text font-amiri leading-tight">
                 {selectedProduct.name}
               </h2>
 
@@ -704,7 +704,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
                 <input
                   type="text"
                   placeholder="بحث عن خدمة"
-                  className="w-full bg-white border border-app-card rounded-full py-3.5 pr-6 pl-12 text-right focus:outline-none focus:border-app-gold shadow-sm font-alexandria text-sm"
+                  className="w-full bg-white border border-app-card rounded-full py-3.5 pr-6 pl-12 text-right focus:outline-none focus:border-app-gold shadow-sm font-amiri text-sm"
                 />
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-app-textSec" size={20} />
               </div>
@@ -785,7 +785,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onBook, favourites, onToggleFavourite
               >
                 <ArrowRight size={20} />
               </button>
-              <h2 className="text-base font-bold text-app-text font-alexandria truncate">
+              <h2 className="text-base font-bold text-app-text font-amiri truncate">
                 {activeCategory}
               </h2>
             </div>

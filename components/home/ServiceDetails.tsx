@@ -374,7 +374,7 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
             </div>
 
             <div className="px-8 mb-4">
-                <h2 className="text-xl font-semibold text-app-text font-alexandria leading-tight mb-2">{product.name}</h2>
+                <h2 className="text-xl font-semibold text-app-text font-amiri leading-tight mb-2">{product.name}</h2>
                 <p className="text-sm text-app-text/70">{product?.description}</p>
                 <div className="mt-2 mb-1 flex flex-wrap gap-2">
                     {resolvedAddonGroups.length > 0 && (

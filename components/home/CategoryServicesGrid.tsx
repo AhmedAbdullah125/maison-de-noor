@@ -104,7 +104,7 @@ export default function CategoryServicesGrid({
                 >
                     <ArrowRight size={20} />
                 </button>
-                <h2 className="text-base font-semibold text-app-text font-alexandria truncate">{title}</h2>
+                <h2 className="text-base font-semibold text-app-text font-amiri truncate">{title}</h2>
             </div>
 
             {/* حالات التحميل/الخطأ فقط لما يكون فيه serviceId */}

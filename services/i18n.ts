@@ -263,7 +263,9 @@ export const translations = {
     block: 'Block',
     street: 'Street',
     house: 'House',
-    apartment: 'Apartment'
+    apartment: 'Apartment',
+    call: 'Call',
+    whatsapp: 'WhatsApp'
   },
   ar: {
     dashboard: 'لوحة التحكم',
@@ -522,7 +524,9 @@ export const translations = {
     block: 'قطعة',
     street: 'شارع',
     house: 'منزل',
-    apartment: 'شقة'
+    apartment: 'شقة',
+    call: 'اتصال',
+    whatsapp: 'واتساب'
   }
 };
 

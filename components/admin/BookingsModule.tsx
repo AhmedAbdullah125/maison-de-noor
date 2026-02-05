@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, X, Phone, Mail, User, Check, AlertCircle } from "lucide-react";
 import { translations, Locale } from "../../services/i18n";
 import {
   BookingType,
   BookingStatus,
   changeBookingStatus,
   toastApi,
+  ApiBooking
 } from "./bookings/bookings.api";
 import { useBookings } from "./bookings/useBookings";
 
@@ -37,6 +38,8 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [changingId, setChangingId] = useState<number | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<ApiBooking | null>(null);
+  const [showPhoneActions, setShowPhoneActions] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     show: boolean;
     bookingId: number | null;
@@ -66,7 +69,8 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
     </div>
   );
 
-  const handleActionClick = (bookingId: number, action: "confirm" | "cancel") => {
+  const handleActionClick = (bookingId: number, action: "confirm" | "cancel", e: React.MouseEvent) => {
+    e.stopPropagation();
     setConfirmDialog({ show: true, bookingId, action });
   };
 
@@ -155,13 +159,42 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   (type === "completed" ? "completed" : "upcoming");
 
                 return (
-                  <tr key={b.id} className="hover:bg-gray-50/50">
+                  <tr
+                    key={b.id}
+                    className="hover:bg-gray-50/50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      if (b.user) {
+                        setSelectedBooking(b);
+                        setShowPhoneActions(false);
+                      }
+                    }}
+                  >
                     <td className="px-6 py-4 font-semibold text-gray-400 text-xs">
                       {b.booking_number ? b.booking_number : `#${b.id}`}
                     </td>
 
-                    <td className="px-6 py-4 font-semibold text-gray-900">
-                      {serviceName}
+                    <td className="px-6 py-4">
+                      {/* Show user avatar if available, alongside service */}
+                      <div className="flex items-center gap-3">
+                        {b.user && (
+                          <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                            <img
+                              src={b.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(b.user.name)}&background=random`}
+                              alt={b.user.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(b.user?.name || 'User')}&background=random`;
+                              }}
+                            />
+                          </div>
+                        )}
+                        <div className="flex flex-col">
+                          <span className="text-sm font-semibold text-gray-900 line-clamp-1 max-w-[200px]" title={serviceName}>
+                            {serviceName}
+                          </span>
+                          {b.user && <span className="text-[10px] text-gray-500">{b.user.name}</span>}
+                        </div>
+                      </div>
                     </td>
 
                     <td className="px-6 py-4">
@@ -205,7 +238,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                             <button
                               className="bg-green-500 hover:bg-green-600 text-white text-[10px] font-semibold rounded-lg px-3 py-2 outline-none disabled:opacity-60 transition-colors"
                               disabled={changingId === b.id}
-                              onClick={() => handleActionClick(b.id, "confirm")}
+                              onClick={(e) => handleActionClick(b.id, "confirm", e)}
                             >
                               {t.confirmBooking}
                             </button>
@@ -214,7 +247,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                             <button
                               className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-semibold rounded-lg px-3 py-2 outline-none disabled:opacity-60 transition-colors"
                               disabled={changingId === b.id}
-                              onClick={() => handleActionClick(b.id, "cancel")}
+                              onClick={(e) => handleActionClick(b.id, "cancel", e)}
                             >
                               {t.cancelBookingAction}
                             </button>
@@ -256,8 +289,8 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
 
       {/* Confirmation Dialog */}
       {confirmDialog.show && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full mx-4 shadow-xl">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full mx-4 shadow-xl animate-scaleIn">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               {confirmDialog.action === "confirm"
                 ? t.confirmBooking
@@ -284,6 +317,94 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
               >
                 {t.confirmBookingAction}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Details Popup */}
+      {selectedBooking && selectedBooking.user && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setSelectedBooking(null)}
+        >
+          <div
+            className="bg-white w-full max-w-[440px] rounded-[32px] shadow-2xl overflow-hidden animate-scaleIn relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedBooking(null)}
+              className="absolute top-4 right-4 w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors z-10"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Content */}
+            <div className="p-8 flex flex-col items-center text-center">
+              {/* Avatar */}
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-50 border-4 border-white shadow-lg mb-4">
+                <img
+                  src={selectedBooking.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user.name)}&background=random`}
+                  alt={selectedBooking.user.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user?.name || 'User')}&background=random`;
+                  }}
+                />
+              </div>
+
+              {/* Name & ID */}
+              <h2 className="text-xl font-bold text-gray-900 mb-1">{selectedBooking.user.name}</h2>
+              <span className="text-xs font-medium text-[#483383] bg-[#483383]/10 px-3 py-1 rounded-full mb-6">
+                ID: {selectedBooking.user.id}
+              </span>
+
+              {/* Contact Info */}
+              <div className="w-full space-y-3 mb-2">
+                {selectedBooking.user.phone && (
+                  <div
+                    className={`flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer ${showPhoneActions ? 'bg-blue-50 ring-2 ring-blue-100' : 'bg-gray-50'}`}
+                    onClick={() => setShowPhoneActions(!showPhoneActions)}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm shrink-0">
+                      <Phone size={14} />
+                    </div>
+                    {!showPhoneActions ? (
+                      <span className="text-sm font-semibold text-gray-600" dir="ltr">{selectedBooking.user.phone}</span>
+                    ) : (
+                      <div className="flex items-center gap-2 animate-fadeIn w-full justify-between">
+                        <span className="text-sm font-semibold text-gray-600" dir="ltr">{selectedBooking.user.phone}</span>
+                        <a
+                          href={`tel:${selectedBooking.user.phone}`}
+                          className="flex-1 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-colors shadow-sm flex justify-center items-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {t.call}
+                        </a>
+                        <a
+                          href={`https://wa.me/${selectedBooking.user.phone.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex-1 py-1.5 bg-[#25D366] text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity shadow-sm flex justify-center items-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {t.whatsapp}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {selectedBooking.user.email && (
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm">
+                      <Mail size={14} />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600 truncate">{selectedBooking.user.email}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

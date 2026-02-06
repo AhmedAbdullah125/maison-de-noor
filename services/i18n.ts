@@ -268,7 +268,11 @@ export const translations = {
     whatsapp: 'WhatsApp',
     showMore: 'Show Profile',
     scan: 'Scan',
-    more: 'More'
+    more: 'More',
+    questionnaireResponses: 'Questionnaire Responses',
+    question: 'Question',
+    answer: 'Answer',
+    clientDidNotAnswer: 'Client did not answer any questions'
   },
   ar: {
     dashboard: 'لوحة التحكم',
@@ -532,7 +536,11 @@ export const translations = {
     whatsapp: 'واتساب',
     showMore: 'عرض الملف الشخصي',
     scan: 'مسح',
-    more: 'المزيد'
+    more: 'المزيد',
+    questionnaireResponses: 'إجابات الاستبيان',
+    question: 'السؤال',
+    answer: 'الإجابة',
+    clientDidNotAnswer: 'لم تقم العميلة بالإجابة على أي أسئلة'
   }
 };
 

@@ -63,7 +63,7 @@ const TeamAppLayout: React.FC = () => {
           <Route path="*" element={<Navigate to="/team/appointments" replace />} />
         </Routes>
       </div>
-      {showTabBar && <TeamTabBar />}
+      {showTabBar && <TeamTabBar lang={lang} />}
     </div>
   );
 };

@@ -253,6 +253,7 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
   const upcomingRequest = upcomingSession
     ? userData.requests.find(req => req.sessions?.some(s => s.id === upcomingSession.id))
     : null;
+  console.log(userData);
 
   return (
     <div className="min-h-full bg-app-bg pt-6 pb-24">
@@ -272,7 +273,7 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
       <div className="mx-6 bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 mb-6 text-center">
         <div className="w-20 h-20 bg-app-bg rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg">
           {userData.photo && !userData.photo.includes('unknown.svg') ? (
-            <img src={userData.photo} alt={userData.name} className="w-full h-full object-cover" />
+            <img src={userData.photo.replace(/\\\//g, '/')} alt={userData.name} className="w-full h-full object-cover" />
           ) : (
             <span className="text-app-gold text-2xl font-semibold">{userData.name.charAt(0)}</span>
           )}

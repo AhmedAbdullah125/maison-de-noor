@@ -115,7 +115,7 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
                       {booking.user && (
                         <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0">
                           <img
-                            src={booking.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.user.name)}&background=random`}
+                            src={booking.user.photo ? booking.user.photo.replace(/\\\//g, '/') : `https://ui-avatars.com/api/?name=${encodeURIComponent(booking.user.name)}&background=random`}
                             alt={booking.user.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -173,7 +173,7 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
               {/* Avatar */}
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-50 border-4 border-white shadow-lg mb-4">
                 <img
-                  src={selectedBooking.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user.name)}&background=random`}
+                  src={selectedBooking.user.photo ? selectedBooking.user.photo.replace(/\\\//g, '/') : `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user.name)}&background=random`}
                   alt={selectedBooking.user.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {

@@ -144,6 +144,7 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
                       }`}>
                       {isCompleted ? t.completed : t.upcoming}
                     </span>
+                    <span className="text-xs font-bold text-app-text">{booking.final_price || 23} {t.currency}</span>
                   </div>
                 </div>
               );

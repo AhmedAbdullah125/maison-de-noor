@@ -20,6 +20,7 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
   const [selectedBooking, setSelectedBooking] = useState<ApiBooking | null>(null);
 
   // Filter appointments by selected date
+
   const appointments = useMemo(() => {
     const dateStr = currentDate.toISOString().split('T')[0];
     return apiRows.filter((booking) => booking.start_date === dateStr);

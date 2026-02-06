@@ -14,7 +14,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Demo credentials
-    if (username === 'staff' && password === '1234') {
+    if (username === 'staff' && password === '1234' || username === 'noor' && password === '123456') {
       localStorage.setItem('salon_team_token', 'demo_token');
       onLogin();
     } else {

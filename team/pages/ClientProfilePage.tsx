@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowRight, Phone, MessageSquare, Calendar, Ticket, CheckCircle2, Loader2, AlertCircle, ChevronDown } from 'lucide-react';
+import { ArrowRight, Phone, MessageSquare, Calendar, Ticket, CheckCircle2, Loader2, AlertCircle, ChevronDown, Image as ImageIcon, Upload, X, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { DASHBOARD_API_BASE_URL } from '@/lib/apiConfig';
 import { http } from '@/components/services/http';
 import { changeBookingStatus } from '../../components/admin/bookings/bookings.api';
@@ -82,6 +83,11 @@ interface Request {
   created_at: string;
 }
 
+interface UserImage {
+  id: number;
+  image: string;
+}
+
 interface UserData {
   id: number;
   name: string;
@@ -91,6 +97,7 @@ interface UserData {
   wallet: string;
   requests: Request[];
   questionnaire_responses: QuestionnaireResponse[];
+  images: UserImage[];
 }
 
 interface Question {
@@ -138,9 +145,31 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
   const [expandedSections, setExpandedSections] = useState({
     subscriptions: false,
     questionnaire: false,
-    history: false
+    history: false,
+    gallery: false
   });
-  const t = translations[lang];
+
+  // Upload Modal State
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [previews, setPreviews] = useState<string[]>([]);
+
+  const additionalTranslations = {
+    gallery: lang === 'ar' ? 'معرض الصور' : 'Gallery',
+    noImages: lang === 'ar' ? 'لا توجد صور' : 'No images found',
+    addImage: lang === 'ar' ? 'إضافة صورة' : 'Add Image',
+    uploadImages: lang === 'ar' ? 'رفع الصور' : 'Upload Images',
+    selectImages: lang === 'ar' ? 'اختر صور' : 'Select Images',
+    uploading: lang === 'ar' ? 'جاري الرفع...' : 'Uploading...',
+    uploadSuccess: lang === 'ar' ? 'تم رفع الصور بنجاح' : 'Images uploaded successfully',
+    uploadError: lang === 'ar' ? 'حدث خطأ أثناء رفع الصور' : 'Error uploading images',
+    dragDrop: lang === 'ar' ? 'اضغط لاختيار الصور' : 'Click to select images',
+    maxSize: lang === 'ar' ? 'الحد الأقصى 5 ميجابايت' : 'Max size 5MB',
+    remove: lang === 'ar' ? 'حذف' : 'Remove',
+  };
+
+  const t = { ...translations[lang], ...additionalTranslations };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -207,6 +236,65 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
   const formatTime = (timeStr: string): string => {
     if (!timeStr) return '';
     return timeStr.substring(0, 5); // Extract HH:mm from HH:mm:ss
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files) as File[];
+      const validFiles = filesArray.filter((file) => file.type.startsWith('image/'));
+
+      if (validFiles.length !== filesArray.length) {
+        toast.error(lang === 'ar' ? 'يجب اختيار صور فقط' : 'Please select images only');
+      }
+
+      setSelectedFiles(prev => [...prev, ...validFiles]);
+
+      // Create previews
+      const newPreviews = validFiles.map((file) => URL.createObjectURL(file));
+      setPreviews(prev => [...prev, ...newPreviews]);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => {
+      // Revoke old URL to avoid memory leaks
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0 || !clientId) return;
+
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('user_id', clientId);
+
+      selectedFiles.forEach((file, index) => {
+        formData.append(`images[${index}]`, file);
+      });
+
+      await http.post(`${DASHBOARD_API_BASE_URL}/user-images`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      toast.success(t.uploadSuccess);
+      setIsUploadModalOpen(false);
+      setSelectedFiles([]);
+      setPreviews([]);
+
+      // Refresh profile
+      fetchUserProfile(clientId);
+    } catch (err) {
+      console.error('Error uploading images:', err);
+      toast.error(t.uploadError);
+    } finally {
+      setUploading(false);
+    }
   };
 
   if (loading) {
@@ -540,7 +628,125 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
             </div>
           )}
         </div>
+        {/* Gallery Section */}
+        <div className="bg-white rounded-[24px] border border-gray-100 overflow-hidden">
+          <button
+            onClick={() => toggleSection('gallery')}
+            className="w-full p-5 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors"
+          >
+            <h3 className="font-semibold text-app-text flex items-center gap-2">
+              <ImageIcon size={18} className="text-app-gold" />
+              {t.gallery}
+            </h3>
+            <ChevronDown
+              size={20}
+              className={`text-gray-400 transition-transform duration-300 ${expandedSections.gallery ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {expandedSections.gallery && (
+            <div className="px-5 pb-5">
+              <div className="mb-4 flex justify-end">
+                <button
+                  onClick={() => setIsUploadModalOpen(true)}
+                  className="flex items-center gap-2 bg-[#483383] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#3d2b70] transition-colors"
+                >
+                  <Plus size={16} />
+                  {t.addImage}
+                </button>
+              </div>
+
+              {userData.images && userData.images.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {userData.images.map((img) => (
+                    <div key={img.id} className="aspect-square rounded-xl overflow-hidden border border-gray-100 group relative">
+                      <img
+                        src={img.image.replace(/\\\//g, '/')}
+                        alt="Client gallery"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 text-center py-4">{t.noImages}</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Upload Modal */}
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="font-semibold text-lg">{t.uploadImages}</h3>
+              <button
+                onClick={() => setIsUploadModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* File Input */}
+              <div className="relative">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:bg-gray-50 transition-colors">
+                  <div className="w-12 h-12 bg-[#483383]/10 text-[#483383] rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Upload size={24} />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700">{t.dragDrop}</p>
+                  <p className="text-xs text-gray-400 mt-1">{t.selectImages}</p>
+                </div>
+              </div>
+
+              {/* Previews */}
+              {previews.length > 0 && (
+                <div className="grid grid-cols-3 gap-3">
+                  {previews.map((preview, idx) => (
+                    <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-gray-100 group">
+                      <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => handleRemoveFile(idx)}
+                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-50 bg-gray-50/50 flex justify-end gap-3">
+              <button
+                onClick={() => setIsUploadModalOpen(false)}
+                className="px-6 py-3 rounded-xl font-semibold text-gray-500 hover:bg-gray-100 transition-colors"
+              >
+                {translations[lang].cancel}
+              </button>
+              <button
+                onClick={handleUpload}
+                disabled={uploading || selectedFiles.length === 0}
+                className="px-6 py-3 rounded-xl font-semibold bg-[#483383] text-white hover:bg-[#3d2b70] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {uploading && <Loader2 size={18} className="animate-spin" />}
+                {uploading ? t.uploading : t.uploadImages}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

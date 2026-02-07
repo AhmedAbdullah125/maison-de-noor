@@ -1,5 +1,7 @@
 import React from "react";
 import { Scissors, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
+import RichTextEditor from "../../../ui/RichTextEditor";
 import { Locale } from "../../../../services/i18n";
 import { Product } from "../../../../types";
 
@@ -141,10 +143,10 @@ export default function BasicInfoCard({
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                             {t.description} (AR)
                         </label>
-                        <textarea
-                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all h-32 resize-none"
+                        <RichTextEditor
                             value={String(form.description || "")}
-                            onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                            onChange={(value) => setForm((p) => ({ ...p, description: value }))}
+                            dir="rtl"
                         />
                     </div>
 
@@ -152,11 +154,10 @@ export default function BasicInfoCard({
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                             {t.description} (EN)
                         </label>
-                        <textarea
-                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all h-32 resize-none text-left"
-                            dir="ltr"
+                        <RichTextEditor
                             value={String((form as any).descriptionEn || "")}
-                            onChange={(e) => setForm((p) => ({ ...p, descriptionEn: e.target.value }))}
+                            onChange={(value) => setForm((p) => ({ ...p, descriptionEn: value }))}
+                            dir="ltr"
                         />
                     </div>
                 </div>

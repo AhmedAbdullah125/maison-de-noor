@@ -846,12 +846,8 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
                   <span className="text-gray-500">{t.optionsPrice}</span>
                   <span className="font-medium">{parseFloat(selectedSession.request.pricing.options_price || "0").toFixed(3)} {t.currency}</span>
                 </div>
-                {parseFloat(selectedSession.request.pricing.discount_amount || "0") !== 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>{t.discount}</span>
-                    <span>{parseFloat(selectedSession.request.pricing.discount_amount).toFixed(3)} {t.currency}</span>
-                  </div>
-                )}
+
+
                 <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold text-lg">
                   <span>{t.finalPrice}</span>
                   <span>{parseFloat(selectedSession.request.pricing.final_price).toFixed(3)} {t.currency}</span>

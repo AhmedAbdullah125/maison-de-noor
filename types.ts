@@ -66,6 +66,7 @@ export interface Product {
   image: string;
   images?: string[];
   description?: string;
+  descriptionEn?: string;
   duration?: string;
   addons?: ServiceAddon[];
   addonGroups?: ServiceAddonGroup[];

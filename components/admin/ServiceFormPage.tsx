@@ -32,6 +32,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     name: "",
     nameEn: "",
     description: "",
+    descriptionEn: "",
     price: "",
     image: "",
     images: [],
@@ -245,6 +246,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
             name: arTranslation?.name || "",
             nameEn: enTranslation?.name || "",
             description: arTranslation?.description || "",
+            descriptionEn: enTranslation?.description || "",
             price: String(item.price || ""),
             image: mainImageUrl,
             images: apiGalleryUrls,
@@ -372,7 +374,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
     fd.append("translations[1][language]", "en");
     fd.append("translations[1][name]", String((form as any).nameEn || form.name || ""));
-    fd.append("translations[1][description]", String(form.description || ""));
+    fd.append("translations[1][description]", String((form as any).descriptionEn || ""));
 
     gallery.forEach((g, i) => {
       if (!g.file) return; // ✅ تجاهل remote في create
@@ -446,7 +448,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
     fd.append("translations[1][language]", "en");
     fd.append("translations[1][name]", String((form as any).nameEn || form.name || ""));
-    fd.append("translations[1][description]", String(form.description || ""));
+    fd.append("translations[1][description]", String((form as any).descriptionEn || ""));
 
     let imageIndex = 0;
     gallery.forEach((g) => {

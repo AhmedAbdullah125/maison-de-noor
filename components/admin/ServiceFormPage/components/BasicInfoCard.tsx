@@ -135,15 +135,30 @@ export default function BasicInfoCard({
                 </div>
 
                 {/* description */}
-                <div className="col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        {t.description}
-                    </label>
-                    <textarea
-                        className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all h-32 resize-none"
-                        value={String(form.description || "")}
-                        onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-                    />
+                {/* description */}
+                <div className="col-span-2 grid grid-cols-1 gap-6">
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            {t.description} (AR)
+                        </label>
+                        <textarea
+                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all h-32 resize-none"
+                            value={String(form.description || "")}
+                            onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            {t.description} (EN)
+                        </label>
+                        <textarea
+                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all h-32 resize-none text-left"
+                            dir="ltr"
+                            value={String((form as any).descriptionEn || "")}
+                            onChange={(e) => setForm((p) => ({ ...p, descriptionEn: e.target.value }))}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

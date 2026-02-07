@@ -115,6 +115,9 @@ export default function AddonsCard({
     onToggleOption: (id: number) => void;
     onReload?: () => void;
 }) {
+
+    console.log(options);
+
     const [modalOpen, setModalOpen] = useState(false);
     const [editingAddon, setEditingAddon] = useState<GlobalAddon | null>(null);
     const [saving, setSaving] = useState(false);
@@ -125,7 +128,8 @@ export default function AddonsCard({
         titleEn: "",
         titleAr: "",
         required: false,
-        selectionType: "single",
+        selectionType: "single"
+        ,
         items: [{ id: "1", labelEn: "", labelAr: "", price: 0 }],
     });
 

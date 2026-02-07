@@ -291,10 +291,11 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
 
                       <div>
                         <p className="font-semibold text-gray-900">{svc.name}</p>
-                        <p className="text-[10px] text-gray-400 truncate max-w-[200px]">
+                        <p className="text-[10px] text-gray-400 line-clamp-3 leading-tight">
                           {svc.description}
                         </p>
                       </div>
+
                     </div>
                   </td>
 

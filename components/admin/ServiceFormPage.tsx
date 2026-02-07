@@ -54,7 +54,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
 
   const { isLoading: catsLoading, rows: categories } = useCategoriesOptions(lang);
-  const { isLoading: optionsLoading, rows: options } = useOptionsOptions(lang);
+  const { isLoading: optionsLoading, rows: options, refetch: refetchOptions } = useOptionsOptions(lang);
 
 
   const selectedOptionIds = useMemo(
@@ -624,7 +624,6 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
         <div className="flex flex-col gap-8">
 
-
           <AddonsCard
             lang={lang}
             t={t}
@@ -635,8 +634,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
             selectedOptionIds={selectedOptionIds}
             onToggleOption={handleToggleGlobalAddon}
             onReload={async () => {
-              // Force re-fetch by reloading the page
-              window.location.reload();
+              refetchOptions();
             }}
           />
 

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { LayoutGrid, ChevronDown, Plus, X, Save, Loader2, ListPlus, Trash, Copy, Edit, Trash2 } from "lucide-react";
+import { LayoutGrid, ChevronDown, Plus, X, Save, Loader2, ListPlus, Trash, Copy, Edit, Trash2, ArrowUp, ArrowDown, ChevronUp } from "lucide-react";
 import { Locale } from "../../../../services/i18n";
 import { toast } from "sonner";
 import { http } from "../../../services/http";
 import { DASHBOARD_API_BASE_URL } from "@/lib/apiConfig";
 import { GlobalAddon, GlobalAddonItem } from "../../services/useOptionsOptions";
+import { moveOption } from "../../services/options.api";
 
 // Helper to convert to number
 const toNum = (x: any) => {
@@ -124,6 +125,7 @@ export default function AddonsCard({
     const [deletingId, setDeletingId] = useState<string | number | null>(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [addonToDelete, setAddonToDelete] = useState<GlobalAddon | null>(null);
+    const [movingId, setMovingId] = useState<number | string | null>(null);
     const [form, setForm] = useState<Partial<GlobalAddon>>({
         titleEn: "",
         titleAr: "",
@@ -239,6 +241,28 @@ export default function AddonsCard({
         setDeleteModalOpen(true);
     };
 
+    const handleMove = async (addon: GlobalAddon, direction: "up" | "down", e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        const currentIndex = options.findIndex((o) => o.id === addon.id);
+        if (currentIndex === -1) return;
+
+        let newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+        if (newIndex < 0 || newIndex >= options.length) return;
+
+        try {
+            setMovingId(addon.id);
+            await moveOption({ lang, id: addon.id, new_index: newIndex });
+            if (onReload) await onReload();
+        } catch (e: any) {
+            toast(e?.message || (lang === "ar" ? "فشل النقل" : "Move failed"), {
+                style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
+            });
+        } finally {
+            setMovingId(null);
+        }
+    };
     const confirmDelete = async () => {
         if (!addonToDelete) return;
 
@@ -376,6 +400,25 @@ export default function AddonsCard({
                                                     </div>
 
                                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {/* Move Up/Down */}
+                                                        <div className="flex flex-col">
+                                                            <button
+                                                                onClick={(e) => handleMove(addon, "up", e)}
+                                                                className="p-1 text-gray-400 hover:text-[#483383] hover:bg-violet-50 rounded-lg transition-all disabled:opacity-30"
+                                                                title={t.moveUp || "Move Up"}
+                                                                disabled={movingId !== null || options.findIndex(o => o.id === addon.id) === 0}
+                                                            >
+                                                                <ChevronUp size={14} />
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => handleMove(addon, "down", e)}
+                                                                className="p-1 text-gray-400 hover:text-[#483383] hover:bg-violet-50 rounded-lg transition-all disabled:opacity-30"
+                                                                title={t.moveDown || "Move Down"}
+                                                                disabled={movingId !== null || options.findIndex(o => o.id === addon.id) === options.length - 1}
+                                                            >
+                                                                <ChevronDown size={14} />
+                                                            </button>
+                                                        </div>
                                                         <button
                                                             onClick={(e) => handleDuplicate(addon, e)}
                                                             className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-xl transition-all"

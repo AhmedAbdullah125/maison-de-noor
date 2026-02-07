@@ -61,6 +61,9 @@ function mapApiOptionToAddon(opt: ApiOption): GlobalAddon {
 export function useOptionsOptions(lang: Locale) {
     const [isLoading, setIsLoading] = useState(true);
     const [apiRows, setApiRows] = useState<ApiOption[]>([]);
+    const [trigger, setTrigger] = useState(0);
+
+    const refetch = () => setTrigger((v) => v + 1);
 
     useEffect(() => {
         let mounted = true;
@@ -81,7 +84,7 @@ export function useOptionsOptions(lang: Locale) {
         return () => {
             mounted = false;
         };
-    }, [lang]);
+    }, [lang, trigger]);
 
     const rows: GlobalAddon[] = useMemo(() => {
         return (apiRows || [])
@@ -90,5 +93,5 @@ export function useOptionsOptions(lang: Locale) {
             .map(mapApiOptionToAddon);
     }, [apiRows]);
 
-    return { isLoading, rows };
+    return { isLoading, rows, refetch };
 }

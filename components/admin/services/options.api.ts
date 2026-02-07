@@ -80,4 +80,26 @@ export async function getOptions(params: { lang: Locale; page: number; per_page:
         toastApi(false, msg);
         return { ok: false as const, error: msg };
     }
+
 }
+
+export async function moveOption(params: { lang: Locale; id: number | string; new_index: number }) {
+    const fd = new FormData();
+    fd.append("new_index", String(params.new_index));
+
+    try {
+        const res = await http.patch(`${DASHBOARD_API_BASE_URL}/service-options/${params.id}/move`, fd, {
+            headers: { lang: params.lang, Accept: "application/json" },
+        });
+
+        toastApi(!!res?.data?.status, res?.data?.message);
+
+        if (!res?.data?.status) return { ok: false as const, error: res?.data?.message || "Failed" };
+        return { ok: true as const, data: res.data };
+    } catch (e: any) {
+        const msg = e?.response?.data?.message || e?.message || "move option error";
+        toastApi(false, msg);
+        return { ok: false as const, error: msg };
+    }
+}
+

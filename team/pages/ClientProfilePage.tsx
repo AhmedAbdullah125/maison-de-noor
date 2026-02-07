@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowRight, Phone, MessageSquare, Calendar, Ticket, CheckCircle2, Loader2, AlertCircle, ChevronDown, Image as ImageIcon, Upload, X, Plus } from 'lucide-react';
+import { ArrowRight, Phone, MessageSquare, Calendar, Ticket, CheckCircle2, Loader2, AlertCircle, ChevronDown, Image as ImageIcon, Upload, X, Plus, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { DASHBOARD_API_BASE_URL } from '@/lib/apiConfig';
 import { http } from '@/components/services/http';
@@ -59,6 +59,20 @@ interface Subscription {
   service: string;
 }
 
+interface RequestOption {
+  id: number;
+  price: string;
+  option: {
+    id: number | null;
+    name: string | null;
+  };
+  option_value: {
+    id: number;
+    value: string | null;
+    price: string;
+  } | null;
+}
+
 interface Request {
   id: number;
   request_number: string;
@@ -70,6 +84,10 @@ interface Request {
     progress: number;
   };
   pricing: {
+    base_price: string;
+    options_price: string;
+    total_price: string;
+    discount_amount: string;
     final_price: string;
   };
   validity: {
@@ -80,7 +98,12 @@ interface Request {
   service: Service;
   subscription: Subscription;
   sessions: Session[];
+  options: RequestOption[];
   created_at: string;
+  notes: {
+    customer_notes: string | null;
+    admin_notes: string | null;
+  };
 }
 
 interface UserImage {
@@ -149,6 +172,8 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
     gallery: false
   });
 
+  const [selectedSession, setSelectedSession] = useState<{ session: Session, request: Request } | null>(null);
+
   // Upload Modal State
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -167,6 +192,16 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
     dragDrop: lang === 'ar' ? 'اضغط لاختيار الصور' : 'Click to select images',
     maxSize: lang === 'ar' ? 'الحد الأقصى 5 ميجابايت' : 'Max size 5MB',
     remove: lang === 'ar' ? 'حذف' : 'Remove',
+    sessionDetails: lang === 'ar' ? 'تفاصيل الجلسة' : 'Session Details',
+    options: lang === 'ar' ? 'الإضافات' : 'Options',
+    notes: lang === 'ar' ? 'ملاحظات' : 'Notes',
+    basePrice: lang === 'ar' ? 'السعر الأساسي' : 'Base Price',
+    optionsPrice: lang === 'ar' ? 'سعر الإضافات' : 'Options Price',
+    totalPrice: lang === 'ar' ? 'الإجمالي' : 'Total Price',
+    finalPrice: lang === 'ar' ? 'السعر النهائي' : 'Final Price',
+    discount: lang === 'ar' ? 'الخصم' : 'Discount',
+    customerNotes: lang === 'ar' ? 'ملاحظات العميلة' : 'Customer Notes',
+    adminNotes: lang === 'ar' ? 'ملاحظات الإدارة' : 'Admin Notes',
   };
 
   const t = { ...translations[lang], ...additionalTranslations };
@@ -341,7 +376,7 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
   const upcomingRequest = upcomingSession
     ? userData.requests.find(req => req.sessions?.some(s => s.id === upcomingSession.id))
     : null;
-  console.log(userData);
+  console.log(upcomingRequest);
 
   return (
     <div className="min-h-full bg-app-bg pt-6 pb-24">
@@ -388,7 +423,10 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
       {/* Quick Action: Confirm Attendance */}
       {upcomingSession && upcomingRequest && (
         <div className="mx-6 mb-8">
-          <div className="bg-[#483383] text-white p-6 rounded-[24px] shadow-xl shadow-[#483383]/20 relative overflow-hidden">
+          <div
+            onClick={() => setSelectedSession({ session: upcomingSession, request: upcomingRequest })}
+            className="bg-[#483383] text-white p-6 rounded-[24px] shadow-xl shadow-[#483383]/20 relative overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]"
+          >
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -743,6 +781,107 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
                 {uploading && <Loader2 size={18} className="animate-spin" />}
                 {uploading ? t.uploading : t.uploadImages}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Session Details Modal */}
+      {selectedSession && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <h3 className="font-semibold text-lg">{t.sessionDetails}</h3>
+              <button
+                onClick={() => setSelectedSession(null)}
+                className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Header Info */}
+              <div className="bg-gray-50 p-4 rounded-2xl space-y-3">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-semibold text-app-text">{getServiceName(selectedSession.request.service, lang)}</h4>
+                  <span className="bg-[#483383] text-white text-xs px-2 py-1 rounded-lg">
+                    {selectedSession.session.session_number} / {selectedSession.request.sessions_info.session_count}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+                  <span className="flex items-center gap-1"><Calendar size={14} /> {formatDate(selectedSession.session.schedule.session_date || "")}</span>
+                  <span className="flex items-center gap-1"><Clock size={14} /> {formatTime(selectedSession.session.schedule.start_time || "")}</span>
+                </div>
+              </div>
+
+              {/* Options */}
+              {selectedSession.request.options && selectedSession.request.options.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-app-text mb-3 flex items-center gap-2">
+                    <div className="w-1 h-4 bg-app-gold rounded-full"></div>
+                    {t.options}
+                  </h4>
+                  <div className="space-y-2">
+                    {selectedSession.request.options.map(opt => (
+                      <div key={opt.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl">
+                        <span className="text-gray-700 text-sm">
+                          {opt.option.name || (opt.option_value?.value) || `Option #${opt.id}`}
+                        </span>
+                        <span className="font-semibold text-app-text text-sm">
+                          {parseFloat(opt.price).toFixed(3)} {t.currency}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Pricing Breakdown */}
+              <div className="bg-gray-50 p-4 rounded-2xl space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{t.basePrice}</span>
+                  <span className="font-medium">{parseFloat(selectedSession.request.pricing.base_price || "0").toFixed(3)} {t.currency}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{t.optionsPrice}</span>
+                  <span className="font-medium">{parseFloat(selectedSession.request.pricing.options_price || "0").toFixed(3)} {t.currency}</span>
+                </div>
+                {parseFloat(selectedSession.request.pricing.discount_amount || "0") !== 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>{t.discount}</span>
+                    <span>{parseFloat(selectedSession.request.pricing.discount_amount).toFixed(3)} {t.currency}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold text-lg">
+                  <span>{t.finalPrice}</span>
+                  <span>{parseFloat(selectedSession.request.pricing.final_price).toFixed(3)} {t.currency}</span>
+                </div>
+              </div>
+
+              {/* Notes */}
+              {(selectedSession.request.notes.customer_notes || selectedSession.request.notes.admin_notes) && (
+                <div>
+                  <h4 className="font-semibold text-app-text mb-3 flex items-center gap-2">
+                    <div className="w-1 h-4 bg-app-gold rounded-full"></div>
+                    {t.notes}
+                  </h4>
+                  <div className="space-y-3">
+                    {selectedSession.request.notes.customer_notes && (
+                      <div className="bg-orange-50 p-3 rounded-xl border border-orange-100">
+                        <p className="text-xs text-orange-600 font-semibold mb-1">{t.customerNotes}</p>
+                        <p className="text-sm text-gray-700">{selectedSession.request.notes.customer_notes}</p>
+                      </div>
+                    )}
+                    {selectedSession.request.notes.admin_notes && (
+                      <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                        <p className="text-xs text-blue-600 font-semibold mb-1">{t.adminNotes}</p>
+                        <p className="text-sm text-gray-700">{selectedSession.request.notes.admin_notes}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         </div>

@@ -533,14 +533,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
           );
           return;
         }
-        if (Number(sub.sessionsCount) < 2) {
-          toast(
-            lang === "ar"
-              ? `عدد الجلسات يجب أن يكون 2 على الأقل للاشتراك: ${sub.title}`
-              : `Sessions count must be at least 2 for subscription: ${sub.title}`
-          );
-          return;
-        }
+
         if (Number(sub.validityDays) < 1) {
           toast(
             lang === "ar"

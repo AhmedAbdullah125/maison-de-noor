@@ -173,6 +173,7 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
   });
 
   const [selectedSession, setSelectedSession] = useState<{ session: Session, request: Request } | null>(null);
+  console.log(selectedSession?.request.options);
 
   // Upload Modal State
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -825,7 +826,7 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
                     {selectedSession.request.options.map(opt => (
                       <div key={opt.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl">
                         <span className="text-gray-700 text-sm">
-                          {opt.option.name || (opt.option_value?.value) || `Option #${opt.id}`}
+                          {(opt.option_value?.value) || opt.option.name || `Option #${opt.id}`}
                         </span>
                         <span className="font-semibold text-app-text text-sm">
                           {parseFloat(opt.price).toFixed(3)} {t.currency}

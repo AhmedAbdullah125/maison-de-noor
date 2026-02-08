@@ -58,15 +58,17 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
     } | null>(null);
 
     const [paymentType, setPaymentType] = useState<"cash" | "knet" | "wallet">("cash");
-    const [startDate, setStartDate] = useState<string>(getTomorrowDate());
-    const [startTime, setStartTime] = useState<string>(getNowTime());
+    const today = getTomorrowDate();
+    const now = getNowTime();
+    const [startDate, setStartDate] = useState<string>(today);
+    const [startTime, setStartTime] = useState<string>(now);
 
     useEffect(() => {
         setSelectedAddonIds(new Set());
         setBookingModal(null);
         setPaymentType("cash");
-        setStartDate(getTomorrowDate());
-        setStartTime(getNowTime());
+        setStartDate("");
+        setStartTime("");
     }, [product?.id]);
 
     const resolvedAddonGroups: ServiceAddonGroup[] = useMemo(() => {
@@ -180,8 +182,8 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
         finalTotal: number;
     }) => {
         if (!validateRequiredGroups()) return;
-        setStartDate(getTomorrowDate());
-        setStartTime(getNowTime());
+        setStartDate("");
+        setStartTime("");
         setPaymentType("cash");
         setBookingModal(data);
     };
@@ -287,9 +289,8 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="bg-app-bg/50 rounded-xl border border-app-card/30 p-3 text-right">
                                     <label className="block text-[11px] font-semibold text-app-text mb-2">التاريخ</label>
-                                    <input
-                                        type="date"
-                                        className="w-full bg-white rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold"
+                                    <input type="date" required
+                                        className="w-full bg-white rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold invalid:border-red-500"
                                         value={startDate}
                                         min={getTomorrowDate()}
                                         onChange={(e) => setStartDate(e.target.value)}
@@ -298,10 +299,9 @@ export default function ServiceDetails({ product, onBack, onCreated }: Props) {
 
                                 <div className="bg-app-bg/50 rounded-xl border border-app-card/30 p-3 text-right">
                                     <label className="block text-[11px] font-semibold text-app-text mb-2">الوقت</label>
-                                    <input
-                                        type="time"
-                                        className="w-full bg-white rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold"
-                                        value={startTime.slice(0, 5)}
+                                    <input type="time" required
+                                        className="w-full bg-white rounded-xl p-3 text-sm outline-none border border-app-card/30 focus:border-app-gold invalid:border-red-500"
+                                        value={startTime ? startTime.slice(0, 5) : ""}
                                         onChange={(e) => setStartTime(e.target.value)}
                                     />
                                 </div>

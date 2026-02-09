@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowRight, Phone, MessageSquare, Calendar, Ticket, CheckCircle2, Loader2, AlertCircle, ChevronDown, Image as ImageIcon, Upload, X, Plus, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import imageCompression from 'browser-image-compression';
 import { DASHBOARD_API_BASE_URL } from '@/lib/apiConfig';
 import { http } from '@/components/services/http';
 import { changeBookingStatus } from '../../components/admin/bookings/bookings.api';
@@ -308,9 +309,33 @@ const ClientProfilePage: React.FC<ClientProfilePageProps> = ({ lang = 'ar' }) =>
       const formData = new FormData();
       formData.append('user_id', clientId);
 
-      selectedFiles.forEach((file, index) => {
-        formData.append(`images[${index}]`, file);
-      });
+      // Compression options
+      const options = {
+        maxSizeMB: 1, // Maximum file size in MB
+        maxWidthOrHeight: 800, // Resize to max 800px (width or height)
+        useWebWorker: true,
+        fileType: 'image/webp', // Convert to WebP format
+        initialQuality: 0.8, // 80% quality
+      };
+
+      // Compress each image before uploading
+      for (let index = 0; index < selectedFiles.length; index++) {
+        const file = selectedFiles[index];
+        try {
+          // Compress the image
+          const compressedFile = await imageCompression(file, options);
+
+          // Create a new File object with .webp extension
+          const fileName = file.name.replace(/\.[^/.]+$/, '.webp');
+          const webpFile = new File([compressedFile], fileName, { type: 'image/webp' });
+
+          formData.append(`images[${index}]`, webpFile);
+        } catch (compressionError) {
+          console.error('Error compressing image:', compressionError);
+          // If compression fails, use the original file
+          formData.append(`images[${index}]`, file);
+        }
+      }
 
       await http.post(`${DASHBOARD_API_BASE_URL}/user-images`, formData, {
         headers: {

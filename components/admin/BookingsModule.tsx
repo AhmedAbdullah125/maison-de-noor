@@ -226,21 +226,26 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                       <span className="text-xs font-semibold text-gray-900">—</span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        {b?.request?.payment?.payment_status === "paid" ? (
-                          <span className="inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
-                            {t.paid || 'Paid'}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
-                            {t.unpaid || 'Unpaid'}
-                          </span>
-                        )}
-                        {b?.request?.payment?.payment_type && (
-                          <span className="text-[10px] text-gray-500 uppercase tracking-wider px-1">
-                            {b.request.payment.payment_type}
-                          </span>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <div className="flex flex-col gap-1">
+                          {b?.request?.payment?.payment_status === "paid" ? (
+                            <span className="inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                              {t.paid || 'Paid'}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                              {t.unpaid || 'Unpaid'}
+                            </span>
+                          )}
+                          {b?.request?.payment?.payment_type && (
+                            <span className="text-[10px] text-gray-500 uppercase tracking-wider px-1">
+                              {b.request.payment.payment_type}
+                            </span>
+                          )}
+                        </div>
+                        <span>
+                          {b?.request?.pricing?.final_price} {t.currency}
+                        </span>
                       </div>
                     </td>
                     <td

@@ -11,6 +11,7 @@ import {
   toastApi,
   ApiBooking
 } from "./bookings/bookings.api";
+
 import { useBookings } from "./bookings/useBookings";
 
 interface BookingsModuleProps {
@@ -34,6 +35,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
   const navigate = useNavigate();
   const t = translations[lang];
   const perPage = 10;
+
 
   const { isLoading, apiRows, meta, canPrev, canNext, setPage, refetch } =
     useBookings(lang, type, perPage);
@@ -140,6 +142,12 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
                   {t.staffAssigned}
                 </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                  {t.paymentStatus || 'Payment Status'}
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                  {t.paymentStatus}
+                </th>
                 <th
                   className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === "ar" ? "text-start" : "text-end"
                     }`}
@@ -176,6 +184,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                     </td>
 
                     <td className="px-6 py-4">
+
                       {/* Show user avatar if available, alongside service */}
                       <div className="flex items-center gap-3">
                         {b.user && (
@@ -216,11 +225,29 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                     <td className="px-6 py-4">
                       <span className="text-xs font-semibold text-gray-900">—</span>
                     </td>
-
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        {b?.request?.payment?.payment_status === "paid" ? (
+                          <span className="inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                            {t.paid || 'Paid'}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center w-fit px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                            {t.unpaid || 'Unpaid'}
+                          </span>
+                        )}
+                        {b?.request?.payment?.payment_type && (
+                          <span className="text-[10px] text-gray-500 uppercase tracking-wider px-1">
+                            {b.request.payment.payment_type}
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td
                       className={`px-6 py-4 ${lang === "ar" ? "text-start" : "text-end"
                         }`}
                     >
+
                       <div
                         className={`flex items-center gap-2 ${lang === "ar" ? "justify-start" : "justify-end"
                           }`}

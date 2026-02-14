@@ -162,6 +162,7 @@ export interface ManagerPermissions {
   completedBookings: boolean;
   subscriptions: boolean;
   staffHR: boolean;
+  payments: boolean;
   accounting: boolean;
   reports: boolean;
   notifications: boolean;

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid } from 'lucide-react';
+import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid, CreditCard } from 'lucide-react';
 import { translations, getLang, setLang, Locale } from '../../services/i18n';
 import { Manager, ManagerPermissions } from '../../types';
 // Module Components
@@ -12,6 +12,7 @@ import ServiceFormPage from './ServiceFormPage';
 import ServiceAddonsModule from './ServiceAddonsModule'; // Added
 import UsersModule from './UsersModule';
 import BookingsModule from './BookingsModule';
+import PaymentMethods from './PaymentMethods';
 import StaffModule from './StaffModule';
 import AccountingModule from './AccountingModule';
 import ActivityLogModule from './ActivityLogModule';
@@ -67,6 +68,7 @@ const AdminDashboard: React.FC = () => {
       { id: 'activeSubscriptions', label: t.activeSubscriptions, icon: <Ticket size={20} />, path: '/admin/subscriptions/active', permissionKey: 'subscriptions' },
       { id: 'expiredSubscriptions', label: t.expiredSubscriptions, icon: <Clock size={20} />, path: '/admin/subscriptions/expired', permissionKey: 'subscriptions' },
       { id: 'staffHR', label: t.staffHR, icon: <UserRound size={20} />, path: '/admin/staff' },
+      { id: 'paymentsMethods', label: t.paymentsMethods, icon: <CreditCard size={20} />, path: '/admin/payments-methods', permissionKey: 'payments' },
       { id: 'accounting', label: t.accounting, icon: <Wallet size={20} />, path: '/admin/accounting' },
       { id: 'reports', label: t.reports, icon: <BarChart3 size={20} />, path: '/admin/reports' },
       { id: 'managers', label: t.managers, icon: <ShieldCheck size={20} />, path: '/admin/managers' },
@@ -176,6 +178,7 @@ const AdminDashboard: React.FC = () => {
             <Route path="subscriptions/expired" element={hasPermission('subscriptions') ? <ExpiredSubscriptionsModule lang={lang} /> : <Navigate to="/admin" />} />
 
             <Route path="staff" element={hasPermission('staffHR') ? <StaffModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="payments-methods" element={hasPermission('payments') ? <PaymentMethods lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="accounting" element={hasPermission('accounting') ? <AccountingModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="activity" element={hasPermission('activityLog') ? <ActivityLogModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="notifications" element={hasPermission('notifications') ? <NotificationsModule lang={lang} /> : <Navigate to="/admin" />} />

@@ -98,9 +98,9 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     const files = e.target.files;
     if (!files) return;
 
-    const items: GalleryItem[] = Array.from(files).map((f) => ({
-      file: f,
+    const items: GalleryItem[] = Array.from(files as FileList).map((f: File) => ({
       preview: URL.createObjectURL(f),
+      file: f,
       remote: false,
     }));
 

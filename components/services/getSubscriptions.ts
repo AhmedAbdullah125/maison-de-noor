@@ -1,6 +1,21 @@
 import { toast } from "sonner";
 import { http } from "./http";
 
+export type SubscriptionUser = {
+    id: number;
+    name: string;
+    email: string | null;
+    photo: string;
+    phone: string;
+    lang: string;
+    is_active: number;
+    is_verify: number;
+    wallet: string;
+    deleted_at: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
 export type SubscriptionItem = {
     id: number;
     request_number: string;
@@ -19,6 +34,7 @@ export type SubscriptionItem = {
     base_price: string;
     options_price: string;
     final_price: string;
+    user: SubscriptionUser;
 };
 
 type PaginationLinks = {

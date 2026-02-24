@@ -67,6 +67,7 @@ const ActiveSubscriptionsModule: React.FC<ActiveSubscriptionsModuleProps> = ({ l
                 <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.orderNumber}</th>
                 <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.service}</th>
                 <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.subscription}</th>
+                <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.users}</th>
                 <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.sessions}</th>
                 <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.date}</th>
                 <th className="text-start py-4 px-4 text-sm font-semibold text-gray-700">{t.finalPrice}</th>
@@ -84,6 +85,21 @@ const ActiveSubscriptionsModule: React.FC<ActiveSubscriptionsModuleProps> = ({ l
                       {subscription.subscription_description && (
                         <div className="text-xs text-gray-500 mt-1">{subscription.subscription_description}</div>
                       )}
+                    </div>
+                  </td>
+                  {/* user */}
+                  <td className="py-4 px-4 text-sm text-gray-900">
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={subscription.user?.photo}
+                        alt={subscription.user?.name}
+                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                        onError={(e) => { (e.target as HTMLImageElement).src = 'https://maison-de-noor.com/assets/img/unknown.svg'; }}
+                      />
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-medium truncate">{subscription.user?.name || '-'}</span>
+                        <span className="text-xs text-gray-500">{subscription.user?.phone || '-'}</span>
+                      </div>
                     </div>
                   </td>
                   <td className="py-4 px-4 text-sm text-gray-900">

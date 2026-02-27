@@ -22,6 +22,8 @@ import ReportsModule from './ReportsModule';
 import ActiveSubscriptionsModule from './ActiveSubscriptionsModule';
 import ExpiredSubscriptionsModule from './ExpiredSubscriptionsModule';
 import AdminClientProfilePage from './users/AdminClientProfilePage';
+import CouponsModule from './CouponsModule';
+
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -63,6 +65,7 @@ const AdminDashboard: React.FC = () => {
       { id: 'services', label: t.services, icon: <Scissors size={20} />, path: '/admin/services' },
       { id: 'serviceAddons', label: t.serviceAddons, icon: <LayoutGrid size={20} />, path: '/admin/service-addons' }, // Added
       { id: 'users', label: t.users, icon: <Users size={20} />, path: '/admin/users' },
+      //coupons
       { id: 'upcomingBookings', label: t.upcomingBookings, icon: <CalendarClock size={20} />, path: '/admin/bookings/upcoming' },
       { id: 'completedBookings', label: t.completedBookings, icon: <CalendarCheck size={20} />, path: '/admin/bookings/completed' },
       { id: 'activeSubscriptions', label: t.activeSubscriptions, icon: <Ticket size={20} />, path: '/admin/subscriptions/active', permissionKey: 'subscriptions' },
@@ -73,7 +76,9 @@ const AdminDashboard: React.FC = () => {
       { id: 'reports', label: t.reports, icon: <BarChart3 size={20} />, path: '/admin/reports' },
       { id: 'managers', label: t.managers, icon: <ShieldCheck size={20} />, path: '/admin/managers' },
       { id: 'notifications', label: t.notifications, icon: <Bell size={20} />, path: '/admin/notifications' },
+      { id: 'coupons', label: t.coupons, icon: <Ticket size={20} />, path: '/admin/coupons' },
       { id: 'activityLog', label: t.activityLog, icon: <History size={20} />, path: '/admin/activity' },
+
     ];
 
     // Filter by permissions
@@ -183,7 +188,9 @@ const AdminDashboard: React.FC = () => {
             <Route path="activity" element={hasPermission('activityLog') ? <ActivityLogModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="notifications" element={hasPermission('notifications') ? <NotificationsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="managers" element={hasPermission('managers') ? <ManagersModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="coupons" element={hasPermission('coupons') ? <CouponsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="reports" element={hasPermission('reports') ? <ReportsModule lang={lang} /> : <Navigate to="/admin" />} />
+
             <Route path="*" element={<div className="p-20 text-center text-gray-400">Feature under development</div>} />
           </Routes>
         </div>

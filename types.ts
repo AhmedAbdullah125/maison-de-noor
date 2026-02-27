@@ -168,6 +168,7 @@ export interface ManagerPermissions {
   notifications: boolean;
   activityLog: boolean;
   managers: boolean;
+  coupons: boolean;
 }
 
 export interface Manager {

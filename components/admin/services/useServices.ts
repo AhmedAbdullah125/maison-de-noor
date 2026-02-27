@@ -8,7 +8,8 @@ export type UiServiceRow = {
     description: string;
     image: string;
     price: string;
-    duration: string; // API مش مرجّع duration → هنحط placeholder
+    duration: string;
+    categoryId: number;
 };
 
 export function useServices(lang: Locale, perPage: number) {
@@ -47,7 +48,8 @@ export function useServices(lang: Locale, perPage: number) {
                 description: tr.description || "",
                 image: s.main_image || "",
                 price: s.discounted_price ?? s.price,
-                duration: "-", // ✅ مش موجود في response
+                duration: "-",
+                categoryId: s.category_id,
             };
         });
     }, [rows, lang]);

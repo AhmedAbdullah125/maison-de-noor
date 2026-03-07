@@ -37,8 +37,10 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
   const perPage = 10;
 
 
+  const [paymentFilter, setPaymentFilter] = useState<"paid" | "unpaid" | undefined>(undefined);
+
   const { isLoading, apiRows, meta, canPrev, canNext, setPage, refetch } =
-    useBookings(lang, type, perPage);
+    useBookings(lang, type, perPage, paymentFilter);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [changingId, setChangingId] = useState<number | null>(null);
@@ -106,7 +108,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="relative w-full md:w-96">
+        <div className="relative w-full md:w-96 flex items-center gap-2">
           <input
             type="text"
             className={`w-full ${lang === "ar" ? "pr-11 pl-4" : "pl-11 pr-4"
@@ -120,6 +122,28 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
               } top-1/2 -translate-y-1/2 text-gray-400`}
             size={18}
           />
+          {/* Payment Status Filter */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPaymentFilter(undefined)}
+              className={`px-4 py-2.5 rounded-2xl text-sm font-semibold border transition-colors ${paymentFilter === undefined
+                ? "bg-gray-900 text-white border-gray-900"
+                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                }`}
+            >
+              {t.all || "All"}
+            </button>
+            <button
+              onClick={() => setPaymentFilter("paid")}
+              className={`px-4 py-2.5 rounded-2xl text-sm font-semibold border transition-colors ${paymentFilter === "paid"
+                ? "bg-green-600 text-white border-green-600"
+                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                }`}
+            >
+              {t.paid || "Paid"}
+            </button>
+          </div>
+
         </div>
       </div>
 

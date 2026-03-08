@@ -296,7 +296,23 @@ export const translations = {
     questionnaireResponses: 'Questionnaire Responses',
     question: 'Question',
     answer: 'Answer',
-    clientDidNotAnswer: 'Client did not answer any questions'
+    clientDidNotAnswer: 'Client did not answer any questions',
+    // Create Order
+    createOrder: 'Create Order',
+    selectService: 'Select Service',
+    selectSubscription: 'Select Package',
+    selectOptions: 'Extra Options',
+    startTime: 'Start Time',
+    paymentType: 'Payment Type',
+    submitting: 'Submitting...',
+    orderCreated: 'Order created successfully!',
+    customerName: 'Customer Name',
+    customerPhone: 'Phone Number',
+    noSubscriptions: 'No packages (single session)',
+    noOptions: 'No add-ons available',
+    submitOrder: 'Submit Order',
+    backToServices: 'Back to Services',
+    loadingServices: 'Loading services...'
   },
   ar: {
     dashboard: 'لوحة التحكم',
@@ -587,7 +603,23 @@ export const translations = {
     questionnaireResponses: 'إجابات الاستبيان',
     question: 'السؤال',
     answer: 'الإجابة',
-    clientDidNotAnswer: 'لم تقم العميلة بالإجابة على أي أسئلة'
+    clientDidNotAnswer: 'لم تقم العميلة بالإجابة على أي أسئلة',
+    // Create Order
+    createOrder: 'إنشاء طلب',
+    selectService: 'اختر الخدمة',
+    selectSubscription: 'اختر الباقة',
+    selectOptions: 'الخيارات الإضافية',
+    startTime: 'وقت البدء',
+    paymentType: 'طريقة الدفع',
+    submitting: 'جاري الإرسال...',
+    orderCreated: 'تم إنشاء الطلب بنجاح!',
+    customerName: 'اسم العميلة',
+    customerPhone: 'رقم الهاتف',
+    noSubscriptions: 'بدون باقة (جلسة واحدة)',
+    noOptions: 'لا توجد إضافات متاحة',
+    submitOrder: 'إرسال الطلب',
+    backToServices: 'العودة للخدمات',
+    loadingServices: 'جاري تحميل الخدمات...'
   }
 };
 

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid, CreditCard, PlusCircle } from 'lucide-react';
 import { translations, getLang, setLang, Locale } from '../../services/i18n';
 import { Manager, ManagerPermissions } from '../../types';
 // Module Components
@@ -23,6 +23,7 @@ import ActiveSubscriptionsModule from './ActiveSubscriptionsModule';
 import ExpiredSubscriptionsModule from './ExpiredSubscriptionsModule';
 import AdminClientProfilePage from './users/AdminClientProfilePage';
 import CouponsModule from './CouponsModule';
+import CreateOrderModule from './CreateOrderModule';
 
 
 const AdminDashboard: React.FC = () => {
@@ -78,6 +79,7 @@ const AdminDashboard: React.FC = () => {
       { id: 'notifications', label: t.notifications, icon: <Bell size={20} />, path: '/admin/notifications' },
       { id: 'coupons', label: t.coupons, icon: <Ticket size={20} />, path: '/admin/coupons' },
       { id: 'activityLog', label: t.activityLog, icon: <History size={20} />, path: '/admin/activity' },
+      { id: 'createOrder', label: t.createOrder, icon: <PlusCircle size={20} />, path: '/admin/create-order' },
 
     ];
 
@@ -190,6 +192,7 @@ const AdminDashboard: React.FC = () => {
             <Route path="managers" element={hasPermission('managers') ? <ManagersModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="coupons" element={hasPermission('coupons') ? <CouponsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="reports" element={hasPermission('reports') ? <ReportsModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="create-order" element={<CreateOrderModule lang={lang} />} />
 
             <Route path="*" element={<div className="p-20 text-center text-gray-400">Feature under development</div>} />
           </Routes>

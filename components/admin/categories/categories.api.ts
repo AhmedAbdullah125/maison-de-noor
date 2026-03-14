@@ -70,7 +70,14 @@ export async function getCategories(params: {
     per_page: number;
 }) {
     try {
+        const token = localStorage.getItem("token");
+        const headers = {
+            lang: params.lang,
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`
+        }
         const res = await http.get<ApiCategoriesResponse>(
+
             `${DASHBOARD_API_BASE_URL}/categories`,
             {
                 params: {
@@ -78,7 +85,7 @@ export async function getCategories(params: {
                     per_page: params.per_page,
 
                 },
-                headers: { lang: params.lang },
+                headers: headers,
             }
         );
 

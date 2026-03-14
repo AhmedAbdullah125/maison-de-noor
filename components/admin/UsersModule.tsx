@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { Search, UserCheck } from "lucide-react";
 import { translations, Locale } from "../../services/i18n";
 import { useUsers } from "./users/useUsers";
+import UsersPagination from "./users/UsersPagination";
 
 interface UsersModuleProps {
   lang: Locale;
@@ -23,7 +24,7 @@ function formatDate(createdAt: string, lang: Locale) {
 
 export default function UsersModule({ lang }: UsersModuleProps) {
   const t = translations[lang];
-  const { isLoading, apiRows } = useUsers(lang);
+  const { isLoading, apiRows, meta, page, setPage, canPrev, canNext } = useUsers(lang, 10);
   const [searchTerm, setSearchTerm] = useState("");
 
   const filtered = useMemo(() => {
@@ -150,6 +151,21 @@ export default function UsersModule({ lang }: UsersModuleProps) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {!isLoading && meta && (
+        <UsersPagination
+          lang={lang}
+          meta={{
+            current_page: meta.current_page,
+            last_page: meta.last_page,
+            total: meta.total,
+          }}
+          canPrev={canPrev}
+          canNext={canNext}
+          onPrev={() => setPage((p) => Math.max(1, p - 1))}
+          onNext={() => setPage((p) => p + 1)}
+        />
       )}
     </div>
   );

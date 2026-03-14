@@ -83,7 +83,7 @@ async function fetchPublicServices(lang: Locale): Promise<Service[]> {
 async function createOrder(payload: object, lang: Locale) {
     try {
         const res = await http.post(
-            `${DASHBOARD_API_BASE_URL}/v1/requests/create`,
+            `${DASHBOARD_API_BASE_URL}/admin/requests/store`,
             payload,
             { headers: { "Accept-Language": lang, Accept: "application/json" } }
         );

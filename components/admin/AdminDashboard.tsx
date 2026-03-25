@@ -24,6 +24,7 @@ import ExpiredSubscriptionsModule from './ExpiredSubscriptionsModule';
 import AdminClientProfilePage from './users/AdminClientProfilePage';
 import CouponsModule from './CouponsModule';
 import CreateOrderModule from './CreateOrderModule';
+import BannersModule from './BannersModule';
 
 
 const AdminDashboard: React.FC = () => {
@@ -66,7 +67,8 @@ const AdminDashboard: React.FC = () => {
       { id: 'services', label: t.services, icon: <Scissors size={20} />, path: '/admin/services' },
       { id: 'serviceAddons', label: t.serviceAddons, icon: <LayoutGrid size={20} />, path: '/admin/service-addons' }, // Added
       { id: 'users', label: t.users, icon: <Users size={20} />, path: '/admin/users' },
-      //coupons
+      //banners
+      { id: 'banners', label: t.banners, icon: <LayoutGrid size={20} />, path: '/admin/banners' },
       { id: 'upcomingBookings', label: t.upcomingBookings, icon: <CalendarClock size={20} />, path: '/admin/bookings/upcoming' },
       { id: 'completedBookings', label: t.completedBookings, icon: <CalendarCheck size={20} />, path: '/admin/bookings/completed' },
       { id: 'activeSubscriptions', label: t.activeSubscriptions, icon: <Ticket size={20} />, path: '/admin/subscriptions/active', permissionKey: 'subscriptions' },
@@ -176,6 +178,7 @@ const AdminDashboard: React.FC = () => {
             <Route path="service-addons" element={hasPermission('serviceAddons') ? <ServiceAddonsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="service-addons" element={hasPermission('serviceAddons') ? <ServiceAddonsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="users" element={hasPermission('users') ? <UsersModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="banners" element={<BannersModule lang={lang} />} />
             <Route path="users/:userId" element={hasPermission('users') ? <AdminClientProfilePage lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="bookings/upcoming" element={hasPermission('upcomingBookings') ? <BookingsModule type="upcoming" lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="bookings/completed" element={hasPermission('completedBookings') ? <BookingsModule type="completed" lang={lang} /> : <Navigate to="/admin" />} />

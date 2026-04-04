@@ -78,6 +78,7 @@ const AdminDashboard: React.FC = () => {
       { id: 'categories', label: t.categories, icon: <Tags size={20} />, path: '/admin/categories', permission: 'view categories' },
       { id: 'services', label: t.services, icon: <Scissors size={20} />, path: '/admin/services', permission: 'view services' },
       { id: 'serviceAddons', label: t.serviceAddons, icon: <LayoutGrid size={20} />, path: '/admin/service-addons', permission: 'view options' },
+      { id: 'createOrder', label: t.createOrder, icon: <PlusCircle size={20} />, path: '/admin/create-order', permission: 'manage bookings' },
       { id: 'users', label: t.users, icon: <Users size={20} />, path: '/admin/users', permission: 'view users' },
       { id: 'upcomingBookings', label: t.upcomingBookings, icon: <CalendarClock size={20} />, path: '/admin/bookings/upcoming', permission: 'view bookings' },
       { id: 'completedBookings', label: t.completedBookings, icon: <CalendarCheck size={20} />, path: '/admin/bookings/completed', permission: 'view bookings' },
@@ -92,7 +93,6 @@ const AdminDashboard: React.FC = () => {
       { id: 'notifications', label: t.notifications, icon: <Bell size={20} />, path: '/admin/notifications', permission: 'manage settings' },
       { id: 'coupons', label: t.coupons, icon: <Ticket size={20} />, path: '/admin/coupons', permission: 'manage system' },
       { id: 'activityLog', label: t.activityLog, icon: <History size={20} />, path: '/admin/activity', permission: 'view logs' },
-      { id: 'createOrder', label: t.createOrder, icon: <PlusCircle size={20} />, path: '/admin/create-order', permission: 'manage bookings' },
     ];
 
     // Show item only if the admin has the required permission

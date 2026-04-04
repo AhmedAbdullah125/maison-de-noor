@@ -8,7 +8,20 @@ import { toast } from "sonner";
 import { http } from "../services/http";
 import { getAccessToken } from "../auth/authStorage";
 
+// ─── Time slots ───────────────────────────────────────────────────────────────
 
+const TIME_SLOTS: string[] = [];
+// 12 PM → 4 PM
+for (let h = 12; h <= 16; h++) {
+    TIME_SLOTS.push(`${String(h).padStart(2, "0")}:00`);
+    if (h < 16) TIME_SLOTS.push(`${String(h).padStart(2, "0")}:30`);
+}
+// 9 PM → 12 AM
+for (let h = 21; h <= 23; h++) {
+    TIME_SLOTS.push(`${String(h).padStart(2, "0")}:00`);
+    TIME_SLOTS.push(`${String(h).padStart(2, "0")}:30`);
+}
+TIME_SLOTS.push("00:00");
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface OptionValue {
@@ -87,7 +100,11 @@ async function createOrder(payload: object, lang: Locale) {
             payload,
             { headers: { "Accept-Language": lang, Accept: "application/json" } }
         );
-        return { ok: true as const, data: res.data };
+        // API may return HTTP 200 but with status:false for business-logic errors
+        if (!res.data?.status) {
+            return { ok: false as const, error: res.data?.message || "Error creating order" };
+        }
+        return { ok: true as const, data: res.data, message: res.data?.message as string };
     } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || "Error creating order";
         return { ok: false as const, error: msg };
@@ -214,7 +231,18 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
         setSubmitting(false);
 
         if (res.ok) {
-            toast("✅ " + (t.orderCreated || "Order created!"), {
+            const paymentUrl = res.data?.items?.payment_url;
+            if (paymentUrl) {
+                toast("⏩ Redirecting to payment...", {
+                    style: { background: "#483383", color: "#fff", borderRadius: "10px" },
+                });
+                // Small delay so the toast renders, then hard-navigate
+                setTimeout(() => {
+                    window.location.replace(paymentUrl);
+                }, 500);
+                return;
+            }
+            toast("✅ " + (res.message || t.orderCreated || "Order created!"), {
                 style: { background: "#198754", color: "#fff", borderRadius: "10px" },
             });
             setSuccessResult(res.data);
@@ -519,14 +547,18 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
                                 <label className="text-xs font-semibold text-gray-500 block mb-1.5">
                                     {t.startTime} <span className="text-red-500">*</span>
                                 </label>
-                                <input
-                                    type="time"
+                                <select
                                     value={startTime}
                                     onChange={(e) => setStartTime(e.target.value)}
                                     required
                                     dir="ltr"
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-2xl outline-none text-sm focus:border-[#483383] transition-colors"
-                                />
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-2xl outline-none text-sm focus:border-[#483383] transition-colors bg-white"
+                                >
+                                    <option value="" disabled>{t.startTime}</option>
+                                    {TIME_SLOTS.map((slot) => (
+                                        <option key={slot} value={slot}>{slot}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                     </div>

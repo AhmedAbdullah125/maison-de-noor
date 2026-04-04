@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
 import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid, CreditCard, PlusCircle } from 'lucide-react';
 import { translations, getLang, setLang, Locale } from '../../services/i18n';
-import { Manager, ManagerPermissions } from '../../types';
+import { getAdminSession, hasPermission } from './auth/permissions';
 // Module Components
 import DashboardHome from './DashboardHome';
 import CategoriesModule from './CategoriesModule';
@@ -34,10 +34,7 @@ const AdminDashboard: React.FC = () => {
   const [lang, setLangState] = useState<Locale>(getLang());
   const t = translations[lang];
 
-  const currentManager = useMemo((): Manager | null => {
-    const session = localStorage.getItem('salon_admin_session');
-    return session ? JSON.parse(session) : null;
-  }, []);
+  const currentManager = useMemo(() => getAdminSession(), []);
 
   useEffect(() => {
     if (!currentManager) {
@@ -62,41 +59,34 @@ const AdminDashboard: React.FC = () => {
     if (!currentManager) return [];
 
     const items = [
-      { id: 'dashboard', label: t.dashboard, icon: <LayoutDashboard size={20} />, path: '/admin' },
-      { id: 'categories', label: t.categories, icon: <Tags size={20} />, path: '/admin/categories' },
-      { id: 'services', label: t.services, icon: <Scissors size={20} />, path: '/admin/services' },
-      { id: 'serviceAddons', label: t.serviceAddons, icon: <LayoutGrid size={20} />, path: '/admin/service-addons' }, // Added
-      { id: 'users', label: t.users, icon: <Users size={20} />, path: '/admin/users' },
-      //banners
-      { id: 'banners', label: t.banners, icon: <LayoutGrid size={20} />, path: '/admin/banners' },
-      { id: 'upcomingBookings', label: t.upcomingBookings, icon: <CalendarClock size={20} />, path: '/admin/bookings/upcoming' },
-      { id: 'completedBookings', label: t.completedBookings, icon: <CalendarCheck size={20} />, path: '/admin/bookings/completed' },
-      { id: 'activeSubscriptions', label: t.activeSubscriptions, icon: <Ticket size={20} />, path: '/admin/subscriptions/active', permissionKey: 'subscriptions' },
-      { id: 'expiredSubscriptions', label: t.expiredSubscriptions, icon: <Clock size={20} />, path: '/admin/subscriptions/expired', permissionKey: 'subscriptions' },
-      { id: 'staffHR', label: t.staffHR, icon: <UserRound size={20} />, path: '/admin/staff' },
-      { id: 'paymentsMethods', label: t.paymentsMethods, icon: <CreditCard size={20} />, path: '/admin/payments-methods', permissionKey: 'payments' },
-      { id: 'accounting', label: t.accounting, icon: <Wallet size={20} />, path: '/admin/accounting' },
-      { id: 'reports', label: t.reports, icon: <BarChart3 size={20} />, path: '/admin/reports' },
-      { id: 'managers', label: t.managers, icon: <ShieldCheck size={20} />, path: '/admin/managers' },
-      { id: 'notifications', label: t.notifications, icon: <Bell size={20} />, path: '/admin/notifications' },
-      { id: 'coupons', label: t.coupons, icon: <Ticket size={20} />, path: '/admin/coupons' },
-      { id: 'activityLog', label: t.activityLog, icon: <History size={20} />, path: '/admin/activity' },
-      { id: 'createOrder', label: t.createOrder, icon: <PlusCircle size={20} />, path: '/admin/create-order' },
-
+      { id: 'dashboard',            label: t.dashboard,            icon: <LayoutDashboard size={20} />, path: '/admin',                        permission: 'view dashboard' },
+      { id: 'categories',           label: t.categories,           icon: <Tags size={20} />,            path: '/admin/categories',              permission: 'view categories' },
+      { id: 'services',             label: t.services,             icon: <Scissors size={20} />,        path: '/admin/services',                permission: 'view services' },
+      { id: 'serviceAddons',        label: t.serviceAddons,        icon: <LayoutGrid size={20} />,      path: '/admin/service-addons',          permission: 'view options' },
+      { id: 'users',                label: t.users,                icon: <Users size={20} />,           path: '/admin/users',                   permission: 'view users' },
+      { id: 'upcomingBookings',     label: t.upcomingBookings,     icon: <CalendarClock size={20} />,   path: '/admin/bookings/upcoming',       permission: 'view bookings' },
+      { id: 'completedBookings',    label: t.completedBookings,    icon: <CalendarCheck size={20} />,   path: '/admin/bookings/completed',      permission: 'view bookings' },
+      { id: 'activeSubscriptions',  label: t.activeSubscriptions,  icon: <Ticket size={20} />,          path: '/admin/subscriptions/active',    permission: 'view subscriptions' },
+      { id: 'expiredSubscriptions', label: t.expiredSubscriptions, icon: <Clock size={20} />,           path: '/admin/subscriptions/expired',   permission: 'view subscriptions' },
+      { id: 'staffHR',              label: t.staffHR,              icon: <UserRound size={20} />,       path: '/admin/staff',                   permission: 'manage system' },
+      { id: 'paymentsMethods',      label: t.paymentsMethods,      icon: <CreditCard size={20} />,      path: '/admin/payments-methods',        permission: 'manage settings' },
+      { id: 'banners',              label: t.banners,              icon: <LayoutGrid size={20} />,      path: '/admin/banners',                 permission: 'manage settings' },
+      { id: 'accounting',           label: t.accounting,           icon: <Wallet size={20} />,          path: '/admin/accounting',              permission: 'export data' },
+      { id: 'reports',              label: t.reports,              icon: <BarChart3 size={20} />,       path: '/admin/reports',                 permission: 'export data' },
+      { id: 'managers',             label: t.managers,             icon: <ShieldCheck size={20} />,     path: '/admin/managers',                permission: 'manage system' },
+      { id: 'notifications',        label: t.notifications,        icon: <Bell size={20} />,            path: '/admin/notifications',           permission: 'manage settings' },
+      { id: 'coupons',              label: t.coupons,              icon: <Ticket size={20} />,          path: '/admin/coupons',                 permission: 'manage system' },
+      { id: 'activityLog',          label: t.activityLog,          icon: <History size={20} />,         path: '/admin/activity',                permission: 'view logs' },
+      { id: 'createOrder',          label: t.createOrder,          icon: <PlusCircle size={20} />,      path: '/admin/create-order',            permission: 'manage bookings' },
     ];
 
-    // Filter by permissions
-    return items.filter(item => {
-      if (true) return true;
-      const key = (item.permissionKey || item.id) as keyof ManagerPermissions;
-      return currentManager.permissions[key] === true;
-    });
+    // Show item only if the admin has the required permission
+    return items.filter(item => hasPermission(item.permission));
   }, [currentManager, t]);
 
-  const hasPermission = (id: keyof ManagerPermissions) => {
-    if (!currentManager) return false;
-    if (true) return true;
-    return currentManager.permissions[id] === true;
+  const canAccess = (permission: string | null) => {
+    if (!permission) return true; // no restriction
+    return hasPermission(permission);
   };
 
   if (!currentManager) return null;
@@ -170,31 +160,30 @@ const AdminDashboard: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto p-8 no-scrollbar bg-gray-50/50">
           <Routes>
-            <Route index element={hasPermission('dashboard') ? <DashboardHome lang={lang} /> : <Navigate to="/admin/activity" />} />
-            <Route path="categories" element={hasPermission('categories') ? <CategoriesModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="services" element={hasPermission('services') ? <ServicesModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="services/new" element={hasPermission('services') ? <ServiceFormPage lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="services/:id/edit" element={hasPermission('services') ? <ServiceFormPage lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="service-addons" element={hasPermission('serviceAddons') ? <ServiceAddonsModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="service-addons" element={hasPermission('serviceAddons') ? <ServiceAddonsModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="users" element={hasPermission('users') ? <UsersModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route index element={canAccess('view dashboard') ? <DashboardHome lang={lang} /> : <Navigate to="/admin/activity" />} />
+            <Route path="categories" element={canAccess('view categories') ? <CategoriesModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="services" element={canAccess('view services') ? <ServicesModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="services/new" element={canAccess('view services') ? <ServiceFormPage lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="services/:id/edit" element={canAccess('view services') ? <ServiceFormPage lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="service-addons" element={canAccess('view services') ? <ServiceAddonsModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="users" element={canAccess('view users') ? <UsersModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="banners" element={<BannersModule lang={lang} />} />
-            <Route path="users/:userId" element={hasPermission('users') ? <AdminClientProfilePage lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="bookings/upcoming" element={hasPermission('upcomingBookings') ? <BookingsModule type="upcoming" lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="bookings/completed" element={hasPermission('completedBookings') ? <BookingsModule type="completed" lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="users/:userId" element={canAccess('view users') ? <AdminClientProfilePage lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="bookings/upcoming" element={canAccess('view bookings') ? <BookingsModule type="upcoming" lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="bookings/completed" element={canAccess('view bookings') ? <BookingsModule type="completed" lang={lang} /> : <Navigate to="/admin" />} />
 
             <Route path="subscriptions" element={<Navigate to="/admin/subscriptions/active" replace />} />
-            <Route path="subscriptions/active" element={hasPermission('subscriptions') ? <ActiveSubscriptionsModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="subscriptions/expired" element={hasPermission('subscriptions') ? <ExpiredSubscriptionsModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="subscriptions/active" element={canAccess('view subscriptions') ? <ActiveSubscriptionsModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="subscriptions/expired" element={canAccess('view subscriptions') ? <ExpiredSubscriptionsModule lang={lang} /> : <Navigate to="/admin" />} />
 
-            <Route path="staff" element={hasPermission('staffHR') ? <StaffModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="payments-methods" element={hasPermission('payments') ? <PaymentMethods lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="accounting" element={hasPermission('accounting') ? <AccountingModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="activity" element={hasPermission('activityLog') ? <ActivityLogModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="notifications" element={hasPermission('notifications') ? <NotificationsModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="managers" element={hasPermission('managers') ? <ManagersModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="coupons" element={hasPermission('coupons') ? <CouponsModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="reports" element={hasPermission('reports') ? <ReportsModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="staff" element={<StaffModule lang={lang} />} />
+            <Route path="payments-methods" element={<PaymentMethods lang={lang} />} />
+            <Route path="accounting" element={<AccountingModule lang={lang} />} />
+            <Route path="activity" element={<ActivityLogModule lang={lang} />} />
+            <Route path="notifications" element={<NotificationsModule lang={lang} />} />
+            <Route path="managers" element={<ManagersModule lang={lang} />} />
+            <Route path="coupons" element={<CouponsModule lang={lang} />} />
+            <Route path="reports" element={<ReportsModule lang={lang} />} />
             <Route path="create-order" element={<CreateOrderModule lang={lang} />} />
 
             <Route path="*" element={<div className="p-20 text-center text-gray-400">Feature under development</div>} />

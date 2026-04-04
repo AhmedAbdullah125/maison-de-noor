@@ -22,6 +22,7 @@ export type LoginResponse = {
         };
         admin: any;
         permissions: string[];
+        roles: string[];
     };
 };
 
@@ -84,18 +85,17 @@ export async function adminLogin(
         );
 
         // Transform and store admin session for salon admin dashboard
+        const { roles: roleNames = [] } = res.data.items;
         const adminSession = {
             id: admin.id?.toString() || admin.id,
             username: admin.username,
             email: admin.email,
             fullName: admin.name,
-            password: "", // Don't store password
-            role: (admin.roles?.[0]?.name || "admin").replace(/-/g, '_'), // Normalize role name: super-admin -> super_admin
+            role: (admin.roles?.[0]?.name || "admin"),
             status: admin.status,
-            permissions: permissions.reduce((acc: any, perm: string) => {
-                acc[perm.replace(/\s+/g, '_')] = true;
-                return acc;
-            }, {}),
+            // Store exact API permission names for accurate permission checks
+            permissions: permissions as string[],
+            roles: roleNames as string[],
             createdAt: admin.created_at,
             updatedAt: admin.updated_at,
             lastLoginAt: new Date().toISOString(),

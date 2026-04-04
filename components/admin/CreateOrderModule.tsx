@@ -93,6 +93,16 @@ async function fetchPublicServices(lang: Locale): Promise<Service[]> {
 
 
 
+/** Extract the best human-readable error message from an API response body */
+function extractErrorMessage(data: any, fallback = "Error creating order"): string {
+    if (!data) return fallback;
+    // Top-level message
+    const top = data.message as string | undefined;
+    // First field-level message from items array
+    const field = Array.isArray(data.items) && data.items[0]?.message;
+    return field || top || fallback;
+}
+
 async function createOrder(payload: object, lang: Locale) {
     try {
         const res = await http.post(
@@ -102,11 +112,12 @@ async function createOrder(payload: object, lang: Locale) {
         );
         // API may return HTTP 200 but with status:false for business-logic errors
         if (!res.data?.status) {
-            return { ok: false as const, error: res.data?.message || "Error creating order" };
+            return { ok: false as const, error: extractErrorMessage(res.data) };
         }
         return { ok: true as const, data: res.data, message: res.data?.message as string };
     } catch (e: any) {
-        const msg = e?.response?.data?.message || e?.message || "Error creating order";
+        const data = e?.response?.data;
+        const msg = extractErrorMessage(data) || e?.message || "Error creating order";
         return { ok: false as const, error: msg };
     }
 }

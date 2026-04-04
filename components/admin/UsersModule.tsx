@@ -156,15 +156,12 @@ export default function UsersModule({ lang }: UsersModuleProps) {
       {!isLoading && meta && (
         <UsersPagination
           lang={lang}
-          meta={{
-            current_page: meta.current_page,
-            last_page: meta.last_page,
-            total: meta.total,
-          }}
+          meta={meta}
           canPrev={canPrev}
           canNext={canNext}
           onPrev={() => setPage((p) => Math.max(1, p - 1))}
-          onNext={() => setPage((p) => p + 1)}
+          onNext={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+          onGoTo={(p) => setPage(p)}
         />
       )}
     </div>

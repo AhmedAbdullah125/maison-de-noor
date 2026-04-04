@@ -8,8 +8,15 @@ export type ApiUser = {
     name: string;
     email: string | null;
     phone: string;
-    status: string | null; // null in sample
-    created_at: string; // "2026-01-29 10:45:50"
+    status: string | null;
+    created_at: string; // "YYYY-MM-DD HH:mm:ss"
+};
+
+export type ApiPaginationLink = {
+    url: string | null;
+    label: string;
+    page: number | null;
+    active: boolean;
 };
 
 export type ApiPaginationMeta = {
@@ -19,16 +26,28 @@ export type ApiPaginationMeta = {
     total: number;
     from: number | null;
     to: number | null;
+    links: ApiPaginationLink[];
+};
+
+export type ApiPaginationLinks = {
+    first: string | null;
+    last: string | null;
+    prev: string | null;
+    next: string | null;
 };
 
 type ApiUsersResponse = {
     status: boolean;
     data: ApiUser[];
-    pagination?: {
+    links?: ApiPaginationLinks;
+    meta?: {
         current_page: number;
         last_page: number;
         per_page: number;
         total: number;
+        from: number | null;
+        to: number | null;
+        links: ApiPaginationLink[];
     };
     message: string;
 };
@@ -58,17 +77,18 @@ export async function getUsers(params: { lang: Locale; page: number; per_page: n
         }
 
         const users: ApiUser[] = res.data.data || [];
-        const pagination = res.data.pagination;
+        const rawMeta = res.data.meta;
 
         let meta: ApiPaginationMeta | null = null;
-        if (pagination) {
+        if (rawMeta) {
             meta = {
-                current_page: pagination.current_page || 1,
-                last_page: pagination.last_page || 1,
-                total: pagination.total || 0,
-                per_page: pagination.per_page || per_page,
-                from: null,
-                to: null
+                current_page: rawMeta.current_page || 1,
+                last_page: rawMeta.last_page || 1,
+                total: rawMeta.total || 0,
+                per_page: rawMeta.per_page || per_page,
+                from: rawMeta.from ?? null,
+                to: rawMeta.to ?? null,
+                links: rawMeta.links || [],
             };
         }
 

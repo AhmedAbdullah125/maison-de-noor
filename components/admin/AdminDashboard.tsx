@@ -4,6 +4,8 @@ import { Routes, Route, useNavigate, Link, useLocation, Navigate } from 'react-r
 import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid, CreditCard, PlusCircle } from 'lucide-react';
 import { translations, getLang, setLang, Locale } from '../../services/i18n';
 import { getAdminSession, hasPermission } from './auth/permissions';
+import { authEvents } from '../services/http';
+import { clearAuth } from '../auth/authStorage';
 // Module Components
 import DashboardHome from './DashboardHome';
 import CategoriesModule from './CategoriesModule';
@@ -43,6 +45,19 @@ const AdminDashboard: React.FC = () => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   }, [navigate, lang, currentManager]);
 
+  // Global 401 handler: any API call that returns 401 clears auth and redirects
+  useEffect(() => {
+    const prev = authEvents.onLogout;
+    authEvents.onLogout = (_reason?: string) => {
+      clearAuth();
+      localStorage.removeItem('salon_admin_session');
+      navigate('/admin/login', { replace: true });
+    };
+    return () => {
+      authEvents.onLogout = prev; // restore on unmount
+    };
+  }, [navigate]);
+
   const handleLogout = async () => {
     const { adminLogout } = await import('./auth/logout.api');
     await adminLogout();
@@ -59,25 +74,25 @@ const AdminDashboard: React.FC = () => {
     if (!currentManager) return [];
 
     const items = [
-      { id: 'dashboard',            label: t.dashboard,            icon: <LayoutDashboard size={20} />, path: '/admin',                        permission: 'view dashboard' },
-      { id: 'categories',           label: t.categories,           icon: <Tags size={20} />,            path: '/admin/categories',              permission: 'view categories' },
-      { id: 'services',             label: t.services,             icon: <Scissors size={20} />,        path: '/admin/services',                permission: 'view services' },
-      { id: 'serviceAddons',        label: t.serviceAddons,        icon: <LayoutGrid size={20} />,      path: '/admin/service-addons',          permission: 'view options' },
-      { id: 'users',                label: t.users,                icon: <Users size={20} />,           path: '/admin/users',                   permission: 'view users' },
-      { id: 'upcomingBookings',     label: t.upcomingBookings,     icon: <CalendarClock size={20} />,   path: '/admin/bookings/upcoming',       permission: 'view bookings' },
-      { id: 'completedBookings',    label: t.completedBookings,    icon: <CalendarCheck size={20} />,   path: '/admin/bookings/completed',      permission: 'view bookings' },
-      { id: 'activeSubscriptions',  label: t.activeSubscriptions,  icon: <Ticket size={20} />,          path: '/admin/subscriptions/active',    permission: 'view subscriptions' },
-      { id: 'expiredSubscriptions', label: t.expiredSubscriptions, icon: <Clock size={20} />,           path: '/admin/subscriptions/expired',   permission: 'view subscriptions' },
-      { id: 'staffHR',              label: t.staffHR,              icon: <UserRound size={20} />,       path: '/admin/staff',                   permission: 'manage system' },
-      { id: 'paymentsMethods',      label: t.paymentsMethods,      icon: <CreditCard size={20} />,      path: '/admin/payments-methods',        permission: 'manage settings' },
-      { id: 'banners',              label: t.banners,              icon: <LayoutGrid size={20} />,      path: '/admin/banners',                 permission: 'manage settings' },
-      { id: 'accounting',           label: t.accounting,           icon: <Wallet size={20} />,          path: '/admin/accounting',              permission: 'export data' },
-      { id: 'reports',              label: t.reports,              icon: <BarChart3 size={20} />,       path: '/admin/reports',                 permission: 'export data' },
-      { id: 'managers',             label: t.managers,             icon: <ShieldCheck size={20} />,     path: '/admin/managers',                permission: 'manage system' },
-      { id: 'notifications',        label: t.notifications,        icon: <Bell size={20} />,            path: '/admin/notifications',           permission: 'manage settings' },
-      { id: 'coupons',              label: t.coupons,              icon: <Ticket size={20} />,          path: '/admin/coupons',                 permission: 'manage system' },
-      { id: 'activityLog',          label: t.activityLog,          icon: <History size={20} />,         path: '/admin/activity',                permission: 'view logs' },
-      { id: 'createOrder',          label: t.createOrder,          icon: <PlusCircle size={20} />,      path: '/admin/create-order',            permission: 'manage bookings' },
+      { id: 'dashboard', label: t.dashboard, icon: <LayoutDashboard size={20} />, path: '/admin', permission: 'view dashboard' },
+      { id: 'categories', label: t.categories, icon: <Tags size={20} />, path: '/admin/categories', permission: 'view categories' },
+      { id: 'services', label: t.services, icon: <Scissors size={20} />, path: '/admin/services', permission: 'view services' },
+      { id: 'serviceAddons', label: t.serviceAddons, icon: <LayoutGrid size={20} />, path: '/admin/service-addons', permission: 'view options' },
+      { id: 'users', label: t.users, icon: <Users size={20} />, path: '/admin/users', permission: 'view users' },
+      { id: 'upcomingBookings', label: t.upcomingBookings, icon: <CalendarClock size={20} />, path: '/admin/bookings/upcoming', permission: 'view bookings' },
+      { id: 'completedBookings', label: t.completedBookings, icon: <CalendarCheck size={20} />, path: '/admin/bookings/completed', permission: 'view bookings' },
+      { id: 'activeSubscriptions', label: t.activeSubscriptions, icon: <Ticket size={20} />, path: '/admin/subscriptions/active', permission: 'view subscriptions' },
+      { id: 'expiredSubscriptions', label: t.expiredSubscriptions, icon: <Clock size={20} />, path: '/admin/subscriptions/expired', permission: 'view subscriptions' },
+      { id: 'staffHR', label: t.staffHR, icon: <UserRound size={20} />, path: '/admin/staff', permission: 'manage system' },
+      { id: 'paymentsMethods', label: t.paymentsMethods, icon: <CreditCard size={20} />, path: '/admin/payments-methods', permission: 'manage settings' },
+      { id: 'banners', label: t.banners, icon: <LayoutGrid size={20} />, path: '/admin/banners', permission: 'manage settings' },
+      { id: 'accounting', label: t.accounting, icon: <Wallet size={20} />, path: '/admin/accounting', permission: 'export data' },
+      { id: 'reports', label: t.reports, icon: <BarChart3 size={20} />, path: '/admin/reports', permission: 'export data' },
+      { id: 'managers', label: t.managers, icon: <ShieldCheck size={20} />, path: '/admin/managers', permission: 'manage system' },
+      { id: 'notifications', label: t.notifications, icon: <Bell size={20} />, path: '/admin/notifications', permission: 'manage settings' },
+      { id: 'coupons', label: t.coupons, icon: <Ticket size={20} />, path: '/admin/coupons', permission: 'manage system' },
+      { id: 'activityLog', label: t.activityLog, icon: <History size={20} />, path: '/admin/activity', permission: 'view logs' },
+      { id: 'createOrder', label: t.createOrder, icon: <PlusCircle size={20} />, path: '/admin/create-order', permission: 'manage bookings' },
     ];
 
     // Show item only if the admin has the required permission

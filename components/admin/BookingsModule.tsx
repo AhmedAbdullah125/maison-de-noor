@@ -61,6 +61,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
       return bn.includes(q) || svc.includes(q);
     });
   }, [apiRows, searchTerm]);
+  console.log(filtered);
 
   const renderSkeleton = () => (
     <div className="space-y-4">
@@ -161,13 +162,13 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   {t.service}
                 </th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                  {t.customer || 'Customer'}
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
                   {t.schedule}
                 </th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
                   {t.staffAssigned}
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
-                  {t.paymentStatus || 'Payment Status'}
                 </th>
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
                   {t.paymentStatus}
@@ -208,27 +209,32 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                     </td>
 
                     <td className="px-6 py-4">
-
-                      {/* Show user avatar if available, alongside service */}
+                      <span className="text-sm font-semibold text-gray-900 line-clamp-1 max-w-[200px]" title={serviceName}>
+                        {serviceName}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {b.user && (
-                          <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
-                            <img
-                              src={b.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(b.user.name)}&background=random`}
-                              alt={b.user.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(b.user?.name || 'User')}&background=random`;
-                              }}
-                            />
-                          </div>
+                        {b.user ? (
+                          <>
+                            <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                              <img
+                                src={b.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(b.user.name)}&background=random`}
+                                alt={b.user.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(b.user?.name || 'User')}&background=random`;
+                                }}
+                              />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold text-gray-900">{b.user.name}</span>
+                              {b.user.phone && <span className="text-[10px] text-gray-500">{b.user.phone}</span>}
+                            </div>
+                          </>
+                        ) : (
+                          <span className="text-xs font-semibold text-gray-900">—</span>
                         )}
-                        <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-gray-900 line-clamp-1 max-w-[200px]" title={serviceName}>
-                            {serviceName}
-                          </span>
-                          {b.user && <span className="text-[10px] text-gray-500">{b.user.name}</span>}
-                        </div>
                       </div>
                     </td>
 

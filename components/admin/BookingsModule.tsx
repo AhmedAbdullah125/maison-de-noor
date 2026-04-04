@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, X, Phone, Mail, User, Check, AlertCircle } from "lucide-react";
 import { translations, Locale } from "../../services/i18n";
@@ -39,10 +39,19 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
 
   const [paymentFilter, setPaymentFilter] = useState<"paid" | "unpaid" | undefined>(undefined);
 
-  const { isLoading, apiRows, meta, canPrev, canNext, setPage, refetch } =
-    useBookings(lang, type, perPage, paymentFilter);
-
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  const { isLoading, apiRows, meta, canPrev, canNext, setPage, refetch } =
+    useBookings(lang, type, perPage, paymentFilter, debouncedSearch);
+
   const [changingId, setChangingId] = useState<number | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<ApiBooking | null>(null);
   const [showPhoneActions, setShowPhoneActions] = useState(false);
@@ -52,16 +61,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
     action: "confirm" | "cancel" | null;
   }>({ show: false, bookingId: null, action: null });
 
-  const filtered = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
-    if (!q) return apiRows;
-    return apiRows.filter((b) => {
-      const bn = (b.booking_number || "").toLowerCase();
-      const svc = (b.service || "").toLowerCase();
-      return bn.includes(q) || svc.includes(q);
-    });
-  }, [apiRows, searchTerm]);
-  console.log(filtered);
+  const filtered = apiRows;
 
   const renderSkeleton = () => (
     <div className="space-y-4">
@@ -204,16 +204,16 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                       }
                     }}
                   >
-                    <td className="px-6 py-4 font-semibold text-gray-400 text-xs">
+                    <td className="px-2 py-2 font-semibold text-gray-400 text-xs">
                       {b.booking_number ? b.booking_number : `#${b.id}`}
                     </td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-2 py-2">
                       <span className="text-sm font-semibold text-gray-900 line-clamp-1 max-w-[200px]" title={serviceName}>
                         {serviceName}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-2 py-2">
                       <div className="flex items-center gap-3">
                         {b.user ? (
                           <>
@@ -238,7 +238,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                       </div>
                     </td>
 
-                    <td className="px-6 py-4">
+                    <td className="px-2 py-2">
                       <div className="flex flex-col">
                         <span
                           className="text-sm font-semibold text-gray-900"

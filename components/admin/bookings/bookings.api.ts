@@ -58,6 +58,7 @@ export async function getBookings(params: {
     page: number;
     per_page: number;
     payment_status?: "paid" | "unpaid";
+    search?: string;
 }) {
     try {
         const res = await http.get<ApiBookingsResponse>(
@@ -68,6 +69,7 @@ export async function getBookings(params: {
                     page: params.page,
                     per_page: params.per_page,
                     ...(params.payment_status ? { payment_status: params.payment_status } : {}),
+                    ...(params.search ? { search: params.search } : {}),
                 },
                 headers: { "Accept-Language": params.lang, Accept: "application/json" },
             }

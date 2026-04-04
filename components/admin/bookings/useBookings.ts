@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Locale } from "../../../services/i18n";
 import { ApiBooking, ApiPaginationMeta, BookingType, getBookings } from "./bookings.api";
 
-export function useBookings(lang: Locale, type: BookingType, perPage: number, paymentStatus?: "paid" | "unpaid") {
+export function useBookings(lang: Locale, type: BookingType, perPage: number, paymentStatus?: "paid" | "unpaid", search?: string) {
     const [isLoading, setIsLoading] = useState(true);
     const [apiRows, setApiRows] = useState<ApiBooking[]>([]);
     const [meta, setMeta] = useState<ApiPaginationMeta | null>(null);
@@ -10,7 +10,7 @@ export function useBookings(lang: Locale, type: BookingType, perPage: number, pa
 
     const fetcher = useCallback(async () => {
         setIsLoading(true);
-        const res = await getBookings({ lang, type, page, per_page: perPage, payment_status: paymentStatus });
+        const res = await getBookings({ lang, type, page, per_page: perPage, payment_status: paymentStatus, search });
         if (res.ok) {
             setApiRows(res.data ?? []);
             setMeta(res.meta ?? null);
@@ -19,13 +19,13 @@ export function useBookings(lang: Locale, type: BookingType, perPage: number, pa
             setMeta(null);
         }
         setIsLoading(false);
-    }, [lang, type, page, perPage, paymentStatus]);
+    }, [lang, type, page, perPage, paymentStatus, search]);
 
 
     useEffect(() => {
-        // reset page when type or payment filter changes
+        // reset page when type, search, or payment filter changes
         setPage(1);
-    }, [type, paymentStatus]);
+    }, [type, paymentStatus, search]);
 
     useEffect(() => {
         fetcher();

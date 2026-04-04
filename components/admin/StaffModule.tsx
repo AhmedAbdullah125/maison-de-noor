@@ -263,6 +263,15 @@ const StaffModule: React.FC<StaffModuleProps> = ({ lang }) => {
                     <label className="block text-sm font-semibold text-gray-700 mb-3">
                       {lang === 'ar' ? 'الصلاحيات' : 'Permissions'}
                     </label>
+
+                    <div className="flex gap-2 mb-2">
+                      <button onClick={() => setSelectedPermissions(availablePermissions.map(p => p.name))} className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all transform hover:scale-105 ${selectedPermissions.length === availablePermissions.length ? 'bg-[#483383] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-700 hover:border-[#483383]'}`}>
+                        {lang === 'ar' ? 'اختر الكل' : 'Select All'}
+                      </button>
+                      <button onClick={() => setSelectedPermissions([])} className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all transform hover:scale-105 ${selectedPermissions.length === 0 ? 'bg-[#483383] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-700 hover:border-[#483383]'}`}>
+                        {lang === 'ar' ? 'الغاء الكل' : 'Deselect All'}
+                      </button>
+                    </div>
                     <div className="flex flex-wrap gap-2 p-4 bg-gray-50 rounded-2xl min-h-[120px]">
                       {availablePermissions.map((permission) => {
                         const isSelected = selectedPermissions.includes(permission.name);

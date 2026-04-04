@@ -1,265 +1,460 @@
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import { Plus, Edit, Trash2, X, Search, Shield, User, Mail, ShieldAlert, Check, ToggleLeft, ToggleRight } from 'lucide-react';
-import { db } from '../../services/db';
-import { Manager, ManagerPermissions } from '../../types';
-import { translations, Locale } from '../../services/i18n';
+import React, { useState, useMemo } from "react";
+import {
+    Plus, X, Search, Shield, Check,
+    ChevronLeft, ChevronRight, UserCheck, Loader2,
+    Edit, Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { translations, Locale } from "../../services/i18n";
+import { useAdmins } from "./managers/useAdmins";
+import { ApiAdmin, CreateAdminPayload } from "./managers/managers.api";
+import { useAdminActions } from "./managers/useAdminActions";
+import { useRoles } from "./staff/useRoles";
 
 interface ManagersModuleProps {
-  lang: Locale;
+    lang: Locale;
 }
 
-// Add missing serviceAddons property to DEFAULT_PERMISSIONS to match ManagerPermissions interface.
-const DEFAULT_PERMISSIONS: ManagerPermissions = {
-  dashboard: true, categories: true, services: true, serviceAddons: true, users: true, upcomingBookings: true,
-  completedBookings: true, subscriptions: true, staffHR: false, accounting: false,
-  reports: false, notifications: true, activityLog: true, managers: false
+const EMPTY_FORM: CreateAdminPayload = {
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    account_type: "admin",
+    role: "",
 };
 
+function formatDate(createdAt: string, lang: Locale) {
+    const iso = createdAt?.includes(" ") ? createdAt.replace(" ", "T") : createdAt;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return createdAt;
+    return d.toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US");
+}
+
+function safeLower(s: any) {
+    return String(s ?? "").toLowerCase();
+}
+
 const ManagersModule: React.FC<ManagersModuleProps> = ({ lang }) => {
-  const t = translations[lang];
-  const [dbData, setDbData] = useState(db.getData());
-  const [searchTerm, setSearchTerm] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingManager, setEditingManager] = useState<Manager | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'disabled'>('all');
+    const t = translations[lang];
+    const {
+        isLoading,
+        admins,
+        pagination,
+        page,
+        setPage,
+        canPrev,
+        canNext,
+        totalPages,
+        refetch,
+    } = useAdmins(lang, 10);
 
-  const currentLoggedIn = JSON.parse(localStorage.getItem('salon_admin_session') || '{}') as Manager;
+    const { roles, isLoading: rolesLoading } = useRoles(lang, 200);
+    const { isSaving, isDeleting, create, update, remove } = useAdminActions(lang);
 
-  const [form, setForm] = useState<Partial<Manager>>({
-    fullName: '', username: '', email: '', password: '', role: 'admin',
-    permissions: { ...DEFAULT_PERMISSIONS }, status: 'active'
-  });
+    const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
-  const filtered = useMemo(() => {
-    return dbData.managers.filter(m => {
-      const matchesSearch = m.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.email.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || m.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [dbData.managers, searchTerm, statusFilter]);
+    // Modal: mode null = closed, "add" = create, "edit" = update
+    const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
+    const [editingAdmin, setEditingAdmin] = useState<ApiAdmin | null>(null);
+    const [form, setForm] = useState<CreateAdminPayload>({ ...EMPTY_FORM });
+    const [formError, setFormError] = useState<string | null>(null);
 
-  const handleOpenModal = (mgr?: Manager) => {
-    if (mgr) {
-      setEditingManager(mgr);
-      setForm({ ...mgr, password: '' });
-    } else {
-      setEditingManager(null);
-      setForm({
-        fullName: '', username: '', email: '', password: '', role: 'admin',
-        permissions: { ...DEFAULT_PERMISSIONS }, status: 'active'
-      });
-    }
-    setModalOpen(true);
-  };
+    // Delete confirmation
+    const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const handleTogglePermission = (key: keyof ManagerPermissions) => {
-    setForm(prev => ({
-      ...prev,
-      permissions: {
-        ...prev.permissions!,
-        [key]: !prev.permissions![key]
-      }
-    }));
-  };
+    const filtered = useMemo(() => {
+        const q = searchTerm.trim().toLowerCase();
+        return admins.filter((m) => {
+            const matchesSearch =
+                !q ||
+                safeLower(m.name).includes(q) ||
+                safeLower(m.username).includes(q) ||
+                safeLower(m.email).includes(q);
+            const matchesStatus = statusFilter === "all" || m.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+    }, [admins, searchTerm, statusFilter]);
 
-  const handleSave = () => {
-    if (!form.fullName || !form.username || !form.email) return;
+    // ── Modal helpers ──────────────────────────────────────────────────
+    const openAdd = () => {
+        setEditingAdmin(null);
+        setForm({ ...EMPTY_FORM });
+        setFormError(null);
+        setModalMode("add");
+    };
 
-    if (editingManager) {
-      const updateData = { ...form, updatedAt: new Date().toISOString() };
-      if (!updateData.password) delete updateData.password;
+    const openEdit = (admin: ApiAdmin) => {
+        setEditingAdmin(admin);
+        setForm({
+            name: admin.name,
+            username: admin.username,
+            email: admin.email,
+            password: "", // never pre-fill password
+            account_type: "admin",
+            role: admin.roles[0] ?? "",
+        });
+        setFormError(null);
+        setModalMode("edit");
+    };
 
-      db.updateEntity('managers', editingManager.id, updateData);
-      db.addLog(currentLoggedIn.fullName, 'admin', 'update', 'Manager', editingManager.id, 'Manager Updated', `Admin updated manager profile: ${form.username}`);
-    } else {
-      const newId = `m_${Date.now()}`;
-      const newMgr: Manager = {
-        ...form as Manager,
-        id: newId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        lastLoginAt: null
-      };
-      db.addEntity('managers', newMgr);
-      db.addLog(currentLoggedIn.fullName, 'admin', 'create', 'Manager', newId, 'Manager Created', `New dashboard manager added: ${form.username}`);
-    }
+    const closeModal = () => {
+        if (isSaving) return;
+        setModalMode(null);
+        setEditingAdmin(null);
+    };
 
-    setDbData({ ...db.getData() });
-    setModalOpen(false);
-  };
+    // ── Validation ─────────────────────────────────────────────────────
+    const validate = (): boolean => {
+        if (!form.name.trim() || !form.username.trim() || !form.email.trim()) {
+            const msg = lang === "ar" ? "يرجى ملء جميع الحقول المطلوبة" : "Please fill all required fields";
+            setFormError(msg);
+            toast(msg, { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } });
+            return false;
+        }
+        // Password required only when adding
+        if (modalMode === "add" && !form.password.trim()) {
+            const msg = lang === "ar" ? "كلمة المرور مطلوبة" : "Password is required";
+            setFormError(msg);
+            toast(msg, { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } });
+            return false;
+        }
+        if (!form.role?.trim()) {
+            const msg = lang === "ar" ? "يرجى اختيار دور" : "Please select a role";
+            setFormError(msg);
+            toast(msg, { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } });
+            return false;
+        }
+        setFormError(null);
+        return true;
+    };
 
-  const handleDelete = (id: string) => {
-    if (id === currentLoggedIn.id) {
-      alert(t.cannotDeleteSelf);
-      return;
-    }
+    // ── Save ───────────────────────────────────────────────────────────
+    const handleSave = async () => {
+        if (!validate()) return;
 
-    const target = dbData.managers.find(m => m.id === id);
-    const superAdmins = dbData.managers.filter(m => m.role === 'super_admin' && m.status === 'active');
+        if (modalMode === "add") {
+            await create(form, () => { closeModal(); refetch(); });
+        } else if (modalMode === "edit" && editingAdmin) {
+            await update(editingAdmin.id, form, () => { closeModal(); refetch(); });
+        }
+    };
 
-    if (target?.role === 'super_admin' && superAdmins.length <= 1) {
-      alert(t.lastSuperAdmin);
-      return;
-    }
+    // ── Delete ─────────────────────────────────────────────────────────
+    const handleDelete = async (id: number) => {
+        setDeletingId(id);
+        await remove(id, () => refetch());
+        setDeletingId(null);
+    };
 
-    if (confirm(t.confirmDelete)) {
-      db.deleteEntity('managers', id);
-      db.addLog(currentLoggedIn.fullName, 'admin', 'delete', 'Manager', id, 'Manager Deleted', `Admin removed manager: ${target?.username}`);
-      setDbData({ ...db.getData() });
-    }
-  };
-
-  const handleStatusToggle = (mgr: Manager) => {
-    const newStatus = mgr.status === 'active' ? 'disabled' : 'active';
-    db.updateEntity('managers', mgr.id, { status: newStatus });
-    db.addLog(currentLoggedIn.fullName, 'admin', 'status-change', 'Manager', mgr.id, 'Status Changed', `Set ${mgr.username} to ${newStatus}`);
-    setDbData({ ...db.getData() });
-  };
-
-  const permissionKeys = Object.keys(DEFAULT_PERMISSIONS) as (keyof ManagerPermissions)[];
-
-  return (
-    <div className="space-y-6 animate-fadeIn">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-1 gap-3">
-          <div className="relative flex-1 max-w-md">
+    // ── Field helper ───────────────────────────────────────────────────
+    const field = (
+        id: string,
+        label: string,
+        type: string,
+        value: string,
+        onChange: (v: string) => void,
+        required = true,
+        placeholder?: string,
+    ) => (
+        <div className="flex flex-col gap-1.5">
+            <label htmlFor={id} className="text-sm font-semibold text-gray-700">
+                {label} {required && <span className="text-red-500">*</span>}
+            </label>
             <input
-              type="text"
-              className={`w-full ${lang === 'ar' ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383]`}
-              placeholder={t.searchManagers}
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+                id={id}
+                type={type}
+                dir={type === "email" || type === "password" ? "ltr" : undefined}
+                className="w-full p-3.5 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383]/30 focus:border-[#483383] text-sm transition-all"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder ?? ""}
+                disabled={isSaving}
             />
-            <Search className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-gray-400`} size={18} />
-          </div>
-          <select
-            className="bg-white border border-gray-200 px-4 py-3 rounded-2xl text-xs font-semibold outline-none"
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value as any)}
-          >
-            <option value="all">{t.all}</option>
-            <option value="active">{t.active}</option>
-            <option value="disabled">{t.disabled}</option>
-          </select>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="bg-[#483383] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 shadow-lg"
-        >
-          <Plus size={20} />
-          <span>{t.addManager}</span>
-        </button>
-      </div>
+    );
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-auto">
-        <table className="w-full text-start">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.fullName}</th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.username}</th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.email}</th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.status}</th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.permissions}</th>
-              <th className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === 'ar' ? 'text-start' : 'text-end'}`}>{t.actions}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {filtered.map((mgr) => {
-              const permCount = Object.values(mgr.permissions).filter(v => v === true).length;
-              const isSuper = mgr.role === 'super_admin';
-              return (
-                <tr key={mgr.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 font-semibold text-gray-900">{mgr.fullName}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{mgr.username}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{mgr.email}</td>
-                  <td className="px-6 py-4">
-                    <button onClick={() => handleStatusToggle(mgr)} className="flex items-center">
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-lg border flex items-center gap-1.5 ${mgr.status === 'active' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-600 border-red-100'}`}>
-                        {mgr.status === 'active' ? <Check size={12} /> : <X size={12} />}
-                        {mgr.status === 'active' ? t.active : t.disabled}
-                      </span>
-                    </button>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`text-[10px] font-semibold ${isSuper ? 'text-[#483383]' : 'text-gray-400'}`}>
-                      {isSuper ? t.fullAccess : `${permCount} ${t.modules}`}
-                    </span>
-                  </td>
-                  <td className={`px-6 py-4 ${lang === 'ar' ? 'text-start' : 'text-end'}`}>
-                    <div className={`flex items-center gap-2 ${lang === 'ar' ? 'justify-start' : 'justify-end'}`}>
-                      <button onClick={() => handleOpenModal(mgr)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all" title={t.edit}><Edit size={18} /></button>
-                      <button onClick={() => handleDelete(mgr.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title={t.delete}><Trash2 size={18} /></button>
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden animate-scaleIn flex flex-col max-h-[90vh]">
-            <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center shrink-0">
-              <h3 className="text-lg font-semibold">{editingManager ? t.editManager : t.addManager}</h3>
-              <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-gray-50 rounded-full"><X size={20} /></button>
+    const renderSkeleton = () => (
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-auto">
+            <div className="h-12 bg-gray-50 border-b border-gray-100" />
+            <div className="p-6 space-y-3">
+                {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-14 bg-gray-50 rounded-2xl animate-pulse" />
+                ))}
             </div>
-
-            <div className="p-8 space-y-8 overflow-y-auto no-scrollbar">
-              {/* Basic Info Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t.fullName}</label>
-                  <input type="text" className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none" value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t.username}</label>
-                  <input type="text" className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t.email}</label>
-                  <input type="email" className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none text-start" dir="ltr" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t.password}</label>
-                  <input type="password" placeholder="••••••••" className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none text-start" dir="ltr" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-                </div>
-              </div>
-
-              {/* Permissions Section */}
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <Shield size={18} className="text-[#483383]" />
-                  <h4 className="text-sm font-semibold text-gray-900">{t.permissions}</h4>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {permissionKeys.map(key => (
-                    <div key={key} onClick={() => handleTogglePermission(key)} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors">
-                      <span className="text-xs font-semibold text-gray-600 capitalize">{t[key as keyof typeof t] || key.replace(/([A-Z])/g, ' $1')}</span>
-                      {form.permissions?.[key] ? (
-                        <ToggleRight className="text-[#483383]" size={24} />
-                      ) : (
-                        <ToggleLeft className="text-gray-300" size={24} />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-8 border-t border-gray-100 flex gap-4 shrink-0">
-              <button onClick={() => setModalOpen(false)} className="flex-1 py-4 font-semibold text-gray-500 bg-gray-50 rounded-2xl">{t.cancel}</button>
-              <button onClick={handleSave} className="flex-1 py-4 font-semibold text-white bg-[#483383] rounded-2xl shadow-lg">{t.save}</button>
-            </div>
-          </div>
         </div>
-      )}
-    </div>
-  );
+    );
+
+    return (
+        <div className="space-y-6">
+            {/* Toolbar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-1 gap-3">
+                    <div className="relative flex-1 max-w-md">
+                        <input
+                            type="text"
+                            className={`w-full ${lang === "ar" ? "pr-11 pl-4" : "pl-11 pr-4"} py-3 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383]`}
+                            placeholder={t.searchManagers}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <Search
+                            className={`absolute ${lang === "ar" ? "right-4" : "left-4"} top-1/2 -translate-y-1/2 text-gray-400`}
+                            size={18}
+                        />
+                    </div>
+                    <select
+                        className="bg-white border border-gray-200 px-4 py-3 rounded-2xl text-xs font-semibold outline-none"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value as any)}
+                    >
+                        <option value="all">{t.all}</option>
+                        <option value="active">{t.active}</option>
+                        <option value="inactive">{lang === "ar" ? "غير نشط" : "Inactive"}</option>
+                    </select>
+                </div>
+
+                <button
+                    onClick={openAdd}
+                    className="bg-[#483383] text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 shadow-lg hover:bg-[#3a2870] transition-colors"
+                >
+                    <Plus size={20} />
+                    <span>{t.addManager}</span>
+                </button>
+            </div>
+
+            {/* Table */}
+            {isLoading ? (
+                renderSkeleton()
+            ) : (
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-auto">
+                    <table className="w-full text-start">
+                        <thead className="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.fullName}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.username}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.email}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.status}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">{t.staffHR}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                                    {lang === "ar" ? "تاريخ الإنشاء" : "Created"}
+                                </th>
+                                <th className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === "ar" ? "text-start" : "text-end"}`}>
+                                    {t.actions}
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody className="divide-y divide-gray-50">
+                            {filtered.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-6 py-12 text-center text-gray-400 text-sm">
+                                        {lang === "ar" ? "لا يوجد مشرفون" : "No admins found"}
+                                    </td>
+                                </tr>
+                            ) : (
+                                filtered.map((admin: ApiAdmin) => {
+                                    const isSuperAdmin = admin.roles.includes("super-admin");
+                                    const isActive = admin.status === "active";
+                                    const isBeingDeleted = deletingId === admin.id && isDeleting;
+
+                                    return (
+                                        <tr key={admin.id} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[#483383]">
+                                                        <UserCheck size={16} />
+                                                    </div>
+                                                    <span className="font-semibold text-gray-900">{admin.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-500">{admin.username}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-500" dir="ltr">{admin.email}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-lg border flex items-center gap-1.5 w-fit ${isActive ? "bg-green-50 text-green-600 border-green-100" : "bg-red-50 text-red-600 border-red-100"}`}>
+                                                    {isActive ? <Check size={12} /> : <X size={12} />}
+                                                    {isActive ? t.active : (lang === "ar" ? "غير نشط" : "Inactive")}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {isSuperAdmin ? (
+                                                    <span className="flex items-center gap-1 text-[10px] font-semibold text-[#483383]">
+                                                        <Shield size={12} />
+                                                        {t.fullAccess ?? "Super Admin"}
+                                                    </span>
+                                                ) : admin.roles.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {admin.roles.map((r) => (
+                                                            <span key={r} className="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-purple-50 text-purple-600">{r}</span>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[10px] text-gray-400">
+                                                        {lang === "ar" ? "لا يوجد أدوار" : "No roles"}
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-400">{formatDate(admin.created_at, lang)}</td>
+
+                                            {/* Actions */}
+                                            <td className={`px-6 py-4 ${lang === "ar" ? "text-start" : "text-end"}`}>
+                                                <div className={`flex items-center gap-2 ${lang === "ar" ? "justify-start" : "justify-end"}`}>
+                                                    <button
+                                                        onClick={() => openEdit(admin)}
+                                                        disabled={isBeingDeleted}
+                                                        className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all disabled:opacity-40"
+                                                        title={t.edit}
+                                                    >
+                                                        <Edit size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(admin.id)}
+                                                        disabled={isBeingDeleted}
+                                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-40 flex items-center"
+                                                        title={t.delete}
+                                                    >
+                                                        {isBeingDeleted
+                                                            ? <Loader2 size={16} className="animate-spin" />
+                                                            : <Trash2 size={16} />}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Pagination */}
+            {!isLoading && pagination && (
+                <div className="flex flex-col md:flex-row items-center justify-between gap-3 px-4 py-3">
+                    <div className="text-xs text-gray-500 shrink-0">
+                        {lang === "ar" ? (
+                            <span>الصفحة {pagination.current_page} من {pagination.total_pages} — الإجمالي {pagination.total_items}</span>
+                        ) : (
+                            <span>Page {pagination.current_page} of {pagination.total_pages} — Total {pagination.total_items}</span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            disabled={!canPrev}
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            className="w-9 h-9 rounded-xl border border-gray-200 bg-white text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center hover:bg-gray-50 transition-colors"
+                        >
+                            <ChevronLeft size={16} className={lang === "ar" ? "rotate-180" : ""} />
+                        </button>
+                        {Array.from({ length: pagination.total_pages }, (_, i) => i + 1).map((p) => (
+                            <button
+                                key={p}
+                                onClick={() => setPage(p)}
+                                className={`w-9 h-9 rounded-xl text-sm font-semibold border transition-colors ${p === pagination.current_page ? "bg-[#483383] text-white border-[#483383]" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"}`}
+                            >
+                                {p}
+                            </button>
+                        ))}
+                        <button
+                            disabled={!canNext}
+                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            className="w-9 h-9 rounded-xl border border-gray-200 bg-white text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center hover:bg-gray-50 transition-colors"
+                        >
+                            <ChevronRight size={16} className={lang === "ar" ? "rotate-180" : ""} />
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Add / Edit Modal */}
+            {modalMode !== null && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        {/* Header */}
+                        <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center shrink-0">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                                {modalMode === "add" ? t.addManager : t.editManager}
+                            </h3>
+                            <button
+                                onClick={closeModal}
+                                disabled={isSaving}
+                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="p-8 space-y-4 overflow-y-auto">
+                            {field("admin-name", lang === "ar" ? "الاسم" : "Name", "text", form.name, (v) => setForm({ ...form, name: v }))}
+                            {field("admin-username", lang === "ar" ? "اسم المستخدم" : "Username", "text", form.username, (v) => setForm({ ...form, username: v }))}
+                            {field("admin-email", lang === "ar" ? "البريد الإلكتروني" : "Email", "email", form.email, (v) => setForm({ ...form, email: v }))}
+                            {field(
+                                "admin-password",
+                                lang === "ar" ? "كلمة المرور" : "Password",
+                                "password",
+                                form.password,
+                                (v) => setForm({ ...form, password: v }),
+                                modalMode === "add", // required only on add
+                                modalMode === "edit"
+                                    ? (lang === "ar" ? "اتركه فارغاً للإبقاء على الحالي" : "Leave blank to keep current")
+                                    : "••••••••",
+                            )}
+
+                            {/* Role */}
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="admin-role" className="text-sm font-semibold text-gray-700">
+                                    {t.staffHR ?? "Role"} <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    id="admin-role"
+                                    className="w-full p-3.5 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383]/30 focus:border-[#483383] text-sm transition-all disabled:opacity-50"
+                                    value={form.role ?? ""}
+                                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                                    disabled={isSaving || rolesLoading}
+                                >
+                                    <option value="" disabled>
+                                        {rolesLoading
+                                            ? (lang === "ar" ? "جارٍ التحميل..." : "Loading...")
+                                            : (lang === "ar" ? "اختر دوراً" : "Select role")}
+                                    </option>
+                                    {roles.map((r) => (
+                                        <option key={r.id} value={r.name}>{r.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {formError && (
+                                <p className="text-sm text-red-500 font-medium">{formError}</p>
+                            )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="px-8 py-6 border-t border-gray-100 flex gap-3 shrink-0">
+                            <button
+                                onClick={closeModal}
+                                disabled={isSaving}
+                                className="flex-1 py-3.5 font-semibold text-gray-500 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors disabled:opacity-50"
+                            >
+                                {t.cancel}
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="flex-1 py-3.5 font-semibold text-white bg-[#483383] rounded-2xl shadow-lg hover:bg-[#3a2870] transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
+                            >
+                                {isSaving && <Loader2 size={16} className="animate-spin" />}
+                                {t.save}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 };
 
 export default ManagersModule;

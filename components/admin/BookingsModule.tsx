@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, X, Phone, Mail, User, Check, AlertCircle } from "lucide-react";
+import { Search, X, Phone, Mail, User, Check, AlertCircle, Calendar, Clock, CreditCard, Activity, FileText } from "lucide-react";
 import { translations, Locale } from "../../services/i18n";
 import {
   BookingType,
@@ -198,10 +198,8 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                     key={b.id}
                     className="hover:bg-gray-50/50 cursor-pointer transition-colors"
                     onClick={() => {
-                      if (b.user) {
-                        setSelectedBooking(b);
-                        setShowPhoneActions(false);
-                      }
+                      setSelectedBooking(b);
+                      setShowPhoneActions(false);
                     }}
                   >
                     <td className="px-2 py-2 font-semibold text-gray-400 text-xs">
@@ -386,101 +384,208 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
         </div>
       )}
 
-      {/* User Details Popup */}
-      {selectedBooking && selectedBooking.user && (
+      {/* Booking Details Popup */}
+      {selectedBooking && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-fadeIn overflow-y-auto"
           onClick={() => setSelectedBooking(null)}
         >
           <div
-            className="bg-white w-full max-w-[440px] rounded-[32px] shadow-2xl overflow-hidden animate-scaleIn relative"
+            className="bg-white w-full max-w-2xl lg:max-w-3xl rounded-[32px] shadow-2xl overflow-hidden animate-scaleIn relative my-auto max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedBooking(null)}
-              className="absolute top-4 right-4 w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors z-10"
-            >
-              <X size={18} />
-            </button>
+            {/* Header / Sticky Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur z-10 shrink-0">
+               <div>
+                 <h2 className="text-xl font-bold text-gray-900 mb-1" dir="ltr">{selectedBooking.booking_number || `#${selectedBooking.id}`}</h2>
+                 <span className="text-sm font-semibold text-gray-500">{selectedBooking.service}</span>
+               </div>
+               <button
+                  onClick={() => setSelectedBooking(null)}
+                  className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+            </div>
 
-            {/* Content */}
-            <div className="p-8 flex flex-col items-center text-center">
-              {/* Avatar */}
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-50 border-4 border-white shadow-lg mb-4">
-                <img
-                  src={selectedBooking.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user.name)}&background=random`}
-                  alt={selectedBooking.user.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user?.name || 'User')}&background=random`;
-                  }}
-                />
-              </div>
+            {/* Scrollable Body */}
+            <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar">
+               
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-              {/* Name & ID */}
-              <h2 className="text-xl font-bold text-gray-900 mb-1">{selectedBooking.user.name}</h2>
-              <span className="text-xs font-medium text-[#483383] bg-[#483383]/10 px-3 py-1 rounded-full mb-6">
-                ID: {selectedBooking.user.id}
-              </span>
-
-              {/* Contact Info */}
-              <div className="w-full space-y-3 mb-2">
-                {selectedBooking.user.phone && (
-                  <div
-                    className={`flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer ${showPhoneActions ? 'bg-blue-50 ring-2 ring-blue-100' : 'bg-gray-50'}`}
-                    onClick={() => setShowPhoneActions(!showPhoneActions)}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm shrink-0">
-                      <Phone size={14} />
+                  {/* Schedule Info */}
+                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                       <Calendar size={16} className="text-blue-500" />
+                       {t.schedule || "Schedule"}
+                    </h3>
+                    <div className="space-y-3">
+                       <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.date || "Date"}</span>
+                          <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.start_date}</span>
+                       </div>
+                       <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.time || "Time"}</span>
+                          <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.start_time}</span>
+                       </div>
+                       {selectedBooking.request?.status && (
+                         <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                            <span className="text-xs text-gray-500">{t.status || "Status"}</span>
+                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide bg-gray-200 text-gray-700`}>
+                              {selectedBooking.request.status}
+                            </span>
+                         </div>
+                       )}
                     </div>
-                    {!showPhoneActions ? (
-                      <span className="text-sm font-semibold text-gray-600" dir="ltr">{selectedBooking.user.phone}</span>
-                    ) : (
-                      <div className="flex items-center gap-2 animate-fadeIn w-full justify-between">
-                        <span className="text-sm font-semibold text-gray-600" dir="ltr">{selectedBooking.user.phone}</span>
-                        <a
-                          href={`tel:${selectedBooking.user.phone}`}
-                          className="flex-1 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-colors shadow-sm flex justify-center items-center"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {t.call}
-                        </a>
-                        <a
-                          href={`https://wa.me/${selectedBooking.user.phone.replace(/\D/g, '')}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex-1 py-1.5 bg-[#25D366] text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity shadow-sm flex justify-center items-center"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {t.whatsapp}
-                        </a>
+                  </div>
+
+                  {/* Customer Info */}
+                  {selectedBooking.user ? (
+                      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <User size={16} className="text-purple-500" />
+                          {t.customer || "Customer Details"}
+                        </h3>
+                        <div className="flex items-center gap-3 mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate(`/admin/users/${selectedBooking.user.id}`)}>
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-white border-2 border-white shadow-sm shrink-0">
+                             <img src={selectedBooking.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user.name)}&background=random`} alt={selectedBooking.user.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div>
+                             <div className="text-sm font-bold text-gray-900">{selectedBooking.user.name}</div>
+                             <div className="text-xs text-gray-500">ID: {selectedBooking.user.id}</div>
+                          </div>
+                        </div>
+                        <div className="space-y-2 flex flex-col justify-end">
+                          {selectedBooking.user.phone && (
+                            <div className="flex items-center justify-between">
+                               <a href={`tel:${selectedBooking.user.phone}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors" dir="ltr" onClick={(e) => e.stopPropagation()}>
+                                 <Phone size={14} /> {selectedBooking.user.phone}
+                               </a>
+                               <a href={`https://wa.me/${selectedBooking.user.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-[10px] bg-[#25D366] text-white px-2 py-1 rounded-lg font-bold" onClick={(e) => e.stopPropagation()}>
+                                 {t.whatsapp || "WhatsApp"}
+                               </a>
+                            </div>
+                          )}
+                          {selectedBooking.user.email && (
+                            <a href={`mailto:${selectedBooking.user.email}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors truncate" onClick={(e) => e.stopPropagation()}>
+                              <Mail size={14} className="shrink-0" /> <span className="truncate">{selectedBooking.user.email}</span>
+                            </a>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                )}
+                  ) : (
+                      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex items-center justify-center">
+                          <span className="text-sm text-gray-500">{t.noCustomerData || "No customer data available"}</span>
+                      </div>
+                  )}
 
-                {selectedBooking.user.email && (
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm">
-                      <Mail size={14} />
-                    </div>
-                    <span className="text-sm font-semibold text-gray-600 truncate">{selectedBooking.user.email}</span>
-                  </div>
-                )}
-              </div>
-              {/* show more */}
-              <button
-                className="px-4 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-semibold transition-colors"
-                onClick={() => {
-                  // navigate to user details page
-                  if (selectedBooking) {
-                    navigate(`/admin/users/${selectedBooking.user.id}`);
-                  }
-                }}
-              >
-                {t.showMore}
-              </button>
+                  {/* Payment & Pricing */}
+                  {selectedBooking.request?.pricing && (
+                      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 h-fit">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                            <CreditCard size={16} className="text-green-500" />
+                            {t.paymentInfo || "Payment & Pricing"}
+                          </h3>
+                          {selectedBooking.request?.payment && (
+                             <div className="flex items-center gap-1">
+                               <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${selectedBooking.request.payment.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                  {selectedBooking.request.payment.payment_status === 'paid' ? (t.paid || 'Paid') : (t.unpaid || 'Unpaid')}
+                               </span>
+                               {selectedBooking.request.payment.payment_type && (
+                                <span className="text-[9px] uppercase font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full">
+                                    {selectedBooking.request.payment.payment_type}
+                                </span>
+                               )}
+                             </div>
+                          )}
+                        </div>
+                        <div className="space-y-3">
+                           <div className="flex justify-between items-center">
+                              <span className="text-xs text-gray-500">{t.basePrice || "Base Price"}</span>
+                              <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.request.pricing.base_price} {t.currency}</span>
+                           </div>
+                           {selectedBooking.request.pricing.options_price !== "0.00" && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-gray-500">{t.optionsPrice || "Options Price"}</span>
+                                <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.request.pricing.options_price} {t.currency}</span>
+                              </div>
+                           )}
+                           {selectedBooking.request.pricing.discount_amount !== "0.00" && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-gray-500">{t.discount || "Discount"}</span>
+                                <span className="text-sm font-semibold text-red-500" dir="ltr">{selectedBooking.request.pricing.discount_amount} {t.currency}</span>
+                              </div>
+                           )}
+                           <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                              <span className="text-xs font-semibold text-gray-900">{t.total || "Final Total"}</span>
+                              <span className="text-sm font-bold text-green-600" dir="ltr">{selectedBooking.request.pricing.final_price} {t.currency}</span>
+                           </div>
+                        </div>
+                      </div>
+                  )}
+
+                  {/* Sessions Info */}
+                  {selectedBooking.request?.sessions_info && (
+                      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 h-fit">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <Activity size={16} className="text-orange-500" />
+                          {t.sessionsInfo || "Sessions Details"}
+                        </h3>
+                        <div className="space-y-3">
+                           <div className="flex justify-between items-center">
+                              <span className="text-xs text-gray-500">{t.totalSessions || "Total Sessions"}</span>
+                              <span className="text-sm font-semibold text-gray-900">{selectedBooking.request.sessions_info.session_count}</span>
+                           </div>
+                           <div className="flex justify-between items-center">
+                              <span className="text-xs text-gray-500">{t.completedSessions || "Completed"}</span>
+                              <span className="text-sm font-semibold text-green-600">{selectedBooking.request.sessions_info.completed_sessions}</span>
+                           </div>
+                           <div className="flex justify-between items-center">
+                              <span className="text-xs text-gray-500">{t.remainingSessions || "Remaining"}</span>
+                              <span className="text-sm font-semibold text-orange-600">{selectedBooking.request.sessions_info.remaining_sessions}</span>
+                           </div>
+                           
+                           {/* Progress */}
+                           <div className="pt-2">
+                              <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden flex" dir="ltr">
+                                 <div 
+                                    className="bg-green-500 h-full rounded-full transition-all duration-500" 
+                                    style={{ width: `${selectedBooking.request.sessions_info.progress || 0}%` }}
+                                 ></div>
+                              </div>
+                              <div className="text-[10px] font-medium text-gray-500 text-end mt-1.5">{selectedBooking.request.sessions_info.progress || 0}%</div>
+                           </div>
+                        </div>
+                      </div>
+                  )}
+
+                  {/* Notes (if any) */}
+                  {(selectedBooking.request?.notes?.customer_notes || selectedBooking.request?.notes?.admin_notes) && (
+                      <div className="md:col-span-2 bg-yellow-50/50 rounded-2xl p-5 border border-yellow-100">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                          <FileText size={16} className="text-yellow-600" />
+                          {t.notes || "Notes"}
+                        </h3>
+                        <div className="space-y-3">
+                           {selectedBooking.request.notes.customer_notes && (
+                             <div>
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.customerNotes || "Customer Notes"}</span>
+                                <p className="text-sm text-gray-800 bg-white p-3 rounded-xl border border-yellow-100/50">{selectedBooking.request.notes.customer_notes}</p>
+                             </div>
+                           )}
+                           {selectedBooking.request.notes.admin_notes && (
+                             <div>
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.adminNotes || "Admin Notes"}</span>
+                                <p className="text-sm text-gray-800 bg-white p-3 rounded-xl border border-yellow-100/50">{selectedBooking.request.notes.admin_notes}</p>
+                             </div>
+                           )}
+                        </div>
+                      </div>
+                  )}
+
+               </div>
+
             </div>
           </div>
         </div>

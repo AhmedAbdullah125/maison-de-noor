@@ -37,7 +37,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
   const perPage = 10;
 
 
-  const [paymentFilter, setPaymentFilter] = useState<"paid" | "unpaid" | undefined>(undefined);
+  const [paymentFilter, setPaymentFilter] = useState<"paid" | "unpaid" | "all">("paid");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -126,8 +126,8 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
           {/* Payment Status Filter */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setPaymentFilter(undefined)}
-              className={`px-4 py-2.5 rounded-2xl text-sm font-semibold border transition-colors ${paymentFilter === undefined
+              onClick={() => setPaymentFilter("all")}
+              className={`px-4 py-2.5 rounded-2xl text-sm font-semibold border transition-colors ${paymentFilter === "all"
                 ? "bg-gray-900 text-white border-gray-900"
                 : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
                 }`}

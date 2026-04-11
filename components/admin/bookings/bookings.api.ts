@@ -15,6 +15,8 @@ export type ApiBooking = {
     start_date: string;
     start_time: string;
     status?: BookingStatus;
+    user?: any;
+    request?: any;
 };
 
 export type ApiPaginationMeta = {

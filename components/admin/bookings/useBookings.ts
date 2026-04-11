@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Locale } from "../../../services/i18n";
 import { ApiBooking, ApiPaginationMeta, BookingType, getBookings } from "./bookings.api";
 
-export function useBookings(lang: Locale, type: BookingType, perPage: number, paymentStatus?: "paid" | "unpaid", search?: string) {
+export function useBookings(lang: Locale, type: BookingType, perPage: number, paymentStatus: "paid" | "unpaid" | "all" = "paid", search?: string) {
     const [isLoading, setIsLoading] = useState(true);
     const [apiRows, setApiRows] = useState<ApiBooking[]>([]);
     const [meta, setMeta] = useState<ApiPaginationMeta | null>(null);
@@ -10,7 +10,8 @@ export function useBookings(lang: Locale, type: BookingType, perPage: number, pa
 
     const fetcher = useCallback(async () => {
         setIsLoading(true);
-        const res = await getBookings({ lang, type, page, per_page: perPage, payment_status: paymentStatus, search });
+        const apiPaymentStatus = paymentStatus === "all" ? undefined : paymentStatus;
+        const res = await getBookings({ lang, type, page, per_page: perPage, payment_status: apiPaymentStatus, search });
         if (res.ok) {
             setApiRows(res.data ?? []);
             setMeta(res.meta ?? null);

@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Clock, X, Phone, Mail, User, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useBookings } from '../../components/admin/bookings/useBookings';
-import { BookingStatus, ApiBooking } from '../../components/admin/bookings/bookings.api';
-import { translations, Locale } from '@/services/i18n';
+import { useBookings } from '../services/bookings/useBookings';
+import { BookingStatus, ApiBooking } from '../services/bookings/bookings.api';
+import { translations, Locale } from '../services/i18n';
 
 interface AppointmentsPageProps {
   lang?: Locale;
@@ -211,7 +211,7 @@ const AppointmentsPage: React.FC<AppointmentsPageProps> = ({ lang = 'ar' }) => {
 
               {/* Action Button */}
               <button
-                onClick={() => navigate(`/team/client/${selectedBooking.user!.id}`)}
+                onClick={() => navigate(`/client/${selectedBooking.user!.id}`)}
                 className="w-full py-4 bg-app-primary text-white text-white rounded-2xl font-bold text-sm shadow-lg shadow-app-primary/20 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity active:scale-[0.98]"
                 style={{ backgroundColor: '#483383' }}
               >

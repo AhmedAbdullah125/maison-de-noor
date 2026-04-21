@@ -4,10 +4,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowRight, Phone, MessageSquare, Calendar, Ticket, CheckCircle2, Loader2, AlertCircle, ChevronDown, Image as ImageIcon, Upload, X, Plus, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import imageCompression from 'browser-image-compression';
-import { DASHBOARD_API_BASE_URL } from '@/lib/apiConfig';
-import { http } from '@/components/services/http';
-import { changeBookingStatus } from '../../components/admin/bookings/bookings.api';
-import { translations, Locale } from '@/services/i18n';
+import { DASHBOARD_API_BASE_URL } from '../lib/apiConfig';
+import { http } from '../services/http';
+import { changeBookingStatus } from '../services/bookings/bookings.api';
+import { translations, Locale } from '../services/i18n';
 
 // Types based on API response
 interface UserProfile {

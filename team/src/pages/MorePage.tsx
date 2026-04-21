@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { LogOut, User, Settings, HelpCircle, ChevronLeft, Languages, ChevronRight } from 'lucide-react';
-import { translations, Locale } from '@/services/i18n';
+import { translations, Locale } from '../services/i18n';
 
 interface MorePageProps {
   onLogout: () => void;

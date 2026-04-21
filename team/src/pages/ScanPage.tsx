@@ -1,10 +1,9 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowRight, Search, AlertCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Html5Qrcode } from 'html5-qrcode';
-import { DASHBOARD_API_BASE_URL } from '@/lib/apiConfig';
-import { http } from '@/components/services/http';
+import { DASHBOARD_API_BASE_URL } from '../lib/apiConfig';
+import { http } from '../services/http';
 
 const ScanPage: React.FC = () => {
   const navigate = useNavigate();
@@ -13,144 +12,128 @@ const ScanPage: React.FC = () => {
   const [cameraError, setCameraError] = useState('');
   const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(false);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
   const [lastScan, setLastScan] = useState('');
-  const isMountedRef = useRef(true); // Track if component is mounted
+
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isRunningRef = useRef(false);  // true only when .start() has resolved
+  const isMountedRef = useRef(true);
 
   // Parse QR code data to extract user ID
   const parseQRData = (data: string): string | null => {
     try {
-      // Check for "noor://account/{id}" format
       if (data.startsWith('noor://account/')) {
         return data.replace('noor://account/', '').trim();
       }
-
-      // Try parsing as JSON
       const parsed = JSON.parse(data);
-      if (parsed.type === 'client' && parsed.id) {
-        return parsed.id;
-      }
-      if (parsed.id) {
-        return parsed.id;
-      }
+      if (parsed.type === 'client' && parsed.id) return parsed.id;
+      if (parsed.id) return parsed.id;
     } catch {
-      // Not JSON, try other formats
+      // Not JSON
     }
-
-    // Check for "client:c1" format
     if (data.startsWith('client:')) {
       return data.replace('client:', '').trim();
     }
-
-    // Assume it's a direct ID
-    return data.trim();
+    return data.trim() || null;
   };
 
-  const handleScanSuccess = async (decodedText: string) => {
-    // Don't process if component has unmounted
-    if (!isMountedRef.current) return;
+  /**
+   * Safely stop the scanner. Only calls .stop() if the scanner is actually running.
+   * Returns a promise that resolves when the scanner is fully stopped.
+   */
+  const safeStop = useCallback(async () => {
+    if (scannerRef.current && isRunningRef.current) {
+      isRunningRef.current = false;
+      try {
+        await scannerRef.current.stop();
+      } catch (e) {
+        // Ignore — scanner may have already been stopped
+      }
+      scannerRef.current = null;
+      if (isMountedRef.current) setScanning(false);
+    }
+  }, []);
 
-    // Prevent duplicate scans
+  const handleScanSuccess = useCallback(async (decodedText: string) => {
+    if (!isMountedRef.current) return;
     if (decodedText === lastScan) return;
     setLastScan(decodedText);
 
     const userId = parseQRData(decodedText);
-
-    if (userId) {
-      try {
-        setLoading(true);
-        setError('');
-
-        // Fetch user profile from API
-        const response = await http.get(`${DASHBOARD_API_BASE_URL}/users/${userId}`);
-
-        // Check again before navigation in case component unmounted during API call
-        if (!isMountedRef.current) return;
-
-        if (response.data && response.data.data) {
-          // Stop scanning before navigation
-          stopScanning();
-          setLastScan('');
-          setError('');
-          setLoading(false);
-
-          navigate(`/team/client/${userId}`);
-        } else {
-          setError(`لم يتم العثور على عميلة بالكود: ${userId}`);
-          setTimeout(() => {
-            setError('');
-            setLastScan('');
-          }, 3000);
-        }
-      } catch (err: any) {
-        console.error('Error fetching user profile:', err);
-        setError('حدث خطأ في تحميل بيانات العميلة');
-        setTimeout(() => {
-          setError('');
-          setLastScan('');
-        }, 3000);
-      } finally {
-        setLoading(false);
-      }
-    } else {
+    if (!userId) {
       setError('كود QR غير صالح');
-      setTimeout(() => {
-        setError('');
-        setLastScan('');
-      }, 3000);
+      setTimeout(() => { if (isMountedRef.current) { setError(''); setLastScan(''); } }, 3000);
+      return;
     }
-  };
 
-  const startScanning = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await http.get(`${DASHBOARD_API_BASE_URL}/users/${userId}`);
+      if (!isMountedRef.current) return;
+
+      if (response.data?.data) {
+        await safeStop();
+        setLastScan('');
+        setError('');
+        navigate(`/client/${userId}`);
+      } else {
+        setError(`لم يتم العثور على عميلة بالكود: ${userId}`);
+        setTimeout(() => { if (isMountedRef.current) { setError(''); setLastScan(''); } }, 3000);
+      }
+    } catch (err: any) {
+      console.error('Error fetching user profile:', err);
+      if (isMountedRef.current) {
+        setError('حدث خطأ في تحميل بيانات العميلة');
+        setTimeout(() => { if (isMountedRef.current) { setError(''); setLastScan(''); } }, 3000);
+      }
+    } finally {
+      if (isMountedRef.current) setLoading(false);
+    }
+  }, [lastScan, navigate, safeStop]);
+
+  const startScanning = useCallback(async () => {
+    // Don't start if already running or unmounted
+    if (isRunningRef.current || !isMountedRef.current) return;
+
     try {
       const html5QrCode = new Html5Qrcode('qr-reader');
       scannerRef.current = html5QrCode;
 
       await html5QrCode.start(
-        { facingMode: 'environment' }, // Use back camera on mobile
-        {
-          fps: 10, // Frames per second to scan
-          qrbox: { width: 250, height: 250 }, // Scanning box size
-        },
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         handleScanSuccess,
-        () => {
-          // Error callback - ignore errors during scanning
-        }
+        () => { /* ignore frame errors */ }
       );
 
-      setScanning(true);
-      setCameraError('');
+      // Only mark as running if still mounted
+      if (isMountedRef.current) {
+        isRunningRef.current = true;
+        setScanning(true);
+        setCameraError('');
+      } else {
+        // Component unmounted during start — stop immediately
+        await html5QrCode.stop().catch(() => {});
+        scannerRef.current = null;
+      }
     } catch (err: any) {
       console.error('Error starting scanner:', err);
+      scannerRef.current = null;
+      if (!isMountedRef.current) return;
 
-      if (err.toString().includes('NotAllowedError')) {
+      const msg = err?.toString() ?? '';
+      if (msg.includes('NotAllowedError')) {
         setCameraError('تم رفض الوصول إلى الكاميرا. الرجاء السماح بالوصول للكاميرا في إعدادات المتصفح.');
-      } else if (err.toString().includes('NotFoundError')) {
+      } else if (msg.includes('NotFoundError')) {
         setCameraError('لم يتم العثور على كاميرا. الرجاء التأكد من توصيل الكاميرا.');
       } else {
         setCameraError('حدث خطأ في الكاميرا. حاول مرة أخرى.');
       }
     }
-  };
-
-  const stopScanning = () => {
-    if (scannerRef.current) {
-      scannerRef.current
-        .stop()
-        .then(() => {
-          setScanning(false);
-          scannerRef.current = null; // Clear the reference
-        })
-        .catch((err) => {
-          console.error('Error stopping scanner:', err);
-          setScanning(false);
-          scannerRef.current = null; // Clear even on error
-        });
-    }
-  };
+  }, [handleScanSuccess]);
 
   useEffect(() => {
-    // Reset lastScan when component mounts to prevent auto-navigation
+    isMountedRef.current = true;
     setLastScan('');
     setError('');
     setCameraError('');
@@ -158,34 +141,27 @@ const ScanPage: React.FC = () => {
     startScanning();
 
     return () => {
-      // Ensure scanner is stopped on unmount
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(err => console.error('Cleanup error:', err));
-        scannerRef.current = null;
-      }
+      isMountedRef.current = false;
+      // safeStop guards against calling .stop() when not running
+      safeStop();
     };
-  }, []);
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualCode.trim()) return;
-
     const userId = manualCode.replace('client:', '').trim();
 
     try {
       setLoading(true);
       setError('');
-
-      // Fetch user profile from API
       const response = await http.get(`${DASHBOARD_API_BASE_URL}/users/${userId}`);
-
-      if (response.data && response.data.data) {
-        navigate(`/team/client/${userId}`);
+      if (response.data?.data) {
+        navigate(`/client/${userId}`);
       } else {
         setError('لم يتم العثور على عميلة بهذا الكود');
       }
-    } catch (err: any) {
-      console.error('Error fetching user profile:', err);
+    } catch {
       setError('لم يتم العثور على عميلة بهذا الكود');
     } finally {
       setLoading(false);
@@ -229,10 +205,7 @@ const ScanPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <>
-              {/* QR Reader Element */}
-              <div id="qr-reader" className="w-full h-full"></div>
-            </>
+            <div id="qr-reader" className="w-full h-full" />
           )}
         </div>
 
@@ -243,10 +216,7 @@ const ScanPage: React.FC = () => {
             <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-app-gold rounded-tr-xl -mt-1 -mr-1" />
             <div className="absolute bottom-0 left-0 w-6 h-6 border-t-4 border-r-4 border-app-gold rounded-tr-xl -mt-1 -mr-1 rotate-[180deg]" />
             <div className="absolute bottom-0 right-0 w-6 h-6 border-t-4 border-r-4 border-app-gold rounded-tr-xl -mt-1 -mr-1 rotate-[90deg]" />
-
-            {/* Scanning Line Animation */}
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-app-gold shadow-[0_0_8px_rgba(197,179,88,0.8)] animate-[scan_2s_infinite_linear]" />
-
             <p className="text-white/70 text-xs font-semibold mt-32 animate-pulse">جاري البحث عن كود...</p>
           </div>
         )}
@@ -276,10 +246,7 @@ const ScanPage: React.FC = () => {
             placeholder="رقم العميل / الكود"
             className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-app-gold focus:bg-white transition-all text-center font-mono font-semibold text-lg"
             value={manualCode}
-            onChange={(e) => {
-              setManualCode(e.target.value);
-              setError('');
-            }}
+            onChange={(e) => { setManualCode(e.target.value); setError(''); }}
           />
           <button
             type="submit"
@@ -297,17 +264,8 @@ const ScanPage: React.FC = () => {
           50% { opacity: 1; }
           100% { top: 90%; opacity: 0; }
         }
-        
-        /* Hide html5-qrcode default UI elements */
-        #qr-reader__dashboard_section {
-          display: none !important;
-        }
-        
-        #qr-reader__dashboard_section_csr {
-          display: none !important;
-        }
-        
-        /* Make video fill the container */
+        #qr-reader__dashboard_section { display: none !important; }
+        #qr-reader__dashboard_section_csr { display: none !important; }
         #qr-reader video {
           width: 100% !important;
           height: 100% !important;

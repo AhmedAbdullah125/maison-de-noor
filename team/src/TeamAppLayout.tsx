@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import TeamTabBar from './components/TeamTabBar';
@@ -7,6 +6,8 @@ import AppointmentsPage from './pages/AppointmentsPage';
 import ScanPage from './pages/ScanPage';
 import MorePage from './pages/MorePage';
 import ClientProfilePage from './pages/ClientProfilePage';
+import { isLoggedIn, clearAuth } from './services/authStorage';
+import { getLang } from './services/i18n';
 
 
 const TeamAppLayout: React.FC = () => {
@@ -14,12 +15,11 @@ const TeamAppLayout: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
-    return (localStorage.getItem('salon_team_lang') as 'ar' | 'en') || 'ar';
+    return (getLang() as 'ar' | 'en') || 'ar';
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('salon_team_token');
-    setIsAuthenticated(!!token);
+    setIsAuthenticated(isLoggedIn());
     setIsLoading(false);
   }, []);
 
@@ -38,7 +38,7 @@ const TeamAppLayout: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('salon_team_token');
+    clearAuth();
     setIsAuthenticated(false);
   };
 
@@ -49,18 +49,18 @@ const TeamAppLayout: React.FC = () => {
   }
 
   // Show TabBar on main pages only, hide on detail pages if needed
-  const showTabBar = location.pathname !== '/team/scan';
+  const showTabBar = location.pathname !== '/scan';
 
   return (
     <div className="w-full max-w-[430px] bg-app-bg max-h-screen min-h-screen shadow-2xl relative flex flex-col overflow-hidden font-alexandria mx-auto">
       <div className="flex-1 overflow-y-auto no-scrollbar relative pb-20">
         <Routes>
-          <Route path="/" element={<Navigate to="/team/appointments" replace />} />
+          <Route path="/" element={<Navigate to="/appointments" replace />} />
           <Route path="appointments" element={<AppointmentsPage lang={lang} />} />
           <Route path="scan" element={<ScanPage />} />
           <Route path="more" element={<MorePage onLogout={handleLogout} lang={lang} toggleLang={toggleLang} />} />
           <Route path="client/:clientId" element={<ClientProfilePage lang={lang} />} />
-          <Route path="*" element={<Navigate to="/team/appointments" replace />} />
+          <Route path="*" element={<Navigate to="/appointments" replace />} />
         </Routes>
       </div>
       {showTabBar && <TeamTabBar lang={lang} />}
@@ -69,3 +69,4 @@ const TeamAppLayout: React.FC = () => {
 };
 
 export default TeamAppLayout;
+

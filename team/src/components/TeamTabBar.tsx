@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, ScanLine, User } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { translations, Locale } from '../../services/i18n';
+import { translations, Locale } from '../services/i18n';
 
 interface TeamTabBarProps {
   lang?: Locale;
@@ -13,9 +13,9 @@ const TeamTabBar: React.FC<TeamTabBarProps> = ({ lang = 'ar' }) => {
   const t = translations[lang];
 
   const tabs = [
-    { id: 'appointments', path: '/team/appointments', icon: <Calendar size={24} />, label: t.appointments },
-    { id: 'scan', path: '/team/scan', icon: <ScanLine size={28} />, label: t.scan, isCenter: true },
-    { id: 'more', path: '/team/more', icon: <User size={24} />, label: t.more },
+    { id: 'appointments', path: '/appointments', icon: <Calendar size={24} />, label: t.appointments },
+    { id: 'scan', path: '/scan', icon: <ScanLine size={28} />, label: t.scan, isCenter: true },
+    { id: 'more', path: '/more', icon: <User size={24} />, label: t.more },
   ];
 
   const currentPath = location.pathname;

@@ -85,12 +85,19 @@ export async function getServices(params: {
     }
 }
 
-/** ✅ DELETE /services/:id (عدّل المسار لو endpoint مختلف عندكم) */
+/** ✅ DELETE /services/:id */
 export async function deleteService(id: number, lang: Locale) {
     try {
+        const token = localStorage.getItem("token");
         const res = await http.delete<ApiSimpleResponse>(
             `${DASHBOARD_API_BASE_URL}/services/${id}`,
-            { headers: { lang } }
+            {
+                headers: {
+                    lang,
+                    Accept: "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+            }
         );
 
         toastApi(!!res?.data?.status, res?.data?.message);
@@ -98,7 +105,7 @@ export async function deleteService(id: number, lang: Locale) {
         if (!res?.data?.status) {
             return { ok: false as const, error: res?.data?.message || "Delete failed" };
         }
-        return { ok: true as const };
+        return { ok: true as const, msg: res?.data?.message };
     } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || "Delete service error";
         toastApi(false, msg);

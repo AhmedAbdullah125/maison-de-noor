@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { translations, Locale } from "../../services/i18n";
 import { useServices } from "./services/useServices";
 import { toast } from "sonner";
-import { DASHBOARD_API_BASE_URL } from "@/lib/apiConfig";
 
 interface ServicesModuleProps {
   lang: Locale;
@@ -89,7 +88,7 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
   const t = translations[lang];
 
   const perPage = 1000;
-  const { isLoading, uiRows } = useServices(lang, perPage);
+  const { isLoading, uiRows, remove } = useServices(lang, perPage);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [localRows, setLocalRows] = useState<any[] | null>(null);
@@ -107,40 +106,6 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
     if (!q) return rowsToRender;
     return rowsToRender.filter((s) => (s.name || "").toLowerCase().includes(q));
   }, [rowsToRender, searchTerm]);
-
-  // ✅ DELETE /services/:id (same file)
-  const deleteService = async (id: number) => {
-    const res = await fetch(`${DASHBOARD_API_BASE_URL}/services/${id}`, {
-      method: "DELETE",
-      headers: {
-        lang,
-        Accept: "application/json",
-        // Authorization: `Bearer ${token}`,
-        // secretKey: "....",
-      } as any,
-    });
-
-    let data: any = null;
-    try {
-      data = await res.json();
-    } catch {
-      data = null;
-    }
-
-    const ok = res.ok && (data?.status === undefined ? true : !!data?.status);
-    const msg =
-      data?.message ||
-      (ok
-        ? lang === "ar"
-          ? "تم حذف الخدمة"
-          : "Service deleted"
-        : lang === "ar"
-          ? "فشل حذف الخدمة"
-          : "Failed to delete service");
-
-    if (!ok) throw new Error(msg);
-    return { ok, msg };
-  };
 
   // ✅ open modal instead of confirm()
   const openDeleteModal = (svc: any) => {
@@ -165,21 +130,31 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
 
     setDeleteLoading(true);
     try {
-      const { msg } = await deleteService(id);
+      const res = await remove(id);
 
-      toast(msg, {
-        style: { background: "#198754", color: "#fff", borderRadius: "10px" },
-      });
-
-      setDeleteModalOpen(false);
-      setDeleteTarget(null);
+      if (res.ok) {
+        toast(
+          (res as any).msg ||
+            (lang === "ar" ? "تم حذف الخدمة" : "Service deleted"),
+          { style: { background: "#198754", color: "#fff", borderRadius: "10px" } }
+        );
+        setDeleteModalOpen(false);
+        setDeleteTarget(null);
+      } else {
+        // rollback on API-level failure
+        setLocalRows(prev);
+        toast(
+          (res as any).error || (lang === "ar" ? "فشل حذف الخدمة" : "Failed to delete service"),
+          { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } }
+        );
+      }
     } catch (e: any) {
-      // rollback
+      // rollback on network error
       setLocalRows(prev);
-
-      toast(e?.message || (lang === "ar" ? "فشل حذف الخدمة" : "Failed to delete service"), {
-        style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
-      });
+      toast(
+        e?.message || (lang === "ar" ? "فشل حذف الخدمة" : "Failed to delete service"),
+        { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } }
+      );
     } finally {
       setDeleteLoading(false);
     }

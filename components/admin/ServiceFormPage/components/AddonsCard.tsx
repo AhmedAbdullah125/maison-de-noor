@@ -365,7 +365,7 @@ export default function AddonsCard({
                                                         </div>
                                                         <div className="relative flex justify-center">
                                                             <span className="bg-white px-6 py-2 text-sm font-semibold text-gray-500 rounded-full border border-gray-200">
-                                                                {lang === "ar" ? "اضافات اخري يمكن اختيارها" : "Other Available Options"}
+                                                                {lang === "ar" ? "اضافات اخرى يمكن اختيارها" : "Other Available Options"}
                                                             </span>
                                                         </div>
                                                     </div>

@@ -12,7 +12,7 @@ export type UiServiceRow = {
     categoryId: number;
 };
 
-export function useServices(lang: Locale, perPage: number) {
+export function useServices(lang: Locale, perPage: number, categoryId?: string) {
     const [isLoading, setIsLoading] = useState(true);
     const [rows, setRows] = useState<ApiService[]>([]);
     const [page, setPage] = useState(1);
@@ -21,7 +21,12 @@ export function useServices(lang: Locale, perPage: number) {
         let mounted = true;
         (async () => {
             setIsLoading(true);
-            const res = await getServices({ lang, per_page: perPage, page });
+            const res = await getServices({ 
+                lang, 
+                per_page: perPage, 
+                page,
+                ...(categoryId ? { category_id: categoryId } : {})
+            });
             if (!mounted) return;
 
             if (!res.ok) {
@@ -37,7 +42,7 @@ export function useServices(lang: Locale, perPage: number) {
         return () => {
             mounted = false;
         };
-    }, [lang, perPage, page]);
+    }, [lang, perPage, page, categoryId]);
 
     const uiRows: UiServiceRow[] = useMemo(() => {
         return rows.map((s) => {

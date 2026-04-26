@@ -58,6 +58,7 @@ export async function getServices(params: {
     lang: Locale;
     per_page: number;
     page?: number;
+    category_id?: string;
 }) {
     try {
         const res = await http.get<ApiServicesResponse>(
@@ -66,6 +67,7 @@ export async function getServices(params: {
                 params: {
                     per_page: params.per_page,
                     ...(params.page ? { page: params.page } : {}),
+                    ...(params.category_id ? { category_id: params.category_id } : {}),
                 },
                 headers: { lang: params.lang },
             }

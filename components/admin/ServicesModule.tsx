@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
-import { Plus, Edit, Trash2, Search, AlertTriangle, X, Loader2 } from "lucide-react";
+import React, { useMemo, useState, useEffect } from "react";
+import { Plus, Edit, Trash2, Search, AlertTriangle, X, Loader2, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { translations, Locale } from "../../services/i18n";
 import { useServices } from "./services/useServices";
+import { getCategories, ApiCategory } from "./categories/categories.api";
 import { toast } from "sonner";
 
 interface ServicesModuleProps {
@@ -88,9 +89,20 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
   const t = translations[lang];
 
   const perPage = 1000;
-  const { isLoading, uiRows, remove } = useServices(lang, perPage);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  
+  const { isLoading, uiRows, remove } = useServices(lang, perPage, categoryId);
+
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
+  
+  useEffect(() => {
+    getCategories({ lang, page: 1, per_page: 100 }).then((res) => {
+      if (res.ok && res.data) setCategories(res.data);
+    });
+  }, [lang]);
+
   const [localRows, setLocalRows] = useState<any[] | null>(null);
 
   // ✅ modal state
@@ -135,7 +147,7 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
       if (res.ok) {
         toast(
           (res as any).msg ||
-            (lang === "ar" ? "تم حذف الخدمة" : "Service deleted"),
+          (lang === "ar" ? "تم حذف الخدمة" : "Service deleted"),
           { style: { background: "#198754", color: "#fff", borderRadius: "10px" } }
         );
         setDeleteModalOpen(false);
@@ -205,6 +217,24 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
           <Search
             className={`absolute ${lang === "ar" ? "right-4" : "left-4"
               } top-1/2 -translate-y-1/2 text-gray-400`}
+            size={18}
+          />
+        </div>
+        <div className="relative w-full md:w-64 shrink-0">
+          <select
+            className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all appearance-none text-gray-700`}
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+          >
+            <option value="">{lang === "ar" ? "جميع الأقسام" : "All Categories"}</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {lang === "ar" ? c.name_ar : c.name_en}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            className={`absolute ${lang === "ar" ? "left-4" : "right-4"} top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none`}
             size={18}
           />
         </div>

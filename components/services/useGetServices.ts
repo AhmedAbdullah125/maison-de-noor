@@ -29,5 +29,4 @@ export const useGetServices = (lang: string, page: number, search?: string) =>
     queryFn: () => fetchServices(lang, page, search),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 60,
-    keepPreviousData: true,
   });

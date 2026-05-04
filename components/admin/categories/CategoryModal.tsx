@@ -80,14 +80,14 @@ export default function CategoryModal({
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Active</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">{t.status}</label>
                             <select
                                 className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-[#483383]"
                                 value={form.is_active ? "1" : "0"}
                                 onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.value === "1" }))}
                             >
-                                <option value="1">Active</option>
-                                <option value="0">Inactive</option>
+                                <option value="1">{t.active}</option>
+                                <option value="0">{t.inactive}</option>
                             </select>
                         </div>
                     </div>

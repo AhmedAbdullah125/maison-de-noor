@@ -24,6 +24,19 @@ export function useCategories(lang: Locale, perPage: number) {
         return m;
     }, [apiRows]);
 
+    async function fetchPage(targetPage: number) {
+        setIsLoading(true);
+        const res = await getCategories({ lang, page: targetPage, per_page: perPage });
+        if (!res.ok) {
+            setApiRows([]);
+            setMeta(null);
+        } else {
+            setApiRows(res.data);
+            setMeta(res.meta);
+        }
+        setIsLoading(false);
+    }
+
     useEffect(() => {
         let mounted = true;
 
@@ -71,9 +84,9 @@ export function useCategories(lang: Locale, perPage: number) {
         imageUrl?: string;
     }) {
         const res = await createCategory(input, lang);
-        if (res.ok && res.created) {
-            upsertRowLocal(res.created);
-            setMeta((m) => (m ? { ...m, total: (m.total || 0) + 1 } : m));
+        if (res.ok) {
+            // Revalidate from server to get fresh positions
+            await fetchPage(page);
         }
         return res;
     }
@@ -101,7 +114,8 @@ export function useCategories(lang: Locale, perPage: number) {
             return res;
         }
 
-        if (res.updated) upsertRowLocal(res.updated);
+        // Revalidate from server to get fresh positions
+        await fetchPage(page);
         return res;
     }
 

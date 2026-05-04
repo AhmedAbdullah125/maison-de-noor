@@ -89,9 +89,8 @@ export async function getCategories(params: {
             }
         );
 
-        toastApi(!!res?.data?.status, res?.data?.message);
-
         if (!res?.data?.status) {
+            toastApi(false, res?.data?.message || "Failed");
             return { ok: false as const, error: res?.data?.message || "Failed" };
         }
 

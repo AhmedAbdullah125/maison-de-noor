@@ -49,7 +49,10 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
     currentImage: "",
   });
 
-  const data: Brand[] = useMemo(() => apiRows.map(mapApiToBrand), [apiRows]);
+  const data: Brand[] = useMemo(
+    () => [...apiRows].sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).map(mapApiToBrand),
+    [apiRows]
+  );
 
   const filtered = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -75,12 +78,13 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
   };
 
   const openEdit = (cat: Brand) => {
+    const apiCat = apiRows.find((r) => r.id === Number(cat.id));
     setEditingId(Number(cat.id));
     setForm({
       name_ar: cat.name || "",
       name_en: cat.nameEn || "",
-      position: 1,
-      is_active: true,
+      position: apiCat?.position ?? 0,
+      is_active: apiCat?.is_active ?? true,
       imageUrl: "",
       currentImage: cat.image || "",
     });

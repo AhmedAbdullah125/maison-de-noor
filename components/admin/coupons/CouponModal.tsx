@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Loader2, Check } from "lucide-react";
+import { X, Loader2, Check, Search } from "lucide-react";
 import { Locale, translations } from "../../../services/i18n";
 import { useCategoriesOptions } from "../categories/useCategoriesOptions";
 import { useServices } from "../services/useServices";
@@ -28,6 +28,7 @@ const CouponModal: React.FC<CouponModalProps> = ({ lang, open, onClose, onSucces
     });
 
     const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
+    const [serviceSearch, setServiceSearch] = useState("");
 
     const { isLoading: catsLoading, rows: categories } = useCategoriesOptions(lang);
     const { isLoading: servicesLoading, uiRows: allServices } = useServices(lang, 1000);
@@ -95,7 +96,22 @@ const CouponModal: React.FC<CouponModalProps> = ({ lang, open, onClose, onSucces
     };
 
     const filteredServices = activeCategoryId ? allServices.filter(s => s.categoryId === activeCategoryId) : allServices;
-    console.log(filteredServices);
+    const visibleServices = serviceSearch.trim()
+        ? filteredServices.filter(s =>
+            s.name?.toLowerCase().includes(serviceSearch.trim().toLowerCase())
+          )
+        : filteredServices;
+
+    const allVisibleSelected = visibleServices.length > 0 && visibleServices.every(s => form.service_ids.includes(s.id));
+
+    const handleToggleAll = () => {
+        const visibleIds = visibleServices.map(s => s.id);
+        if (allVisibleSelected) {
+            setForm(prev => ({ ...prev, service_ids: prev.service_ids.filter(id => !visibleIds.includes(id)) }));
+        } else {
+            setForm(prev => ({ ...prev, service_ids: Array.from(new Set([...prev.service_ids, ...visibleIds])) }));
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-sm animate-fadeIn">
@@ -224,13 +240,55 @@ const CouponModal: React.FC<CouponModalProps> = ({ lang, open, onClose, onSucces
                                     ))}
                                 </div>
 
+                                {/* Search + Select All row */}
+                                <div className="flex items-center gap-3">
+                                    {/* Search */}
+                                    <div className="relative flex-1">
+                                        <Search
+                                            size={15}
+                                            className={`absolute top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none ${lang === 'ar' ? 'right-4' : 'left-4'}`}
+                                        />
+                                        <input
+                                            type="text"
+                                            value={serviceSearch}
+                                            onChange={e => setServiceSearch(e.target.value)}
+                                            placeholder={lang === 'ar' ? 'ابحث عن خدمة...' : 'Search services...'}
+                                            className={`w-full py-2.5 bg-gray-50 border border-gray-100 rounded-2xl text-sm outline-none focus:border-[#483383] transition-all ${lang === 'ar' ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4'}`}
+                                        />
+                                    </div>
+
+                                    {/* Select All toggle */}
+                                    <button
+                                        onClick={handleToggleAll}
+                                        disabled={visibleServices.length === 0}
+                                        className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold border transition-all whitespace-nowrap disabled:opacity-40 ${
+                                            allVisibleSelected
+                                                ? 'bg-[#483383] text-white border-[#483383] shadow-sm'
+                                                : 'bg-white text-gray-600 border-gray-200 hover:border-[#483383]/50'
+                                        }`}
+                                    >
+                                        <div className={`w-4 h-4 rounded flex items-center justify-center border-2 transition-all ${
+                                            allVisibleSelected ? 'bg-white border-white' : 'border-current'
+                                        }`}>
+                                            {allVisibleSelected && <Check size={10} strokeWidth={4} className="text-[#483383]" />}
+                                        </div>
+                                        {allVisibleSelected
+                                            ? (lang === 'ar' ? 'إلغاء تحديد الكل' : 'Deselect All')
+                                            : (lang === 'ar' ? 'تحديد الكل' : 'Select All')
+                                        }
+                                    </button>
+                                </div>
+
                                 {/* Services Grid */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {servicesLoading ? (
                                         <div className="col-span-full h-20 flex items-center justify-center"><Loader2 className="animate-spin text-gray-300" /></div>
+                                    ) : visibleServices.length === 0 ? (
+                                        <div className="col-span-full py-8 text-center text-sm text-gray-400">
+                                            {lang === 'ar' ? 'لا توجد نتائج' : 'No services found'}
+                                        </div>
                                     ) : (
-                                        filteredServices.map(svc => (
-
+                                        visibleServices.map(svc => (
                                             <div
                                                 key={svc.id}
                                                 onClick={() => handleToggleService(svc.id)}

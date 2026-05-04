@@ -31,7 +31,7 @@ const CouponModal: React.FC<CouponModalProps> = ({ lang, open, onClose, onSucces
 
     const { isLoading: catsLoading, rows: categories } = useCategoriesOptions(lang);
     const { isLoading: servicesLoading, uiRows: allServices } = useServices(lang, 1000);
-
+    console.log(allServices);
     useEffect(() => {
         if (open) {
             if (editingCoupon) {
@@ -95,6 +95,7 @@ const CouponModal: React.FC<CouponModalProps> = ({ lang, open, onClose, onSucces
     };
 
     const filteredServices = activeCategoryId ? allServices.filter(s => s.categoryId === activeCategoryId) : allServices;
+    console.log(filteredServices);
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-sm animate-fadeIn">
@@ -229,23 +230,23 @@ const CouponModal: React.FC<CouponModalProps> = ({ lang, open, onClose, onSucces
                                         <div className="col-span-full h-20 flex items-center justify-center"><Loader2 className="animate-spin text-gray-300" /></div>
                                     ) : (
                                         filteredServices.map(svc => (
-                                            Number(svc.price) === 0 ? null :
-                                                <div
-                                                    key={svc.id}
-                                                    onClick={() => handleToggleService(svc.id)}
-                                                    className={`p-4 rounded-[1.5rem] border-2 cursor-pointer transition-all flex items-center justify-between group ${form.service_ids.includes(svc.id) ? "border-[#483383] bg-[#483383]/5" : "border-gray-50 bg-gray-50/30 hover:border-gray-200"}`}
-                                                >
-                                                    <div className="flex items-center gap-3 overflow-hidden">
-                                                        <img src={svc.image} className="w-10 h-10 rounded-xl object-cover shrink-0" alt="" />
-                                                        <div className="overflow-hidden">
-                                                            <p className="text-xs font-bold text-gray-900 leading-tight truncate">{svc.name}</p>
-                                                            <p className="text-[10px] text-[#483383] font-bold mt-0.5">{svc.price} {t.currency}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all shrink-0 ${form.service_ids.includes(svc.id) ? "bg-[#483383] border-[#483383] text-white" : "border-gray-200 bg-white group-hover:border-[#483383]/50"}`}>
-                                                        {form.service_ids.includes(svc.id) && <Check size={14} strokeWidth={4} />}
+
+                                            <div
+                                                key={svc.id}
+                                                onClick={() => handleToggleService(svc.id)}
+                                                className={`p-4 rounded-[1.5rem] border-2 cursor-pointer transition-all flex items-center justify-between group ${form.service_ids.includes(svc.id) ? "border-[#483383] bg-[#483383]/5" : "border-gray-50 bg-gray-50/30 hover:border-gray-200"}`}
+                                            >
+                                                <div className="flex items-center gap-3 overflow-hidden">
+                                                    <img src={svc.image} className="w-10 h-10 rounded-xl object-cover shrink-0" alt="" />
+                                                    <div className="overflow-hidden">
+                                                        <p className="text-xs font-bold text-gray-900 leading-tight truncate">{svc.name}</p>
+                                                        <p className="text-[10px] text-[#483383] font-bold mt-0.5">{svc.price} {t.currency}</p>
                                                     </div>
                                                 </div>
+                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all shrink-0 ${form.service_ids.includes(svc.id) ? "bg-[#483383] border-[#483383] text-white" : "border-gray-200 bg-white group-hover:border-[#483383]/50"}`}>
+                                                    {form.service_ids.includes(svc.id) && <Check size={14} strokeWidth={4} />}
+                                                </div>
+                                            </div>
                                         ))
                                     )}
                                 </div>

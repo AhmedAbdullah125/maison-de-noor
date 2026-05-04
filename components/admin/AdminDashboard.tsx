@@ -87,13 +87,13 @@ const AdminDashboard: React.FC = () => {
       { id: 'expiredSubscriptions', label: t.expiredSubscriptions, icon: <Clock size={20} />, path: '/admin/subscriptions/expired', permission: 'view subscriptions' },
       { id: 'staffHR', label: t.staffHR, icon: <UserRound size={20} />, path: '/admin/staff', permission: 'manage system' },
       { id: 'paymentsMethods', label: t.paymentsMethods, icon: <CreditCard size={20} />, path: '/admin/payments-methods', permission: 'manage settings' },
+      { id: 'managers', label: t.managers, icon: <ShieldCheck size={20} />, path: '/admin/managers', permission: 'manage system' },
+      { id: 'coupons', label: t.coupons, icon: <Ticket size={20} />, path: '/admin/coupons', permission: 'manage system' },
+      { id: 'workingDays', label: t.workingDays, icon: <CalendarDays size={20} />, path: '/admin/working-days', permission: 'manage settings' },
       { id: 'banners', label: t.banners, icon: <LayoutGrid size={20} />, path: '/admin/banners', permission: 'manage settings' },
       { id: 'accounting', label: t.accounting, icon: <Wallet size={20} />, path: '/admin/accounting', permission: 'export data' },
       { id: 'reports', label: t.reports, icon: <BarChart3 size={20} />, path: '/admin/reports', permission: 'export data' },
-      { id: 'managers', label: t.managers, icon: <ShieldCheck size={20} />, path: '/admin/managers', permission: 'manage system' },
       { id: 'notifications', label: t.notifications, icon: <Bell size={20} />, path: '/admin/notifications', permission: 'manage settings' },
-      { id: 'coupons', label: t.coupons, icon: <Ticket size={20} />, path: '/admin/coupons', permission: 'manage system' },
-      { id: 'workingDays', label: t.workingDays, icon: <CalendarDays size={20} />, path: '/admin/working-days', permission: 'manage settings' },
       { id: 'activityLog', label: t.activityLog, icon: <History size={20} />, path: '/admin/activity', permission: 'view logs' },
     ];
 

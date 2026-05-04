@@ -180,6 +180,7 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
         form={form}
         setForm={setForm}
         saving={saving}
+        totalCategories={meta?.total ?? 0}
         onClose={() => setModalOpen(false)}
         onSave={onSave}
       />

@@ -12,6 +12,7 @@ type Props = {
     form: CategoryFormState;
     setForm: React.Dispatch<React.SetStateAction<CategoryFormState>>;
     saving: boolean;
+    totalCategories: number;
     onClose: () => void;
     onSave: () => void;
 };
@@ -23,6 +24,7 @@ export default function CategoryModal({
     form,
     setForm,
     saving,
+    totalCategories,
     onClose,
     onSave,
 }: Props) {
@@ -69,14 +71,16 @@ export default function CategoryModal({
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Position</label>
-                            <input
-                                type="number"
-                                min={1}
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">{t.position}</label>
+                            <select
                                 className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-[#483383]"
                                 value={form.position}
                                 onChange={(e) => setForm((f) => ({ ...f, position: Number(e.target.value) }))}
-                            />
+                            >
+                                {Array.from({ length: totalCategories }, (_, i) => (
+                                    <option key={i} value={i}>{i}</option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>
@@ -93,7 +97,7 @@ export default function CategoryModal({
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Image</label>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">{t.image}</label>
 
                         {editingId && form.currentImage && !form.imageUrl && (
                             <div className="mb-3 flex items-center gap-3">
@@ -102,7 +106,7 @@ export default function CategoryModal({
                                     className="w-12 h-12 rounded-xl object-cover bg-gray-100 border border-gray-100"
                                     alt="current"
                                 />
-                                <div className="text-xs text-gray-500">الصورة الحالية (اختياري تغييرها)</div>
+                                <div className="text-xs text-gray-500">{t.currentImageHint}</div>
                             </div>
                         )}
 
@@ -113,7 +117,7 @@ export default function CategoryModal({
                                     className="w-12 h-12 rounded-xl object-cover bg-gray-100 border border-gray-100"
                                     alt="new"
                                 />
-                                <div className="text-xs text-gray-500">تم تحويل الصورة إلى URL نصّي</div>
+                                <div className="text-xs text-gray-500">{t.imageConvertedHint}</div>
                             </div>
                         )}
 
@@ -140,7 +144,7 @@ export default function CategoryModal({
                             disabled={saving}
                             className="flex-1 py-4 font-semibold text-white bg-[#483383] rounded-2xl shadow-lg disabled:opacity-60"
                         >
-                            {saving ? "جاري الحفظ..." : t.save}
+                            {saving ? t.saving : t.save}
                         </button>
                     </div>
                 </div>

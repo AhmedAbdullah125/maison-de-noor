@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid, CreditCard, PlusCircle } from 'lucide-react';
+import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid, CreditCard, PlusCircle, CalendarDays } from 'lucide-react';
 import { translations, getLang, setLang, Locale } from '../../services/i18n';
 import { getAdminSession, hasPermission } from './auth/permissions';
 import { authEvents } from '../services/http';
@@ -27,6 +27,7 @@ import AdminClientProfilePage from './users/AdminClientProfilePage';
 import CouponsModule from './CouponsModule';
 import CreateOrderModule from './CreateOrderModule';
 import BannersModule from './BannersModule';
+import WorkingDaysModule from './WorkingDaysModule';
 
 
 const AdminDashboard: React.FC = () => {
@@ -92,6 +93,7 @@ const AdminDashboard: React.FC = () => {
       { id: 'managers', label: t.managers, icon: <ShieldCheck size={20} />, path: '/admin/managers', permission: 'manage system' },
       { id: 'notifications', label: t.notifications, icon: <Bell size={20} />, path: '/admin/notifications', permission: 'manage settings' },
       { id: 'coupons', label: t.coupons, icon: <Ticket size={20} />, path: '/admin/coupons', permission: 'manage system' },
+      { id: 'workingDays', label: t.workingDays, icon: <CalendarDays size={20} />, path: '/admin/working-days', permission: 'manage settings' },
       { id: 'activityLog', label: t.activityLog, icon: <History size={20} />, path: '/admin/activity', permission: 'view logs' },
     ];
 
@@ -200,6 +202,7 @@ const AdminDashboard: React.FC = () => {
             <Route path="coupons" element={<CouponsModule lang={lang} />} />
             <Route path="reports" element={<ReportsModule lang={lang} />} />
             <Route path="create-order" element={<CreateOrderModule lang={lang} />} />
+            <Route path="working-days" element={<WorkingDaysModule lang={lang} />} />
 
             <Route path="*" element={<div className="p-20 text-center text-gray-400">Feature under development</div>} />
           </Routes>

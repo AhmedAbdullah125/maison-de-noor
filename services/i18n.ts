@@ -317,7 +317,9 @@ export const translations = {
     noOptions: 'No add-ons available',
     submitOrder: 'Submit Order',
     backToServices: 'Back to Services',
-    loadingServices: 'Loading services...'
+    loadingServices: 'Loading services...',
+    workingDays: 'Working Days',
+    workingDaysHint: 'Manage the salon\'s weekly opening hours'
   },
   ar: {
     dashboard: 'لوحة التحكم',
@@ -629,7 +631,9 @@ export const translations = {
     noOptions: 'لا توجد إضافات متاحة',
     submitOrder: 'إرسال الطلب',
     backToServices: 'العودة للخدمات',
-    loadingServices: 'جاري تحميل الخدمات...'
+    loadingServices: 'جاري تحميل الخدمات...',
+    workingDays: 'أيام العمل',
+    workingDaysHint: 'إدارة أوقات عمل الصالون الأسبوعية'
   }
 };
 

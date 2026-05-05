@@ -10,6 +10,7 @@ export type ApiUser = {
     phone: string;
     status: string | null;
     created_at: string; // "YYYY-MM-DD HH:mm:ss"
+    is_phone_blocked: boolean;
 };
 
 export type ApiPaginationLink = {
@@ -62,11 +63,11 @@ export function toastApi(status: boolean, message: string) {
     });
 }
 
-export async function getUsers(params: { lang: Locale; page: number; per_page: number }) {
+export async function getUsers(params: { lang: Locale; page: number; per_page: number; search?: string }) {
     try {
-        const { lang, page, per_page } = params;
+        const { lang, page, per_page, search } = params;
         const res = await http.get<ApiUsersResponse>(`${DASHBOARD_API_BASE_URL}/users`, {
-            params: { page, per_page },
+            params: { page, per_page, search: search || undefined },
             headers: { lang, Accept: "application/json" },
         });
 
@@ -95,6 +96,28 @@ export async function getUsers(params: { lang: Locale; page: number; per_page: n
         return { ok: true as const, data: users, meta };
     } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || "get users error";
+        toastApi(false, msg);
+        return { ok: false as const, error: msg };
+    }
+}
+
+export async function togglePhoneBlock(id: number, lang: Locale) {
+    try {
+        const token = localStorage.getItem("token");
+        const res = await http.patch<{ status: boolean; message: string }>(
+            `${DASHBOARD_API_BASE_URL}/users/${id}/phone-block`,
+            {},
+            {
+                headers: {
+                    lang, Accept: "application/json", Authorization: `Bearer ${token}`,
+                    "accept-language": lang
+                }
+            }
+        );
+        toastApi(!!res?.data?.status, res?.data?.message);
+        return { ok: !!res?.data?.status, message: res?.data?.message };
+    } catch (e: any) {
+        const msg = e?.response?.data?.message || e?.message || "toggle block error";
         toastApi(false, msg);
         return { ok: false as const, error: msg };
     }

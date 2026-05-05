@@ -21,9 +21,9 @@ export function useServices(lang: Locale, perPage: number, categoryId?: string) 
         let mounted = true;
         (async () => {
             setIsLoading(true);
-            const res = await getServices({ 
-                lang, 
-                per_page: perPage, 
+            const res = await getServices({
+                lang,
+                per_page: perPage,
                 page,
                 ...(categoryId ? { category_id: categoryId } : {})
             });
@@ -54,6 +54,7 @@ export function useServices(lang: Locale, perPage: number, categoryId?: string) 
                 image: s.main_image || "",
                 price: s.discounted_price ?? s.price,
                 duration: "-",
+                booking_limit_per_time: s.booking_limit_per_time,
                 categoryId: s.category_id,
             };
         });

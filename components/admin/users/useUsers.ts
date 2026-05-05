@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Locale } from "../../../services/i18n";
 import { ApiUser, ApiPaginationMeta, getUsers } from "./users.api";
 
-export function useUsers(lang: Locale, perPage: number = 10) {
+export function useUsers(lang: Locale, perPage: number = 10, search: string = "") {
     const [isLoading, setIsLoading] = useState(true);
     const [apiRows, setApiRows] = useState<ApiUser[]>([]);
     const [meta, setMeta] = useState<ApiPaginationMeta | null>(null);
@@ -10,7 +10,7 @@ export function useUsers(lang: Locale, perPage: number = 10) {
 
     const fetcher = useCallback(async () => {
         setIsLoading(true);
-        const res = await getUsers({ lang, page, per_page: perPage });
+        const res = await getUsers({ lang, page, per_page: perPage, search });
         if (res.ok) {
             setApiRows(res.data ?? []);
             setMeta(res.meta ?? null);
@@ -19,7 +19,7 @@ export function useUsers(lang: Locale, perPage: number = 10) {
             setMeta(null);
         }
         setIsLoading(false);
-    }, [lang, page, perPage]);
+    }, [lang, page, perPage, search]);
 
     useEffect(() => {
         fetcher();

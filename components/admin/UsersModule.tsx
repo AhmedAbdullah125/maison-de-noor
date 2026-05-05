@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { Search, UserCheck } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, UserCheck, Loader2 } from "lucide-react";
+import { togglePhoneBlock } from "./users/users.api";
 import { translations, Locale } from "../../services/i18n";
 import { useUsers } from "./users/useUsers";
 import UsersPagination from "./users/UsersPagination";
@@ -24,16 +25,31 @@ function formatDate(createdAt: string, lang: Locale) {
 
 export default function UsersModule({ lang }: UsersModuleProps) {
   const t = translations[lang];
-  const { isLoading, apiRows, meta, page, setPage, canPrev, canNext } = useUsers(lang, 10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const filtered = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
-    if (!q) return apiRows;
-    return apiRows.filter(
-      (u) => safeLower(u.name).includes(q) || safeLower(u.phone).includes(q)
-    );
-  }, [apiRows, searchTerm]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const { isLoading, apiRows, meta, page, setPage, canPrev, canNext, refetch } = useUsers(lang, 10, debouncedSearch);
+  const [saving, setSaving] = useState<number | null>(null);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, setPage]);
+
+  const handleToggleBlock = async (id: number) => {
+    setSaving(id);
+    await togglePhoneBlock(id, lang);
+    await refetch();
+    setSaving(null);
+  };
+
+  const filtered = apiRows;
 
   const renderSkeleton = () => (
     <div className="space-y-4">
@@ -102,7 +118,8 @@ export default function UsersModule({ lang }: UsersModuleProps) {
                 const roleLabel = "USER";
 
                 // API status null.. فهنعتبره active لو null
-                const isActive = user.status == null || String(user.status).toLowerCase() === "active";
+                const isActive = !user.is_phone_blocked;
+                const isSavingThis = saving === user.id;
 
                 return (
                   <tr key={user.id} className="hover:bg-gray-50/50">
@@ -131,19 +148,32 @@ export default function UsersModule({ lang }: UsersModuleProps) {
                       </span>
                     </td>
 
-                    <td
-                      className={`px-6 py-4 ${lang === "ar" ? "text-start" : "text-end"
-                        }`}
-                    >
-                      {isActive ? (
-                        <span className="text-[10px] font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                          {t.active}
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-3 py-1 rounded-full">
-                          {t.inactive ?? "Inactive"}
-                        </span>
-                      )}
+                    <td className="px-6 py-4">
+                      <div className={`flex items-center gap-3 ${lang === "ar" ? "justify-start" : "justify-end"}`}>
+                        {isSavingThis ? (
+                          <Loader2 size={22} className="animate-spin text-[#483383]" />
+                        ) : (
+                          <button
+                            onClick={() => handleToggleBlock(user.id)}
+                            className={`relative w-12 h-6 rounded-full transition-colors duration-200 shrink-0 ${isActive ? "bg-[#483383]" : "bg-gray-200"
+                              }`}
+                          >
+                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${lang === "ar"
+                                ? (isActive ? "right-1" : "right-7")
+                                : (isActive ? "left-7" : "left-1")
+                              }`} />
+                          </button>
+                        )}
+                        {isActive ? (
+                          <span className="text-[10px] font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                            {t.active}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-3 py-1 rounded-full">
+                            {t.inactive ?? "Inactive"}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

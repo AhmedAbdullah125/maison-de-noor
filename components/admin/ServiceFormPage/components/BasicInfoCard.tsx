@@ -20,7 +20,7 @@ export default function BasicInfoCard({
     catsLoading: boolean;
     categories: any[];
 }) {
-
+    console.log(form);
 
     return (
         <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
@@ -82,6 +82,20 @@ export default function BasicInfoCard({
                         className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all"
                         value={String((form as any).duration || "")}
                         onChange={(e) => setForm((p) => ({ ...p, duration: e.target.value }))}
+                    />
+                </div>
+
+                {/* booking limit per time */}
+                <div className="col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        {lang === "ar" ? "اقصي عدد من العملاء يستطاع خدمتهم في نفس الوقت" : "Slot Capacity"}
+                    </label>
+                    <input
+                        type="number"
+                        min="1"
+                        className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-[#483383] transition-all"
+                        value={String((form as any).booking_limit_per_time || "")}
+                        onChange={(e) => setForm((p) => ({ ...p, booking_limit_per_time: Number(e.target.value) }))}
                     />
                 </div>
 

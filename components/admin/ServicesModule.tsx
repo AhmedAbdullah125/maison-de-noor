@@ -92,11 +92,12 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  
+
   const { isLoading, uiRows, remove } = useServices(lang, perPage, categoryId);
+  console.log(uiRows);
 
   const [categories, setCategories] = useState<ApiCategory[]>([]);
-  
+
   useEffect(() => {
     getCategories({ lang, page: 1, per_page: 100 }).then((res) => {
       if (res.ok && res.data) setCategories(res.data);
@@ -118,6 +119,7 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
     if (!q) return rowsToRender;
     return rowsToRender.filter((s) => (s.name || "").toLowerCase().includes(q));
   }, [rowsToRender, searchTerm]);
+  console.log(filtered);
 
   // ✅ open modal instead of confirm()
   const openDeleteModal = (svc: any) => {
@@ -264,6 +266,9 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
                   {t.duration}
                 </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                  {lang === "ar" ? "حد استيعاب الجلسه" : "Slot capacity"}
+                </th>
                 <th
                   className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === "ar" ? "text-start" : "text-end"
                     }`}
@@ -308,6 +313,12 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
 
                   <td className="px-6 py-4 text-sm text-gray-500">{svc.duration}</td>
 
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 bg-blue-50 text-blue-600 rounded-lg font-bold text-sm">
+                      {svc.booking_limit_per_time || 1}
+                    </span>
+                  </td>
+
                   <td className={`px-6 py-4 ${lang === "ar" ? "text-start" : "text-end"}`}>
                     <div
                       className={`flex items-center gap-2 ${lang === "ar" ? "justify-start" : "justify-end"
@@ -333,12 +344,16 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
                       </button>
                     </div>
                   </td>
+
+
+
+
                 </tr>
               ))}
 
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-400">
+                  <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-400">
                     {t.noResults ?? "لا توجد نتائج"}
                   </td>
                 </tr>

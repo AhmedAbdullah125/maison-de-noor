@@ -40,6 +40,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     globalAddonIds: [],
     subscriptions: [],
     category_id: undefined as any,
+    booking_limit_per_time: 1,
   });
 
   const [initialForm, setInitialForm] = useState<string>("");
@@ -256,6 +257,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
           };
 
           (data as any).category_id = item.category_id;
+          (data as any).booking_limit_per_time = item.booking_limit_per_time || 1;
           if (!mounted) return;
 
           setForm(data);
@@ -278,6 +280,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
           };
 
           (empty as any).category_id = undefined;
+          (empty as any).booking_limit_per_time = 1;
 
           if (!mounted) return;
 
@@ -361,6 +364,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     fd.append("price", String(parsePrice(form.price)));
     fd.append("service_type", "configurable");
     fd.append("category_id", String((form as any).category_id));
+    fd.append("booking_limit_per_time", String((form as any).booking_limit_per_time || 1));
 
     if (!mainImageFile) {
       toast(lang === "ar" ? "يرجى إضافة الصورة الرئيسية" : "Please add a main image.");
@@ -437,6 +441,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     fd.append("price", String(parsePrice(form.price)));
     fd.append("service_type", "configurable");
     fd.append("category_id", String((form as any).category_id));
+    fd.append("booking_limit_per_time", String((form as any).booking_limit_per_time || 1));
 
     if (mainImageFile) {
       fd.append("main_image", mainImageFile);

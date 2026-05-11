@@ -8,20 +8,22 @@ import { toast } from "sonner";
 import { http } from "../services/http";
 import { getAccessToken } from "../auth/authStorage";
 
-// ─── Time slots ───────────────────────────────────────────────────────────────
+// ─── Working day types ────────────────────────────────────────────────────────
 
-const TIME_SLOTS: string[] = [];
-// 12 PM → 4 PM
-for (let h = 12; h <= 16; h++) {
-    TIME_SLOTS.push(`${String(h).padStart(2, "0")}:00`);
-    if (h < 16) TIME_SLOTS.push(`${String(h).padStart(2, "0")}:30`);
+interface WorkingDayData {
+    id: number;
+    day_name_en: string;
+    day_name_ar: string;
+    is_open: boolean;
+    work_start_time: string;
+    work_end_time: string;
+    calendar_date: string;
+    slot_step_minutes: number;
+    daily_service_limit: number;
+    all_times: string[];
+    available_times: string[];
+    hidden_booked_times: string[];
 }
-// 9 PM → 12 AM
-for (let h = 21; h <= 23; h++) {
-    TIME_SLOTS.push(`${String(h).padStart(2, "0")}:00`);
-    TIME_SLOTS.push(`${String(h).padStart(2, "0")}:30`);
-}
-TIME_SLOTS.push("00:00");
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface OptionValue {
@@ -63,6 +65,31 @@ interface Service {
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
+async function fetchWorkingDay(
+    date: string,
+    serviceId: number,
+    lang: Locale
+): Promise<{ ok: true; data: WorkingDayData } | { ok: false; error: string }> {
+    try {
+        const token = getAccessToken();
+        const headers: Record<string, string> = {
+            "Accept-Language": lang,
+            "Accept": "application/json",
+        };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const res = await http.get(
+            `/v1/business-working-days/for-date?date=${date}&service_id=${serviceId}`,
+            { headers }
+        );
+        if (res.data?.status && res.data?.data) {
+            return { ok: true, data: res.data.data as WorkingDayData };
+        }
+        return { ok: false, error: res.data?.message || "Failed to fetch slots" };
+    } catch (e: any) {
+        return { ok: false, error: e?.response?.data?.message || e?.message || "Failed to fetch slots" };
+    }
+}
 
 async function fetchPublicServices(lang: Locale): Promise<Service[]> {
     try {
@@ -151,6 +178,11 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
     const [startTime, setStartTime] = useState("");
     const [paymentType, setPaymentType] = useState<"cash" | "knet" | "card">("cash");
 
+    // Working day / slots state
+    const [workingDay, setWorkingDay] = useState<WorkingDayData | null>(null);
+    const [loadingSlots, setLoadingSlots] = useState(false);
+    const [slotsError, setSlotsError] = useState<string | null>(null);
+
     // Submit state
     const [submitting, setSubmitting] = useState(false);
     const [successResult, setSuccessResult] = useState<any>(null);
@@ -178,6 +210,8 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
         setStartTime("");
         setPaymentType("cash");
         setSuccessResult(null);
+        setWorkingDay(null);
+        setSlotsError(null);
     };
 
     const handleBack = () => {
@@ -207,6 +241,33 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
             // Multi choice: add
             return [...prev, { option_id: optionId, option_value_id: valueId }];
         });
+    };
+
+    // Fetch slots whenever date or service changes
+    const handleDateChange = async (date: string) => {
+        setStartDate(date);
+        setStartTime("");
+        setWorkingDay(null);
+        setSlotsError(null);
+
+        if (!date || !selectedService) return;
+
+        setLoadingSlots(true);
+        const result = await fetchWorkingDay(date, selectedService.id, lang);
+        setLoadingSlots(false);
+
+        if (result.ok) {
+            setWorkingDay(result.data);
+            if (!result.data.is_open) {
+                setSlotsError(
+                    lang === "ar"
+                        ? "هذا اليوم غير متاح للحجز"
+                        : "This day is not available for booking"
+                );
+            }
+        } else {
+            setSlotsError(result.error);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -540,38 +601,81 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
                     {/* Date & Time */}
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 space-y-4">
                         <h3 className="text-sm font-bold text-gray-700">{t.schedule}</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                        {/* Date picker */}
+                        <div>
+                            <label className="text-xs font-semibold text-gray-500 block mb-1.5">
+                                {t.startDate} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => handleDateChange(e.target.value)}
+                                required
+                                dir="ltr"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-2xl outline-none text-sm focus:border-[#483383] transition-colors"
+                            />
+                        </div>
+
+                        {/* Slots area */}
+                        {startDate && (
                             <div>
-                                <label className="text-xs font-semibold text-gray-500 block mb-1.5">
-                                    {t.startDate} <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
-                                    required
-                                    dir="ltr"
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-2xl outline-none text-sm focus:border-[#483383] transition-colors"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-semibold text-gray-500 block mb-1.5">
+                                <label className="text-xs font-semibold text-gray-500 block mb-2">
                                     {t.startTime} <span className="text-red-500">*</span>
                                 </label>
-                                <select
+
+                                {/* Loading */}
+                                {loadingSlots && (
+                                    <div className="flex items-center gap-2 text-gray-400 text-sm py-3">
+                                        <Loader2 size={15} className="animate-spin" />
+                                        <span>{lang === "ar" ? "جاري تحميل المواعيد..." : "Loading available slots..."}</span>
+                                    </div>
+                                )}
+
+                                {/* Error / closed day */}
+                                {!loadingSlots && slotsError && (
+                                    <div className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
+                                        {slotsError}
+                                    </div>
+                                )}
+
+                                {/* Available slots grid */}
+                                {!loadingSlots && !slotsError && workingDay && workingDay.is_open && (
+                                    workingDay.available_times.length === 0 ? (
+                                        <div className="text-sm text-gray-400 bg-gray-50 rounded-2xl px-4 py-3">
+                                            {lang === "ar" ? "لا توجد مواعيد متاحة في هذا اليوم" : "No available slots for this day"}
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-wrap gap-2">
+                                            {workingDay.available_times.map((slot) => (
+                                                <button
+                                                    key={slot}
+                                                    type="button"
+                                                    onClick={() => setStartTime(slot)}
+                                                    className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+                                                        startTime === slot
+                                                            ? "bg-[#483383] text-white border-[#483383]"
+                                                            : "bg-white text-gray-700 border-gray-200 hover:border-[#483383]/50 hover:text-[#483383]"
+                                                    }`}
+                                                >
+                                                    {slot.slice(0, 5)}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )
+                                )}
+
+                                {/* Hidden required input to enforce selection */}
+                                <input
+                                    type="text"
                                     value={startTime}
-                                    onChange={(e) => setStartTime(e.target.value)}
                                     required
-                                    dir="ltr"
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-2xl outline-none text-sm focus:border-[#483383] transition-colors bg-white"
-                                >
-                                    <option value="" disabled>{t.startTime}</option>
-                                    {TIME_SLOTS.map((slot) => (
-                                        <option key={slot} value={slot}>{slot}</option>
-                                    ))}
-                                </select>
+                                    readOnly
+                                    className="sr-only"
+                                    aria-hidden
+                                />
                             </div>
-                        </div>
+                        )}
                     </div>
 
                     {/* Payment type */}

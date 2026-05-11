@@ -256,7 +256,7 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
         const result = await fetchWorkingDay(date, selectedService.id, lang);
         setLoadingSlots(false);
 
-        if (result.ok) {
+        if (result.ok === true) {
             setWorkingDay(result.data);
             if (!result.data.is_open) {
                 setSlotsError(

@@ -319,7 +319,8 @@ export const translations = {
     backToServices: 'Back to Services',
     loadingServices: 'Loading services...',
     workingDays: 'Working Days',
-    workingDaysHint: 'Manage the salon\'s weekly opening hours'
+    workingDaysHint: 'Manage the salon\'s weekly opening hours',
+    noResults: 'No results found'
   },
   ar: {
     dashboard: 'لوحة التحكم',
@@ -633,7 +634,8 @@ export const translations = {
     backToServices: 'العودة للخدمات',
     loadingServices: 'جاري تحميل الخدمات...',
     workingDays: 'أيام العمل',
-    workingDaysHint: 'إدارة أوقات عمل الصالون الأسبوعية'
+    workingDaysHint: 'إدارة أوقات عمل الصالون الأسبوعية',
+    noResults: 'لا توجد نتائج'
   }
 };
 

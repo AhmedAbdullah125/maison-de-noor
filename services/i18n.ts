@@ -320,7 +320,14 @@ export const translations = {
     loadingServices: 'Loading services...',
     workingDays: 'Working Days',
     workingDaysHint: 'Manage the salon\'s weekly opening hours',
-    noResults: 'No results found'
+    noResults: 'No results found',
+    noUpcomingBookings: 'No upcoming bookings',
+    noCompletedBookings: 'No completed bookings yet',
+    noCancelledBookings: 'No cancelled bookings',
+    noBookingsSearch: 'No bookings match your search. Try a different keyword.',
+    noBookingsFilter: 'Try switching the payment filter to see more results.',
+    noBookingsHint: 'Bookings will appear here once created.',
+    clearFilters: 'Clear filters'
   },
   ar: {
     dashboard: 'لوحة التحكم',
@@ -635,7 +642,14 @@ export const translations = {
     loadingServices: 'جاري تحميل الخدمات...',
     workingDays: 'أيام العمل',
     workingDaysHint: 'إدارة أوقات عمل الصالون الأسبوعية',
-    noResults: 'لا توجد نتائج'
+    noResults: 'لا توجد نتائج',
+    noUpcomingBookings: 'لا توجد حجوزات قادمة',
+    noCompletedBookings: 'لا توجد حجوزات مكتملة بعد',
+    noCancelledBookings: 'لا توجد حجوزات ملغاة',
+    noBookingsSearch: 'لا توجد حجوزات تطابق بحثك. جرّبي كلمة مختلفة.',
+    noBookingsFilter: 'جرّبي تغيير فلتر الدفع لعرض المزيد من النتائج.',
+    noBookingsHint: 'ستظهر الحجوزات هنا بمجرد إنشائها.',
+    clearFilters: 'مسح الفلاتر'
   }
 };
 

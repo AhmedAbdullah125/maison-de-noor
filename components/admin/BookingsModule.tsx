@@ -481,23 +481,35 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                 <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                   <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <Calendar size={16} className="text-blue-500" />
-                    {t.schedule || "Schedule"}
+                    {t.schedule}
                   </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">{t.date || "Date"}</span>
+                      <span className="text-xs text-gray-500">{t.date}</span>
                       <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.start_date}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-500">{t.time || "Time"}</span>
+                      <span className="text-xs text-gray-500">{t.time}</span>
                       <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.start_time}</span>
                     </div>
                     {selectedBooking.request?.status && (
                       <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                        <span className="text-xs text-gray-500">{t.status || "Status"}</span>
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide bg-gray-200 text-gray-700`}>
+                        <span className="text-xs text-gray-500">{t.status}</span>
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide bg-gray-200 text-gray-700">
                           {selectedBooking.request.status}
                         </span>
+                      </div>
+                    )}
+                    {selectedBooking.request?.request_number && (
+                      <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span className="text-xs text-gray-500">{t.requestNumber}</span>
+                        <span className="text-xs font-mono font-semibold text-gray-700" dir="ltr">{selectedBooking.request.request_number}</span>
+                      </div>
+                    )}
+                    {selectedBooking.request?.created_at && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">{t.createdAt}</span>
+                        <span className="text-xs font-semibold text-gray-700" dir="ltr">{selectedBooking.request.created_at}</span>
                       </div>
                     )}
                   </div>
@@ -508,7 +520,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <User size={16} className="text-purple-500" />
-                      {t.customer || "Customer Details"}
+                      {t.customer}
                     </h3>
                     <div className="flex items-center gap-3 mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate(`/admin/users/${selectedBooking.user.id}`)}>
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-white border-2 border-white shadow-sm shrink-0">
@@ -522,11 +534,11 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                     <div className="space-y-2 flex flex-col justify-end">
                       {selectedBooking.user.phone && (
                         <div className="flex items-center justify-between">
-                          <a href={`tel:${selectedBooking.user.phone}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors" dir="ltr" onClick={(e) => e.stopPropagation()}>
-                            <Phone size={14} /> {selectedBooking.user.phone}
+                          <a href={`tel:${selectedBooking.user.country_code || ''}${selectedBooking.user.phone}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors" dir="ltr" onClick={(e) => e.stopPropagation()}>
+                            <Phone size={14} /> {selectedBooking.user.country_code}{selectedBooking.user.phone}
                           </a>
-                          <a href={`https://wa.me/${selectedBooking.user.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-[10px] bg-[#25D366] text-white px-2 py-1 rounded-lg font-bold" onClick={(e) => e.stopPropagation()}>
-                            {t.whatsapp || "WhatsApp"}
+                          <a href={`https://wa.me/${(selectedBooking.user.country_code || '').replace(/\D/g, '')}${selectedBooking.user.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-[10px] bg-[#25D366] text-white px-2 py-1 rounded-lg font-bold" onClick={(e) => e.stopPropagation()}>
+                            {t.whatsapp}
                           </a>
                         </div>
                       )}
@@ -535,11 +547,38 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                           <Mail size={14} className="shrink-0" /> <span className="truncate">{selectedBooking.user.email}</span>
                         </a>
                       )}
+                      {/* Extended user info */}
+                      <div className="pt-2 border-t border-gray-200 space-y-2 mt-1">
+                        {selectedBooking.user.wallet != null && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500 flex items-center gap-1"><Wallet size={11} />{t.wallet}</span>
+                            <span className="text-xs font-semibold text-emerald-600" dir="ltr">{selectedBooking.user.wallet} {t.currency}</span>
+                          </div>
+                        )}
+                        {selectedBooking.user.lang && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500 flex items-center gap-1"><Globe size={11} />{t.language}</span>
+                            <span className="text-xs font-semibold text-gray-700 uppercase">{selectedBooking.user.lang}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500 flex items-center gap-1"><ShieldCheck size={11} />{t.verified}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${selectedBooking.user.is_verify ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {selectedBooking.user.is_verify ? t.yes : t.no}
+                          </span>
+                        </div>
+                        {selectedBooking.user.created_at && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500">{t.memberSince}</span>
+                            <span className="text-xs font-semibold text-gray-700" dir="ltr">{selectedBooking.user.created_at?.slice(0, 10)}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ) : (
                   <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex items-center justify-center">
-                    <span className="text-sm text-gray-500">{t.noCustomerData || "No customer data available"}</span>
+                    <span className="text-sm text-gray-500">{t.noCustomerData}</span>
                   </div>
                 )}
 
@@ -549,12 +588,12 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                         <CreditCard size={16} className="text-green-500" />
-                        {t.paymentInfo || "Payment & Pricing"}
+                        {t.paymentInfo}
                       </h3>
                       {selectedBooking.request?.payment && (
                         <div className="flex items-center gap-1">
                           <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${selectedBooking.request.payment.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                            {selectedBooking.request.payment.payment_status === 'paid' ? (t.paid || 'Paid') : (t.unpaid || 'Unpaid')}
+                            {selectedBooking.request.payment.payment_status === 'paid' ? t.paid : t.unpaid}
                           </span>
                           {selectedBooking.request.payment.payment_type && (
                             <span className="text-[9px] uppercase font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full">
@@ -566,25 +605,40 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">{t.basePrice || "Base Price"}</span>
+                        <span className="text-xs text-gray-500">{t.basePrice}</span>
                         <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.request.pricing.base_price} {t.currency}</span>
                       </div>
                       {selectedBooking.request.pricing.options_price !== "0.00" && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.optionsPrice || "Options Price"}</span>
+                          <span className="text-xs text-gray-500">{t.optionsPrice}</span>
                           <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.request.pricing.options_price} {t.currency}</span>
                         </div>
                       )}
-                      {selectedBooking.request.pricing.discount_amount !== "0.00" && (
+                      {selectedBooking.request.pricing.total_price && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.discount || "Discount"}</span>
+                          <span className="text-xs text-gray-500">{t.totalPrice}</span>
+                          <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.request.pricing.total_price} {t.currency}</span>
+                        </div>
+                      )}
+                      {selectedBooking.request.pricing.discount_amount && selectedBooking.request.pricing.discount_amount !== "0.00" && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.discount}</span>
                           <span className="text-sm font-semibold text-red-500" dir="ltr">{selectedBooking.request.pricing.discount_amount} {t.currency}</span>
                         </div>
                       )}
                       <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                        <span className="text-xs font-semibold text-gray-900">{t.total || "Final Total"}</span>
+                        <span className="text-xs font-semibold text-gray-900">{t.finalPrice}</span>
                         <span className="text-sm font-bold text-green-600" dir="ltr">{selectedBooking.request.pricing.final_price} {t.currency}</span>
                       </div>
+                      {selectedBooking.request?.payment?.use_wallet != null && (
+                        <div className="flex justify-between items-center pt-1">
+                          <span className="text-xs text-gray-500 flex items-center gap-1"><Wallet size={11} />{t.walletUsed}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${selectedBooking.request.payment.use_wallet ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+                            {selectedBooking.request.payment.use_wallet ? t.yes : t.no}
+                            {selectedBooking.request.payment.much_wallet_used != null && ` — ${selectedBooking.request.payment.much_wallet_used} ${t.currency}`}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -594,22 +648,21 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 h-fit">
                     <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <Activity size={16} className="text-orange-500" />
-                      {t.sessionsInfo || "Sessions Details"}
+                      {t.sessionsInfo}
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">{t.totalSessions || "Total Sessions"}</span>
+                        <span className="text-xs text-gray-500">{t.totalSessions}</span>
                         <span className="text-sm font-semibold text-gray-900">{selectedBooking.request.sessions_info.session_count}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">{t.completedSessions || "Completed"}</span>
+                        <span className="text-xs text-gray-500">{t.completedSessions}</span>
                         <span className="text-sm font-semibold text-green-600">{selectedBooking.request.sessions_info.completed_sessions}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">{t.remainingSessions || "Remaining"}</span>
+                        <span className="text-xs text-gray-500">{t.remainingSessions}</span>
                         <span className="text-sm font-semibold text-orange-600">{selectedBooking.request.sessions_info.remaining_sessions}</span>
                       </div>
-
                       {/* Progress */}
                       <div className="pt-2">
                         <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden flex" dir="ltr">
@@ -629,12 +682,12 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   <div className="bg-blue-50/50 rounded-2xl p-5 border border-blue-100 h-fit">
                     <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <Clock size={16} className="text-blue-500" />
-                      {t.validity || "Validity Period"}
+                      {t.validity}
                     </h3>
                     <div className="space-y-3">
                       {selectedBooking.request.validity.start_date && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.validFrom || "Valid From"}</span>
+                          <span className="text-xs text-gray-500">{t.validFromDate}</span>
                           <span className="text-xs font-semibold text-gray-900" dir="ltr">
                             {selectedBooking.request.validity.start_date}
                             {selectedBooking.request.validity.start_time && ` ${selectedBooking.request.validity.start_time}`}
@@ -643,13 +696,13 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                       )}
                       {selectedBooking.request.validity.end_date && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.validUntil || "Valid Until"}</span>
+                          <span className="text-xs text-gray-500">{t.validUntilDate}</span>
                           <span className="text-xs font-semibold text-gray-900" dir="ltr">{selectedBooking.request.validity.end_date}</span>
                         </div>
                       )}
                       {selectedBooking.request.validity.validity_days != null && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.validityDays || "Validity Days"}</span>
+                          <span className="text-xs text-gray-500">{t.validityDays}</span>
                           <span className="text-xs font-semibold text-blue-700">{selectedBooking.request.validity.validity_days}</span>
                         </div>
                       )}
@@ -662,42 +715,42 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   <div className="bg-purple-50/50 rounded-2xl p-5 border border-purple-100 h-fit">
                     <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <Layers size={16} className="text-purple-500" />
-                      {t.subscriptionPlan || "Subscription Plan"}
+                      {t.subscriptionPlan}
                     </h3>
                     <div className="space-y-2">
                       {selectedBooking.subscription.subscription_name && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.planName || "Plan"}</span>
+                          <span className="text-xs text-gray-500">{t.planName}</span>
                           <span className="text-xs font-semibold text-gray-900">{selectedBooking.subscription.subscription_name}</span>
                         </div>
                       )}
                       {selectedBooking.subscription.session_count != null && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.sessionCount || "Sessions"}</span>
+                          <span className="text-xs text-gray-500">{t.sessionCount}</span>
                           <span className="text-xs font-semibold text-purple-700">{selectedBooking.subscription.session_count}</span>
                         </div>
                       )}
                       {selectedBooking.subscription.remaining_sessions != null && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.remainingSessions || "Remaining"}</span>
+                          <span className="text-xs text-gray-500">{t.remainingSessions}</span>
                           <span className="text-xs font-semibold text-orange-600">{selectedBooking.subscription.remaining_sessions}</span>
                         </div>
                       )}
                       {selectedBooking.subscription.final_price != null && (
                         <div className="flex justify-between items-center pt-2 border-t border-purple-100">
-                          <span className="text-xs font-semibold text-gray-800">{t.total || "Price"}</span>
+                          <span className="text-xs font-semibold text-gray-800">{t.finalPrice}</span>
                           <span className="text-xs font-bold text-green-600" dir="ltr">{selectedBooking.subscription.final_price} {t.currency}</span>
                         </div>
                       )}
                       {selectedBooking.subscription.start_date && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.startDate || "Start Date"}</span>
+                          <span className="text-xs text-gray-500">{t.startDate}</span>
                           <span className="text-xs font-semibold text-gray-900" dir="ltr">{selectedBooking.subscription.start_date}</span>
                         </div>
                       )}
                       {selectedBooking.subscription.status && (
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.status || "Status"}</span>
+                          <span className="text-xs text-gray-500">{t.status}</span>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 uppercase">{selectedBooking.subscription.status}</span>
                         </div>
                       )}
@@ -710,7 +763,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   <div className="md:col-span-2 bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <Info size={16} className="text-indigo-500" />
-                      {t.serviceDetails || "Service Details"}
+                      {t.serviceDetails}
                     </h3>
                     <div className="flex gap-4">
                       {selectedBooking.request.service.main_image && (
@@ -721,37 +774,37 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                       <div className="flex-1 grid grid-cols-2 gap-x-6 gap-y-2">
                         {selectedBooking.request.service.service_type && (
                           <div className="flex justify-between items-center col-span-1">
-                            <span className="text-xs text-gray-500">{t.serviceType || "Type"}</span>
+                            <span className="text-xs text-gray-500">{t.serviceType}</span>
                             <span className="text-[10px] font-bold uppercase bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">{selectedBooking.request.service.service_type}</span>
                           </div>
                         )}
                         {selectedBooking.request.service.price && (
                           <div className="flex justify-between items-center col-span-1">
-                            <span className="text-xs text-gray-500">{t.basePrice || "Base Price"}</span>
+                            <span className="text-xs text-gray-500">{t.basePrice}</span>
                             <span className="text-xs font-semibold text-gray-900" dir="ltr">{selectedBooking.request.service.price} {t.currency}</span>
                           </div>
                         )}
                         {selectedBooking.request.service.discounted_price != null && (
                           <div className="flex justify-between items-center col-span-1">
-                            <span className="text-xs text-gray-500">{t.discountedPrice || "Discounted"}</span>
+                            <span className="text-xs text-gray-500">{t.discountedPrice}</span>
                             <span className="text-xs font-semibold text-red-500" dir="ltr">{selectedBooking.request.service.discounted_price} {t.currency}</span>
                           </div>
                         )}
                         {selectedBooking.request.service.booking_limit_per_time != null && (
                           <div className="flex justify-between items-center col-span-1">
-                            <span className="text-xs text-gray-500">{t.bookingLimitPerTime || "Limit/Time"}</span>
+                            <span className="text-xs text-gray-500">{t.bookingLimitPerTime}</span>
                             <span className="text-xs font-semibold text-gray-700">{selectedBooking.request.service.booking_limit_per_time}</span>
                           </div>
                         )}
                         {selectedBooking.request.service.daily_appointments != null && (
                           <div className="flex justify-between items-center col-span-1">
-                            <span className="text-xs text-gray-500">{t.dailyAppointments || "Daily Capacity"}</span>
+                            <span className="text-xs text-gray-500">{t.dailyAppointments}</span>
                             <span className="text-xs font-semibold text-gray-700">{selectedBooking.request.service.daily_appointments}</span>
                           </div>
                         )}
                         {selectedBooking.request.service.service_options_count != null && (
                           <div className="flex justify-between items-center col-span-1">
-                            <span className="text-xs text-gray-500">{t.optionsCount || "Options"}</span>
+                            <span className="text-xs text-gray-500">{t.optionsCount}</span>
                             <span className="text-xs font-semibold text-gray-700">{selectedBooking.request.service.service_options_count}</span>
                           </div>
                         )}
@@ -761,16 +814,16 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                     {/* Available Subscription Plans Table */}
                     {selectedBooking.request.service.subscriptions?.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1"><Tag size={12} />{t.availablePlans || "Available Plans"}</p>
+                        <p className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1"><Tag size={12} />{t.availablePlans}</p>
                         <div className="overflow-x-auto rounded-xl border border-gray-200">
                           <table className="w-full text-xs">
                             <thead className="bg-gray-100">
                               <tr>
-                                <th className="px-3 py-2 text-left font-semibold text-gray-500">{t.planName || "Plan"}</th>
-                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.sessions || "Sessions"}</th>
-                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.price || "Price"}</th>
-                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.pricePerSession || "Per Session"}</th>
-                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.validityDays || "Days"}</th>
+                                <th className="px-3 py-2 text-left font-semibold text-gray-500">{t.planName}</th>
+                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.sessions}</th>
+                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.price}</th>
+                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.pricePerSession}</th>
+                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.validityDays}</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 bg-white">
@@ -781,7 +834,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                                   <tr key={sub.id} className={isSelected ? "bg-purple-50 font-semibold" : ""}>
                                     <td className="px-3 py-2 text-gray-800">
                                       {name}
-                                      {isSelected && <span className="ml-1.5 text-[9px] bg-purple-200 text-purple-800 px-1.5 py-0.5 rounded-full font-bold">{t.selected || "Selected"}</span>}
+                                      {isSelected && <span className="ml-1.5 text-[9px] bg-purple-200 text-purple-800 px-1.5 py-0.5 rounded-full font-bold">{t.selected}</span>}
                                     </td>
                                     <td className="px-3 py-2 text-center text-gray-700">{sub.session_count}</td>
                                     <td className="px-3 py-2 text-center text-gray-700" dir="ltr">{sub.fixed_price} {t.currency}</td>
@@ -803,7 +856,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   <div className="md:col-span-2 bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100">
                     <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <ListChecks size={16} className="text-indigo-500" />
-                      {t.serviceOptions || "Service Options"}
+                      {t.serviceOptions}
                     </h3>
                     {optionsLoading ? (
                       <div className="space-y-3">
@@ -825,12 +878,12 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                                 <span className="text-xs font-bold text-indigo-800">{optTitle}</span>
                                 {option.is_required === 1 && (
                                   <span className="text-[9px] font-bold bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full uppercase">
-                                    {t.required || "Required"}
+                                    {t.required}
                                   </span>
                                 )}
                                 {option.is_multiple_choice === 1 && (
                                   <span className="text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full uppercase">
-                                    {t.multipleChoice || "Multiple"}
+                                    {t.multipleChoice}
                                   </span>
                                 )}
                               </div>
@@ -839,9 +892,9 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                                 <table className="w-full text-xs">
                                   <thead className="bg-indigo-50">
                                     <tr>
-                                      <th className="px-3 py-2 text-left font-semibold text-gray-500">{t.valueName || "Value"}</th>
-                                      <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.price || "Price"}</th>
-                                      <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.default || "Default"}</th>
+                                      <th className="px-3 py-2 text-left font-semibold text-gray-500">{t.valueName}</th>
+                                      <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.price}</th>
+                                      <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.default}</th>
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-indigo-50">
@@ -856,7 +909,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                                             {valName}
                                             {val.is_default === 1 && (
                                               <span className="ml-1.5 text-[9px] bg-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded-full font-bold">
-                                                {t.default || "Default"}
+                                                {t.default}
                                               </span>
                                             )}
                                           </td>
@@ -889,18 +942,18 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   <div className="md:col-span-2 bg-yellow-50/50 rounded-2xl p-5 border border-yellow-100">
                     <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                       <FileText size={16} className="text-yellow-600" />
-                      {t.notes || "Notes"}
+                      {t.note}
                     </h3>
                     <div className="space-y-3">
                       {selectedBooking.request.notes.customer_notes && (
                         <div>
-                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.customerNotes || "Customer Notes"}</span>
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.customerNotes}</span>
                           <p className="text-sm text-gray-800 bg-white p-3 rounded-xl border border-yellow-100/50">{selectedBooking.request.notes.customer_notes}</p>
                         </div>
                       )}
                       {selectedBooking.request.notes.admin_notes && (
                         <div>
-                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.adminNotes || "Admin Notes"}</span>
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.adminNotes}</span>
                           <p className="text-sm text-gray-800 bg-white p-3 rounded-xl border border-yellow-100/50">{selectedBooking.request.notes.admin_notes}</p>
                         </div>
                       )}

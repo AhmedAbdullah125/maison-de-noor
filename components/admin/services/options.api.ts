@@ -83,6 +83,35 @@ export async function getOptions(params: { lang: Locale; page: number; per_page:
 
 }
 
+export async function getOptionsByIds(params: { lang: Locale; ids: number[] }) {
+    try {
+        const res = await http.get<ApiOptionsResponse>(`${DASHBOARD_API_BASE_URL}/options`, {
+            params: {
+                per_page: 100,
+                page: 1,
+                ...(params.ids.length > 0
+                    ? Object.fromEntries(params.ids.map((id, i) => [`ids[${i}]`, id]))
+                    : {}),
+            },
+            headers: { lang: params.lang },
+        });
+
+        if (!res?.data?.status) return { ok: false as const, error: res?.data?.message || "Failed" };
+
+        // Filter client-side to only return the requested IDs (in case API doesn't support filtering)
+        const allData: ApiOption[] = res.data.data.data;
+        const filtered = params.ids.length > 0
+            ? allData.filter((o) => params.ids.includes(o.id))
+            : allData;
+
+        return { ok: true as const, data: filtered };
+    } catch (e: any) {
+        const msg = e?.response?.data?.message || e?.message || "get options by ids error";
+        return { ok: false as const, error: msg };
+    }
+}
+
+
 export async function moveOption(params: { lang: Locale; id: number | string; new_index: number }) {
     const fd = new FormData();
     fd.append("new_index", String(params.new_index));

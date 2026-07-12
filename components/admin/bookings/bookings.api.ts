@@ -17,6 +17,7 @@ export type ApiBooking = {
     status?: BookingStatus;
     user?: any;
     request?: any;
+    subscription?: any;
 };
 
 export type ApiPaginationMeta = {

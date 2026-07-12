@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, X, Phone, Mail, User, Check, AlertCircle, Calendar, Clock, CreditCard, Activity, FileText } from "lucide-react";
+import { Search, X, Phone, Mail, User, Check, AlertCircle, Calendar, Clock, CreditCard, Activity, FileText, Layers, Tag, Hash, Info, Wallet, ShieldCheck, Globe, ListChecks } from "lucide-react";
 import { translations, Locale } from "../../services/i18n";
 import {
   BookingType,
@@ -11,6 +11,7 @@ import {
   toastApi,
   ApiBooking
 } from "./bookings/bookings.api";
+import { getOptionsByIds, ApiOption } from "./services/options.api";
 
 import { useBookings } from "./bookings/useBookings";
 
@@ -55,6 +56,26 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
   const [changingId, setChangingId] = useState<number | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<ApiBooking | null>(null);
   const [showPhoneActions, setShowPhoneActions] = useState(false);
+  const [optionsData, setOptionsData] = useState<ApiOption[]>([]);
+  const [optionsLoading, setOptionsLoading] = useState(false);
+
+  // Fetch full option data whenever a booking is opened that has option_ids
+  useEffect(() => {
+    const optionIds: number[] = selectedBooking?.request?.service?.option_ids ?? [];
+    if (!selectedBooking || optionIds.length === 0) {
+      setOptionsData([]);
+      return;
+    }
+    let cancelled = false;
+    setOptionsLoading(true);
+    getOptionsByIds({ lang, ids: optionIds }).then((res) => {
+      if (!cancelled) {
+        setOptionsData(res.ok ? res.data : []);
+        setOptionsLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [selectedBooking, lang]);
   const [confirmDialog, setConfirmDialog] = useState<{
     show: boolean;
     bookingId: number | null;
@@ -197,8 +218,8 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                         {type === "completed"
                           ? t.noCompletedBookings || "No completed bookings yet"
                           : type === "cancelled"
-                          ? t.noCancelledBookings || "No cancelled bookings"
-                          : t.noUpcomingBookings || "No upcoming bookings"}
+                            ? t.noCancelledBookings || "No cancelled bookings"
+                            : t.noUpcomingBookings || "No upcoming bookings"}
                       </p>
 
                       {/* Subtitle */}
@@ -206,8 +227,8 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                         {debouncedSearch
                           ? t.noBookingsSearch || "No bookings match your search. Try a different keyword."
                           : paymentFilter !== "all"
-                          ? t.noBookingsFilter || "Try switching the payment filter to see more results."
-                          : t.noBookingsHint || "Bookings will appear here once created."}
+                            ? t.noBookingsFilter || "Try switching the payment filter to see more results."
+                            : t.noBookingsHint || "Bookings will appear here once created."}
                       </p>
 
                       {/* Clear filter hint */}
@@ -439,195 +460,455 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
           >
             {/* Header / Sticky Header */}
             <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur z-10 shrink-0">
-               <div>
-                 <h2 className="text-xl font-bold text-gray-900 mb-1" dir="ltr">{selectedBooking.booking_number || `#${selectedBooking.id}`}</h2>
-                 <span className="text-sm font-semibold text-gray-500">{selectedBooking.service}</span>
-               </div>
-               <button
-                  onClick={() => setSelectedBooking(null)}
-                  className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                >
-                  <X size={20} />
-                </button>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-1" dir="ltr">{selectedBooking.booking_number || `#${selectedBooking.id}`}</h2>
+                <span className="text-sm font-semibold text-gray-500">{selectedBooking.service}</span>
+              </div>
+              <button
+                onClick={() => setSelectedBooking(null)}
+                className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <X size={20} />
+              </button>
             </div>
 
             {/* Scrollable Body */}
             <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar">
-               
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                  {/* Schedule Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {/* Schedule Info */}
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Calendar size={16} className="text-blue-500" />
+                    {t.schedule || "Schedule"}
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">{t.date || "Date"}</span>
+                      <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.start_date}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">{t.time || "Time"}</span>
+                      <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.start_time}</span>
+                    </div>
+                    {selectedBooking.request?.status && (
+                      <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span className="text-xs text-gray-500">{t.status || "Status"}</span>
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide bg-gray-200 text-gray-700`}>
+                          {selectedBooking.request.status}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Customer Info */}
+                {selectedBooking.user ? (
                   <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                     <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                       <Calendar size={16} className="text-blue-500" />
-                       {t.schedule || "Schedule"}
+                      <User size={16} className="text-purple-500" />
+                      {t.customer || "Customer Details"}
                     </h3>
-                    <div className="space-y-3">
-                       <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.date || "Date"}</span>
-                          <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.start_date}</span>
-                       </div>
-                       <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{t.time || "Time"}</span>
-                          <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.start_time}</span>
-                       </div>
-                       {selectedBooking.request?.status && (
-                         <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                            <span className="text-xs text-gray-500">{t.status || "Status"}</span>
-                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide bg-gray-200 text-gray-700`}>
-                              {selectedBooking.request.status}
-                            </span>
-                         </div>
-                       )}
+                    <div className="flex items-center gap-3 mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate(`/admin/users/${selectedBooking.user.id}`)}>
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-white border-2 border-white shadow-sm shrink-0">
+                        <img src={selectedBooking.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user.name)}&background=random`} alt={selectedBooking.user.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-gray-900">{selectedBooking.user.name}</div>
+                        <div className="text-xs text-gray-500">ID: {selectedBooking.user.id}</div>
+                      </div>
+                    </div>
+                    <div className="space-y-2 flex flex-col justify-end">
+                      {selectedBooking.user.phone && (
+                        <div className="flex items-center justify-between">
+                          <a href={`tel:${selectedBooking.user.phone}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors" dir="ltr" onClick={(e) => e.stopPropagation()}>
+                            <Phone size={14} /> {selectedBooking.user.phone}
+                          </a>
+                          <a href={`https://wa.me/${selectedBooking.user.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-[10px] bg-[#25D366] text-white px-2 py-1 rounded-lg font-bold" onClick={(e) => e.stopPropagation()}>
+                            {t.whatsapp || "WhatsApp"}
+                          </a>
+                        </div>
+                      )}
+                      {selectedBooking.user.email && (
+                        <a href={`mailto:${selectedBooking.user.email}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors truncate" onClick={(e) => e.stopPropagation()}>
+                          <Mail size={14} className="shrink-0" /> <span className="truncate">{selectedBooking.user.email}</span>
+                        </a>
+                      )}
                     </div>
                   </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex items-center justify-center">
+                    <span className="text-sm text-gray-500">{t.noCustomerData || "No customer data available"}</span>
+                  </div>
+                )}
 
-                  {/* Customer Info */}
-                  {selectedBooking.user ? (
-                      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                          <User size={16} className="text-purple-500" />
-                          {t.customer || "Customer Details"}
-                        </h3>
-                        <div className="flex items-center gap-3 mb-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate(`/admin/users/${selectedBooking.user.id}`)}>
-                          <div className="w-10 h-10 rounded-full overflow-hidden bg-white border-2 border-white shadow-sm shrink-0">
-                             <img src={selectedBooking.user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedBooking.user.name)}&background=random`} alt={selectedBooking.user.name} className="w-full h-full object-cover" />
-                          </div>
-                          <div>
-                             <div className="text-sm font-bold text-gray-900">{selectedBooking.user.name}</div>
-                             <div className="text-xs text-gray-500">ID: {selectedBooking.user.id}</div>
-                          </div>
+                {/* Payment & Pricing */}
+                {selectedBooking.request?.pricing && (
+                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 h-fit">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                        <CreditCard size={16} className="text-green-500" />
+                        {t.paymentInfo || "Payment & Pricing"}
+                      </h3>
+                      {selectedBooking.request?.payment && (
+                        <div className="flex items-center gap-1">
+                          <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${selectedBooking.request.payment.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {selectedBooking.request.payment.payment_status === 'paid' ? (t.paid || 'Paid') : (t.unpaid || 'Unpaid')}
+                          </span>
+                          {selectedBooking.request.payment.payment_type && (
+                            <span className="text-[9px] uppercase font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full">
+                              {selectedBooking.request.payment.payment_type}
+                            </span>
+                          )}
                         </div>
-                        <div className="space-y-2 flex flex-col justify-end">
-                          {selectedBooking.user.phone && (
-                            <div className="flex items-center justify-between">
-                               <a href={`tel:${selectedBooking.user.phone}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors" dir="ltr" onClick={(e) => e.stopPropagation()}>
-                                 <Phone size={14} /> {selectedBooking.user.phone}
-                               </a>
-                               <a href={`https://wa.me/${selectedBooking.user.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-[10px] bg-[#25D366] text-white px-2 py-1 rounded-lg font-bold" onClick={(e) => e.stopPropagation()}>
-                                 {t.whatsapp || "WhatsApp"}
-                               </a>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">{t.basePrice || "Base Price"}</span>
+                        <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.request.pricing.base_price} {t.currency}</span>
+                      </div>
+                      {selectedBooking.request.pricing.options_price !== "0.00" && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.optionsPrice || "Options Price"}</span>
+                          <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.request.pricing.options_price} {t.currency}</span>
+                        </div>
+                      )}
+                      {selectedBooking.request.pricing.discount_amount !== "0.00" && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.discount || "Discount"}</span>
+                          <span className="text-sm font-semibold text-red-500" dir="ltr">{selectedBooking.request.pricing.discount_amount} {t.currency}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span className="text-xs font-semibold text-gray-900">{t.total || "Final Total"}</span>
+                        <span className="text-sm font-bold text-green-600" dir="ltr">{selectedBooking.request.pricing.final_price} {t.currency}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sessions Info */}
+                {selectedBooking.request?.sessions_info && (
+                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 h-fit">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Activity size={16} className="text-orange-500" />
+                      {t.sessionsInfo || "Sessions Details"}
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">{t.totalSessions || "Total Sessions"}</span>
+                        <span className="text-sm font-semibold text-gray-900">{selectedBooking.request.sessions_info.session_count}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">{t.completedSessions || "Completed"}</span>
+                        <span className="text-sm font-semibold text-green-600">{selectedBooking.request.sessions_info.completed_sessions}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">{t.remainingSessions || "Remaining"}</span>
+                        <span className="text-sm font-semibold text-orange-600">{selectedBooking.request.sessions_info.remaining_sessions}</span>
+                      </div>
+
+                      {/* Progress */}
+                      <div className="pt-2">
+                        <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden flex" dir="ltr">
+                          <div
+                            className="bg-green-500 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(selectedBooking.request.sessions_info.progress || 0, 100)}%` }}
+                          ></div>
+                        </div>
+                        <div className="text-[10px] font-medium text-gray-500 text-end mt-1.5">{selectedBooking.request.sessions_info.progress || 0}%</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Validity Period */}
+                {selectedBooking.request?.validity && (
+                  <div className="bg-blue-50/50 rounded-2xl p-5 border border-blue-100 h-fit">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Clock size={16} className="text-blue-500" />
+                      {t.validity || "Validity Period"}
+                    </h3>
+                    <div className="space-y-3">
+                      {selectedBooking.request.validity.start_date && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.validFrom || "Valid From"}</span>
+                          <span className="text-xs font-semibold text-gray-900" dir="ltr">
+                            {selectedBooking.request.validity.start_date}
+                            {selectedBooking.request.validity.start_time && ` ${selectedBooking.request.validity.start_time}`}
+                          </span>
+                        </div>
+                      )}
+                      {selectedBooking.request.validity.end_date && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.validUntil || "Valid Until"}</span>
+                          <span className="text-xs font-semibold text-gray-900" dir="ltr">{selectedBooking.request.validity.end_date}</span>
+                        </div>
+                      )}
+                      {selectedBooking.request.validity.validity_days != null && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.validityDays || "Validity Days"}</span>
+                          <span className="text-xs font-semibold text-blue-700">{selectedBooking.request.validity.validity_days}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected Subscription Plan */}
+                {selectedBooking.subscription && (
+                  <div className="bg-purple-50/50 rounded-2xl p-5 border border-purple-100 h-fit">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Layers size={16} className="text-purple-500" />
+                      {t.subscriptionPlan || "Subscription Plan"}
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedBooking.subscription.subscription_name && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.planName || "Plan"}</span>
+                          <span className="text-xs font-semibold text-gray-900">{selectedBooking.subscription.subscription_name}</span>
+                        </div>
+                      )}
+                      {selectedBooking.subscription.session_count != null && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.sessionCount || "Sessions"}</span>
+                          <span className="text-xs font-semibold text-purple-700">{selectedBooking.subscription.session_count}</span>
+                        </div>
+                      )}
+                      {selectedBooking.subscription.remaining_sessions != null && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.remainingSessions || "Remaining"}</span>
+                          <span className="text-xs font-semibold text-orange-600">{selectedBooking.subscription.remaining_sessions}</span>
+                        </div>
+                      )}
+                      {selectedBooking.subscription.final_price != null && (
+                        <div className="flex justify-between items-center pt-2 border-t border-purple-100">
+                          <span className="text-xs font-semibold text-gray-800">{t.total || "Price"}</span>
+                          <span className="text-xs font-bold text-green-600" dir="ltr">{selectedBooking.subscription.final_price} {t.currency}</span>
+                        </div>
+                      )}
+                      {selectedBooking.subscription.start_date && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.startDate || "Start Date"}</span>
+                          <span className="text-xs font-semibold text-gray-900" dir="ltr">{selectedBooking.subscription.start_date}</span>
+                        </div>
+                      )}
+                      {selectedBooking.subscription.status && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">{t.status || "Status"}</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 uppercase">{selectedBooking.subscription.status}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Service Details */}
+                {selectedBooking.request?.service && (
+                  <div className="md:col-span-2 bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Info size={16} className="text-indigo-500" />
+                      {t.serviceDetails || "Service Details"}
+                    </h3>
+                    <div className="flex gap-4">
+                      {selectedBooking.request.service.main_image && (
+                        <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-gray-200 bg-white">
+                          <img src={selectedBooking.request.service.main_image} alt="service" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="flex-1 grid grid-cols-2 gap-x-6 gap-y-2">
+                        {selectedBooking.request.service.service_type && (
+                          <div className="flex justify-between items-center col-span-1">
+                            <span className="text-xs text-gray-500">{t.serviceType || "Type"}</span>
+                            <span className="text-[10px] font-bold uppercase bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">{selectedBooking.request.service.service_type}</span>
+                          </div>
+                        )}
+                        {selectedBooking.request.service.price && (
+                          <div className="flex justify-between items-center col-span-1">
+                            <span className="text-xs text-gray-500">{t.basePrice || "Base Price"}</span>
+                            <span className="text-xs font-semibold text-gray-900" dir="ltr">{selectedBooking.request.service.price} {t.currency}</span>
+                          </div>
+                        )}
+                        {selectedBooking.request.service.discounted_price != null && (
+                          <div className="flex justify-between items-center col-span-1">
+                            <span className="text-xs text-gray-500">{t.discountedPrice || "Discounted"}</span>
+                            <span className="text-xs font-semibold text-red-500" dir="ltr">{selectedBooking.request.service.discounted_price} {t.currency}</span>
+                          </div>
+                        )}
+                        {selectedBooking.request.service.booking_limit_per_time != null && (
+                          <div className="flex justify-between items-center col-span-1">
+                            <span className="text-xs text-gray-500">{t.bookingLimitPerTime || "Limit/Time"}</span>
+                            <span className="text-xs font-semibold text-gray-700">{selectedBooking.request.service.booking_limit_per_time}</span>
+                          </div>
+                        )}
+                        {selectedBooking.request.service.daily_appointments != null && (
+                          <div className="flex justify-between items-center col-span-1">
+                            <span className="text-xs text-gray-500">{t.dailyAppointments || "Daily Capacity"}</span>
+                            <span className="text-xs font-semibold text-gray-700">{selectedBooking.request.service.daily_appointments}</span>
+                          </div>
+                        )}
+                        {selectedBooking.request.service.service_options_count != null && (
+                          <div className="flex justify-between items-center col-span-1">
+                            <span className="text-xs text-gray-500">{t.optionsCount || "Options"}</span>
+                            <span className="text-xs font-semibold text-gray-700">{selectedBooking.request.service.service_options_count}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Available Subscription Plans Table */}
+                    {selectedBooking.request.service.subscriptions?.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1"><Tag size={12} />{t.availablePlans || "Available Plans"}</p>
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
+                          <table className="w-full text-xs">
+                            <thead className="bg-gray-100">
+                              <tr>
+                                <th className="px-3 py-2 text-left font-semibold text-gray-500">{t.planName || "Plan"}</th>
+                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.sessions || "Sessions"}</th>
+                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.price || "Price"}</th>
+                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.pricePerSession || "Per Session"}</th>
+                                <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.validityDays || "Days"}</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 bg-white">
+                              {selectedBooking.request.service.subscriptions.map((sub: any) => {
+                                const isSelected = selectedBooking.subscription?.id === sub.id;
+                                const name = sub.translations?.find((tr: any) => tr.language === lang)?.name || sub.translations?.[0]?.name || `Plan #${sub.id}`;
+                                return (
+                                  <tr key={sub.id} className={isSelected ? "bg-purple-50 font-semibold" : ""}>
+                                    <td className="px-3 py-2 text-gray-800">
+                                      {name}
+                                      {isSelected && <span className="ml-1.5 text-[9px] bg-purple-200 text-purple-800 px-1.5 py-0.5 rounded-full font-bold">{t.selected || "Selected"}</span>}
+                                    </td>
+                                    <td className="px-3 py-2 text-center text-gray-700">{sub.session_count}</td>
+                                    <td className="px-3 py-2 text-center text-gray-700" dir="ltr">{sub.fixed_price} {t.currency}</td>
+                                    <td className="px-3 py-2 text-center text-gray-700" dir="ltr">{sub.price_per_session} {t.currency}</td>
+                                    <td className="px-3 py-2 text-center text-gray-700">{sub.validity_days ?? "—"}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Service Options (fetched by option_ids) */}
+                {(optionsLoading || optionsData.length > 0) && (
+                  <div className="md:col-span-2 bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <ListChecks size={16} className="text-indigo-500" />
+                      {t.serviceOptions || "Service Options"}
+                    </h3>
+                    {optionsLoading ? (
+                      <div className="space-y-3">
+                        {[1, 2].map((i) => (
+                          <div key={i} className="h-16 bg-indigo-100/50 rounded-xl animate-pulse" />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-5">
+                        {optionsData.map((option) => {
+                          const optTitle =
+                            option.translations.find((tr) => tr.language === lang)?.title ||
+                            option.translations[0]?.title ||
+                            `Option #${option.id}`;
+                          return (
+                            <div key={option.id}>
+                              {/* Option header */}
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs font-bold text-indigo-800">{optTitle}</span>
+                                {option.is_required === 1 && (
+                                  <span className="text-[9px] font-bold bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full uppercase">
+                                    {t.required || "Required"}
+                                  </span>
+                                )}
+                                {option.is_multiple_choice === 1 && (
+                                  <span className="text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full uppercase">
+                                    {t.multipleChoice || "Multiple"}
+                                  </span>
+                                )}
+                              </div>
+                              {/* Values table */}
+                              <div className="overflow-x-auto rounded-xl border border-indigo-100 bg-white">
+                                <table className="w-full text-xs">
+                                  <thead className="bg-indigo-50">
+                                    <tr>
+                                      <th className="px-3 py-2 text-left font-semibold text-gray-500">{t.valueName || "Value"}</th>
+                                      <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.price || "Price"}</th>
+                                      <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.default || "Default"}</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-indigo-50">
+                                    {option.values.map((val) => {
+                                      const valName =
+                                        val.translations.find((tr) => tr.language === lang)?.name ||
+                                        val.translations[0]?.name ||
+                                        `#${val.id}`;
+                                      return (
+                                        <tr key={val.id} className={val.is_default === 1 ? "bg-indigo-50/60 font-semibold" : ""}>
+                                          <td className="px-3 py-2 text-gray-800">
+                                            {valName}
+                                            {val.is_default === 1 && (
+                                              <span className="ml-1.5 text-[9px] bg-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded-full font-bold">
+                                                {t.default || "Default"}
+                                              </span>
+                                            )}
+                                          </td>
+                                          <td className="px-3 py-2 text-center text-gray-700" dir="ltr">
+                                            {parseFloat(val.price).toFixed(3)} {t.currency}
+                                          </td>
+                                          <td className="px-3 py-2 text-center">
+                                            {val.is_default === 1 ? (
+                                              <span className="inline-block w-4 h-4 rounded-full bg-indigo-500 mx-auto" />
+                                            ) : (
+                                              <span className="inline-block w-4 h-4 rounded-full bg-gray-200 mx-auto" />
+                                            )}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
                             </div>
-                          )}
-                          {selectedBooking.user.email && (
-                            <a href={`mailto:${selectedBooking.user.email}`} className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors truncate" onClick={(e) => e.stopPropagation()}>
-                              <Mail size={14} className="shrink-0" /> <span className="truncate">{selectedBooking.user.email}</span>
-                            </a>
-                          )}
-                        </div>
+                          );
+                        })}
                       </div>
-                  ) : (
-                      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex items-center justify-center">
-                          <span className="text-sm text-gray-500">{t.noCustomerData || "No customer data available"}</span>
-                      </div>
-                  )}
+                    )}
+                  </div>
+                )}
 
-                  {/* Payment & Pricing */}
-                  {selectedBooking.request?.pricing && (
-                      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 h-fit">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                            <CreditCard size={16} className="text-green-500" />
-                            {t.paymentInfo || "Payment & Pricing"}
-                          </h3>
-                          {selectedBooking.request?.payment && (
-                             <div className="flex items-center gap-1">
-                               <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${selectedBooking.request.payment.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                  {selectedBooking.request.payment.payment_status === 'paid' ? (t.paid || 'Paid') : (t.unpaid || 'Unpaid')}
-                               </span>
-                               {selectedBooking.request.payment.payment_type && (
-                                <span className="text-[9px] uppercase font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full">
-                                    {selectedBooking.request.payment.payment_type}
-                                </span>
-                               )}
-                             </div>
-                          )}
+                {/* Notes (if any) */}
+                {(selectedBooking.request?.notes?.customer_notes || selectedBooking.request?.notes?.admin_notes) && (
+                  <div className="md:col-span-2 bg-yellow-50/50 rounded-2xl p-5 border border-yellow-100">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <FileText size={16} className="text-yellow-600" />
+                      {t.notes || "Notes"}
+                    </h3>
+                    <div className="space-y-3">
+                      {selectedBooking.request.notes.customer_notes && (
+                        <div>
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.customerNotes || "Customer Notes"}</span>
+                          <p className="text-sm text-gray-800 bg-white p-3 rounded-xl border border-yellow-100/50">{selectedBooking.request.notes.customer_notes}</p>
                         </div>
-                        <div className="space-y-3">
-                           <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-500">{t.basePrice || "Base Price"}</span>
-                              <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.request.pricing.base_price} {t.currency}</span>
-                           </div>
-                           {selectedBooking.request.pricing.options_price !== "0.00" && (
-                              <div className="flex justify-between items-center">
-                                <span className="text-xs text-gray-500">{t.optionsPrice || "Options Price"}</span>
-                                <span className="text-sm font-semibold text-gray-900" dir="ltr">{selectedBooking.request.pricing.options_price} {t.currency}</span>
-                              </div>
-                           )}
-                           {selectedBooking.request.pricing.discount_amount !== "0.00" && (
-                              <div className="flex justify-between items-center">
-                                <span className="text-xs text-gray-500">{t.discount || "Discount"}</span>
-                                <span className="text-sm font-semibold text-red-500" dir="ltr">{selectedBooking.request.pricing.discount_amount} {t.currency}</span>
-                              </div>
-                           )}
-                           <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                              <span className="text-xs font-semibold text-gray-900">{t.total || "Final Total"}</span>
-                              <span className="text-sm font-bold text-green-600" dir="ltr">{selectedBooking.request.pricing.final_price} {t.currency}</span>
-                           </div>
+                      )}
+                      {selectedBooking.request.notes.admin_notes && (
+                        <div>
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.adminNotes || "Admin Notes"}</span>
+                          <p className="text-sm text-gray-800 bg-white p-3 rounded-xl border border-yellow-100/50">{selectedBooking.request.notes.admin_notes}</p>
                         </div>
-                      </div>
-                  )}
+                      )}
+                    </div>
+                  </div>
+                )}
 
-                  {/* Sessions Info */}
-                  {selectedBooking.request?.sessions_info && (
-                      <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 h-fit">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                          <Activity size={16} className="text-orange-500" />
-                          {t.sessionsInfo || "Sessions Details"}
-                        </h3>
-                        <div className="space-y-3">
-                           <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-500">{t.totalSessions || "Total Sessions"}</span>
-                              <span className="text-sm font-semibold text-gray-900">{selectedBooking.request.sessions_info.session_count}</span>
-                           </div>
-                           <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-500">{t.completedSessions || "Completed"}</span>
-                              <span className="text-sm font-semibold text-green-600">{selectedBooking.request.sessions_info.completed_sessions}</span>
-                           </div>
-                           <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-500">{t.remainingSessions || "Remaining"}</span>
-                              <span className="text-sm font-semibold text-orange-600">{selectedBooking.request.sessions_info.remaining_sessions}</span>
-                           </div>
-                           
-                           {/* Progress */}
-                           <div className="pt-2">
-                              <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden flex" dir="ltr">
-                                 <div 
-                                    className="bg-green-500 h-full rounded-full transition-all duration-500" 
-                                    style={{ width: `${selectedBooking.request.sessions_info.progress || 0}%` }}
-                                 ></div>
-                              </div>
-                              <div className="text-[10px] font-medium text-gray-500 text-end mt-1.5">{selectedBooking.request.sessions_info.progress || 0}%</div>
-                           </div>
-                        </div>
-                      </div>
-                  )}
-
-                  {/* Notes (if any) */}
-                  {(selectedBooking.request?.notes?.customer_notes || selectedBooking.request?.notes?.admin_notes) && (
-                      <div className="md:col-span-2 bg-yellow-50/50 rounded-2xl p-5 border border-yellow-100">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <FileText size={16} className="text-yellow-600" />
-                          {t.notes || "Notes"}
-                        </h3>
-                        <div className="space-y-3">
-                           {selectedBooking.request.notes.customer_notes && (
-                             <div>
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.customerNotes || "Customer Notes"}</span>
-                                <p className="text-sm text-gray-800 bg-white p-3 rounded-xl border border-yellow-100/50">{selectedBooking.request.notes.customer_notes}</p>
-                             </div>
-                           )}
-                           {selectedBooking.request.notes.admin_notes && (
-                             <div>
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1">{t.adminNotes || "Admin Notes"}</span>
-                                <p className="text-sm text-gray-800 bg-white p-3 rounded-xl border border-yellow-100/50">{selectedBooking.request.notes.admin_notes}</p>
-                             </div>
-                           )}
-                        </div>
-                      </div>
-                  )}
-
-               </div>
+              </div>
 
             </div>
           </div>

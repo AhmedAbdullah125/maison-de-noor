@@ -31,7 +31,7 @@ export const http: AxiosInstance = axios.create({ baseURL: DASHBOARD_API_BASE_UR
 
 http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const skipAuth = (config.headers as any)?.["x-skip-auth"];
-    config.headers = config.headers ?? {};
+    config.headers = config.headers ?? new axios.AxiosHeaders();
 
     if (!skipAuth) {
         const token = getAccessToken?.();

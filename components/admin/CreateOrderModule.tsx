@@ -176,7 +176,7 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
     >([]);
     const [startDate, setStartDate] = useState("");
     const [startTime, setStartTime] = useState("");
-    const [paymentType, setPaymentType] = useState<"cash" | "knet" | "card">("cash");
+    const [paymentType, setPaymentType] = useState<"cash" | "knet" | "Visa/Master">("cash");
 
     // Working day / slots state
     const [workingDay, setWorkingDay] = useState<WorkingDayData | null>(null);
@@ -277,6 +277,19 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
             toast("Please fill in all required fields", {
                 style: { background: "#dc3545", color: "#fff", borderRadius: "10px" },
             });
+            return;
+        }
+
+        const missingRequiredOption = selectedService.options.find(
+            (option) => option.is_required && !selectedOptions.some((selected) => selected.option_id === option.id)
+        );
+        if (missingRequiredOption) {
+            toast(
+                lang === "ar"
+                    ? `يرجى اختيار ${missingRequiredOption.title}`
+                    : `Please select ${missingRequiredOption.title}`,
+                { style: { background: "#dc3545", color: "#fff", borderRadius: "10px" } }
+            );
             return;
         }
 
@@ -560,7 +573,10 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
                             <h3 className="text-sm font-bold text-gray-700">{t.selectOptions}</h3>
                             {svc.options.map((opt) => (
                                 <div key={opt.id} className="space-y-2">
-                                    <p className="text-xs font-semibold text-gray-500">{opt.title}</p>
+                                    <p className="text-xs font-semibold text-gray-500">
+                                        {opt.title}
+                                        {!!opt.is_required && <span className="text-red-500"> *</span>}
+                                    </p>
                                     <div className="space-y-1.5">
                                         {opt.values.map((val) => {
                                             const isChecked = selectedOptions.some(
@@ -682,7 +698,7 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 space-y-3">
                         <h3 className="text-sm font-bold text-gray-700">{t.paymentType}</h3>
                         <div className="flex gap-2 flex-wrap">
-                            {(["cash", "knet", "card"] as const).map((pt) => (
+                            {(["cash", "knet", "Visa/Master"] as const).map((pt) => (
                                 <button
                                     key={pt}
                                     type="button"
@@ -692,7 +708,7 @@ const CreateOrderModule: React.FC<Props> = ({ lang }) => {
                                         : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
                                         }`}
                                 >
-                                    {(t as any)[pt] || pt}
+                                    {pt === "Visa/Master" ? t.card : ((t as any)[pt] || pt)}
                                 </button>
                             ))}
                         </div>

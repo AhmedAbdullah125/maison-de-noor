@@ -22,10 +22,11 @@ export type ApiService = {
 };
 
 export type ApiServicesResponse = {
-    status: boolean;
     data: ApiService[];
-    message: string;
+    meta?: { pagination?: { page: number; per_page: number; total: number; last_page: number; has_more: boolean } };
 };
+
+export type ApiServicesPagination = NonNullable<ApiServicesResponse["meta"]>["pagination"];
 
 export type ApiSimpleResponse = {
     status: boolean;
@@ -62,7 +63,7 @@ export async function getServices(params: {
 }) {
     try {
         const res = await http.get<ApiServicesResponse>(
-            `${DASHBOARD_API_BASE_URL}/services`,
+            `${DASHBOARD_API_BASE_URL}/v2/dashboard/services`,
             {
                 params: {
                     per_page: params.per_page,
@@ -73,15 +74,26 @@ export async function getServices(params: {
             }
         );
 
-        toastApi(!!res?.data?.status, res?.data?.message);
-
-        if (!res?.data?.status) {
-            return { ok: false as const, error: res?.data?.message || "Failed" };
+        if (!Array.isArray(res?.data?.data)) {
+            return { ok: false as const, error: (res.data as any)?.error?.message || "Failed" };
         }
 
-        return { ok: true as const, data: res.data.data };
+        return {
+            ok: true as const,
+            data: res.data.data.map((service: any) => ({
+                id: service.id,
+                main_image: service.image?.url ?? null,
+                price: service.price?.amount ?? "0",
+                discounted_price: service.discounted_price?.amount ?? null,
+                service_type: service.type,
+                category_id: service.category_id,
+                service_options_count: service.option_count,
+                translations: service.translations,
+            })),
+            meta: res.data.meta,
+        };
     } catch (e: any) {
-        const msg = e?.response?.data?.message || e?.message || "get services error";
+        const msg = e?.response?.data?.error?.message || e?.response?.data?.message || e?.message || "get services error";
         toastApi(false, msg);
         return { ok: false as const, error: msg };
     }

@@ -30,14 +30,11 @@ export type ApiPaginationMeta = {
 };
 
 type ApiBookingsResponse = {
-    status: boolean;
-    data: {
-        data: ApiBooking[];
-        links?: any;
-        meta: ApiPaginationMeta;
-    };
-    message: string;
+    data: ApiBooking[];
+    meta: { pagination: { page: number; last_page: number; per_page: number; total: number; has_more: boolean } };
 };
+
+type ApiBookingDetailResponse = { data: any };
 
 type ApiSimpleResponse = {
     status: boolean;
@@ -55,6 +52,14 @@ export function toastApi(status: boolean, message: string) {
     });
 }
 
+function adaptBooking(booking: any): ApiBooking {
+    return {
+        ...booking,
+        user: booking.user ?? booking.customer,
+        service: typeof booking.service === "string" ? booking.service : (booking.service?.name ?? ""),
+    };
+}
+
 export async function getBookings(params: {
     lang: Locale;
     type: BookingType;
@@ -65,7 +70,7 @@ export async function getBookings(params: {
 }) {
     try {
         const res = await http.get<ApiBookingsResponse>(
-            `${DASHBOARD_API_BASE_URL}/bookings`,
+            `${DASHBOARD_API_BASE_URL}/v2/dashboard/bookings`,
             {
                 params: {
                     type: params.type,
@@ -78,15 +83,37 @@ export async function getBookings(params: {
             }
         );
 
-        toastApi(!!res?.data?.status, res?.data?.message);
-
-        if (!res?.data?.status) {
-            return { ok: false as const, error: res?.data?.message || "Failed" };
+        if (!Array.isArray(res?.data?.data)) {
+            return { ok: false as const, error: (res.data as any)?.error?.message || "Failed" };
         }
 
-        return { ok: true as const, data: res.data.data.data, meta: res.data.data.meta };
+        const pagination = res.data.meta.pagination;
+        return {
+            ok: true as const,
+            data: res.data.data.map(adaptBooking),
+            meta: { current_page: pagination.page, last_page: pagination.last_page, per_page: pagination.per_page, total: pagination.total, from: null, to: null },
+        };
     } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || "get bookings error";
+        toastApi(false, msg);
+        return { ok: false as const, error: msg };
+    }
+}
+
+export async function getBooking(id: number, lang: Locale) {
+    try {
+        const res = await http.get<ApiBookingDetailResponse>(
+            `${DASHBOARD_API_BASE_URL}/v2/dashboard/bookings/${id}`,
+            { headers: { "Accept-Language": lang, Accept: "application/json" } }
+        );
+
+        if (!res.data?.data) {
+            return { ok: false as const, error: (res.data as any)?.error?.message || "Failed" };
+        }
+
+        return { ok: true as const, data: adaptBooking(res.data.data) };
+    } catch (e: any) {
+        const msg = e?.response?.data?.error?.message || e?.response?.data?.message || e?.message || "get booking error";
         toastApi(false, msg);
         return { ok: false as const, error: msg };
     }

@@ -8,11 +8,10 @@ import {
   BookingType,
   BookingStatus,
   changeBookingStatus,
+  getBooking,
   toastApi,
   ApiBooking
 } from "./bookings/bookings.api";
-import { getOptionsByIds, ApiOption } from "./services/options.api";
-
 import { useBookings } from "./bookings/useBookings";
 
 interface BookingsModuleProps {
@@ -55,27 +54,8 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
 
   const [changingId, setChangingId] = useState<number | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<ApiBooking | null>(null);
+  const [isBookingDetailLoading, setIsBookingDetailLoading] = useState(false);
   const [showPhoneActions, setShowPhoneActions] = useState(false);
-  const [optionsData, setOptionsData] = useState<ApiOption[]>([]);
-  const [optionsLoading, setOptionsLoading] = useState(false);
-
-  // Fetch full option data whenever a booking is opened that has option_ids
-  useEffect(() => {
-    const optionIds: number[] = selectedBooking?.request?.service?.option_ids ?? [];
-    if (!selectedBooking || optionIds.length === 0) {
-      setOptionsData([]);
-      return;
-    }
-    let cancelled = false;
-    setOptionsLoading(true);
-    getOptionsByIds({ lang, ids: optionIds }).then((res) => {
-      if (!cancelled) {
-        setOptionsData(res.ok ? res.data : []);
-        setOptionsLoading(false);
-      }
-    });
-    return () => { cancelled = true; };
-  }, [selectedBooking, lang]);
   const [confirmDialog, setConfirmDialog] = useState<{
     show: boolean;
     bookingId: number | null;
@@ -125,6 +105,15 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
 
     // ✅ ريّح دماغك: اعمل refetch علشان لو booking اتنقل من upcoming لـ completed يختفي من الجدول الحالي
     await refetch();
+  };
+
+  const openBooking = async (booking: ApiBooking) => {
+    setSelectedBooking(booking);
+    setShowPhoneActions(false);
+    setIsBookingDetailLoading(true);
+    const result = await getBooking(booking.id, lang);
+    if (result.ok) setSelectedBooking(result.data);
+    setIsBookingDetailLoading(false);
   };
 
   return (
@@ -261,10 +250,7 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   <tr
                     key={b.id}
                     className="hover:bg-gray-50/50 cursor-pointer transition-colors"
-                    onClick={() => {
-                      setSelectedBooking(b);
-                      setShowPhoneActions(false);
-                    }}
+                    onClick={() => openBooking(b)}
                   >
                     <td className="px-2 py-2 font-semibold text-gray-400 text-xs">
                       {b.booking_number ? b.booking_number : `#${b.id}`}
@@ -474,6 +460,9 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
 
             {/* Scrollable Body */}
             <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar">
+              {isBookingDetailLoading && (
+                <div className="mb-4 text-sm font-semibold text-gray-500">Loading booking details…</div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -851,89 +840,43 @@ const BookingsModule: React.FC<BookingsModuleProps> = ({ type, lang }) => {
                   </div>
                 )}
 
-                {/* Service Options (fetched by option_ids) */}
-                {(optionsLoading || optionsData.length > 0) && (
+                {/* Extras selected and price-snapshotted on this order */}
+                {(selectedBooking.request?.options?.length ?? 0) > 0 && (
                   <div className="md:col-span-2 bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100">
                     <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <ListChecks size={16} className="text-indigo-500" />
                       {t.serviceOptions}
                     </h3>
-                    {optionsLoading ? (
-                      <div className="space-y-3">
-                        {[1, 2].map((i) => (
-                          <div key={i} className="h-16 bg-indigo-100/50 rounded-xl animate-pulse" />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-5">
-                        {optionsData.map((option) => {
-                          const optTitle =
-                            option.translations.find((tr) => tr.language === lang)?.title ||
-                            option.translations[0]?.title ||
-                            `Option #${option.id}`;
-                          return (
-                            <div key={option.id}>
-                              {/* Option header */}
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-xs font-bold text-indigo-800">{optTitle}</span>
-                                {option.is_required === 1 && (
-                                  <span className="text-[9px] font-bold bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full uppercase">
-                                    {t.required}
-                                  </span>
-                                )}
-                                {option.is_multiple_choice === 1 && (
-                                  <span className="text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full uppercase">
-                                    {t.multipleChoice}
-                                  </span>
-                                )}
-                              </div>
-                              {/* Values table */}
-                              <div className="overflow-x-auto rounded-xl border border-indigo-100 bg-white">
-                                <table className="w-full text-xs">
-                                  <thead className="bg-indigo-50">
-                                    <tr>
-                                      <th className="px-3 py-2 text-left font-semibold text-gray-500">{t.valueName}</th>
-                                      <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.price}</th>
-                                      <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.default}</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-indigo-50">
-                                    {option.values.map((val) => {
-                                      const valName =
-                                        val.translations.find((tr) => tr.language === lang)?.name ||
-                                        val.translations[0]?.name ||
-                                        `#${val.id}`;
-                                      return (
-                                        <tr key={val.id} className={val.is_default === 1 ? "bg-indigo-50/60 font-semibold" : ""}>
-                                          <td className="px-3 py-2 text-gray-800">
-                                            {valName}
-                                            {val.is_default === 1 && (
-                                              <span className="ml-1.5 text-[9px] bg-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded-full font-bold">
-                                                {t.default}
-                                              </span>
-                                            )}
-                                          </td>
-                                          <td className="px-3 py-2 text-center text-gray-700" dir="ltr">
-                                            {parseFloat(val.price).toFixed(3)} {t.currency}
-                                          </td>
-                                          <td className="px-3 py-2 text-center">
-                                            {val.is_default === 1 ? (
-                                              <span className="inline-block w-4 h-4 rounded-full bg-indigo-500 mx-auto" />
-                                            ) : (
-                                              <span className="inline-block w-4 h-4 rounded-full bg-gray-200 mx-auto" />
-                                            )}
-                                          </td>
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                    <div className="overflow-x-auto rounded-xl border border-indigo-100 bg-white">
+                      <table className="w-full text-xs">
+                        <thead className="bg-indigo-50">
+                          <tr>
+                            <th className="px-3 py-2 text-start font-semibold text-gray-500">{t.serviceOptions}</th>
+                            <th className="px-3 py-2 text-start font-semibold text-gray-500">{t.valueName}</th>
+                            <th className="px-3 py-2 text-center font-semibold text-gray-500">{t.price}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-indigo-50">
+                          {selectedBooking.request.options.map((selected: any) => {
+                            const optionName = selected.option?.translations?.find((tr: any) => tr.language === lang)?.name
+                              || selected.option?.name
+                              || `Option #${selected.option?.id ?? selected.id}`;
+                            const valueName = selected.option_value?.translations?.find((tr: any) => tr.language === lang)?.name
+                              || selected.option_value?.value
+                              || `#${selected.option_value?.id ?? "—"}`;
+                            return (
+                              <tr key={selected.id}>
+                                <td className="px-3 py-2 font-semibold text-indigo-800">{optionName}</td>
+                                <td className="px-3 py-2 text-gray-800">{valueName}</td>
+                                <td className="px-3 py-2 text-center text-gray-700" dir="ltr">
+                                  {parseFloat(selected.price || "0").toFixed(3)} {t.currency}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 )}
 

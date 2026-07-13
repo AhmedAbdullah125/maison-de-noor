@@ -45,17 +45,13 @@ export const mapApiProductToComponent = (apiProduct: ApiProduct): Product => {
             ? `${apiProduct.price.toFixed(3)} د.ك`
             : undefined,
         image: apiProduct.main_image,
-        categoryId: apiProduct.category.id.toString(),
-        categoryName: apiProduct.category.name,
-        brandId: apiProduct.brand.id.toString(),
-        brandName: apiProduct.brand.name,
-        isNew: apiProduct.is_recently,
-        isFeatured: false, // Not provided by API
-        isActive: apiProduct.is_active,
-        stockStatus: apiProduct.stock_status,
-        inStock: apiProduct.in_stock,
-        quantity: apiProduct.quantity,
-        isFavorite: apiProduct.is_favorite,
+        category: {
+            id: apiProduct.category.id,
+            name: apiProduct.category.name,
+            image: apiProduct.category.image,
+            is_active: apiProduct.category.is_active,
+            position: apiProduct.category.position,
+        },
     };
 };
 

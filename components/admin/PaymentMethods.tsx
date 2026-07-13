@@ -3,6 +3,7 @@ import { translations, Locale } from '../../services/i18n';
 import { Plus, Search, Edit, Trash2, Check, X, Image as ImageIcon, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { API_BASE_URL, DASHBOARD_API_BASE_URL } from '@/lib/apiConfig';
+import { getAccessToken } from '../auth/authStorage';
 
 interface PaymentMethod {
     id: number;
@@ -23,6 +24,11 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
     const [loading, setLoading] = useState(true);
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const apiHeaders = (authenticated = false): Record<string, string> => ({
+        'Accept': 'application/json',
+        'lang': lang,
+        ...(authenticated && getAccessToken() ? { Authorization: `Bearer ${getAccessToken()}` } : {}),
+    });
 
     // Modal & Form State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,10 +49,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
         try {
             setLoading(true);
             const response = await fetch(`${DASHBOARD_API_BASE_URL}/payment-methods`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'lang': lang
-                }
+                headers: apiHeaders()
             });
             const data = await response.json();
 
@@ -105,10 +108,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
         // Fetch fresh data
         try {
             const response = await fetch(`${DASHBOARD_API_BASE_URL}/payment-methods/${method.id}`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'lang': lang
-                }
+                headers: apiHeaders()
             });
             const res = await response.json();
             if (res.status && res.data) {
@@ -167,10 +167,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
 
             const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'lang': lang
-                },
+                headers: apiHeaders(true),
                 body: fd
             });
 
@@ -207,10 +204,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
 
             const response = await fetch(`${DASHBOARD_API_BASE_URL}/payment-methods/${method.id}`, {
                 method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'lang': lang
-                },
+                headers: apiHeaders(true),
                 body: fd
             });
 
@@ -218,7 +212,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
 
             if (!result.status) {
                 // Revert if failed
-                setPaymentMethods(prev => prev.map(m => m.id === id ? { ...m, is_active: currentStatus } : m));
+                setPaymentMethods(prev => prev.map(m => m.id === method.id ? { ...m, is_active: currentStatus } : m));
                 toast.error(result.message || (lang === 'ar' ? 'فشل تحديث الحالة' : 'Failed to update status'));
             } else {
                 toast.success(result.message || (lang === 'ar' ? 'تم تحديث الحالة بنجاح' : 'Status updated successfully'));
@@ -226,7 +220,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
         } catch (error) {
             console.error('Error toggling status:', error);
             // Revert if error
-            setPaymentMethods(prev => prev.map(m => m.id === id ? { ...m, is_active: currentStatus } : m));
+            setPaymentMethods(prev => prev.map(m => m.id === method.id ? { ...m, is_active: currentStatus } : m));
             toast.error(lang === 'ar' ? 'حدث خطأ أثناء تحديث الحالة' : 'An error occurred while updating status');
         }
     };
@@ -237,10 +231,7 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
         try {
             const response = await fetch(`${DASHBOARD_API_BASE_URL}/payment-methods/${id}`, {
                 method: 'DELETE',
-                headers: {
-                    'Accept': 'application/json',
-                    'lang': lang
-                }
+                headers: apiHeaders(true)
             });
             const result = await response.json();
 

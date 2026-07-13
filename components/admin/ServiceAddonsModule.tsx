@@ -232,6 +232,7 @@ async function createOption(params: { lang: Locale; form: Partial<GlobalAddon> }
 
 async function updateOption(params: { lang: Locale; id: string | number; form: Partial<GlobalAddon> }) {
   const fd = buildOptionFormData({ form: params.form, mode: "edit" });
+  fd.append("_method", "PATCH");
 
   const res = await http.post(`${DASHBOARD_API_BASE_URL}/options/${params.id}`, fd, {
     headers: { lang: params.lang, Accept: "application/json" },

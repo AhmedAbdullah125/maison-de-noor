@@ -41,6 +41,7 @@ export default function HomeTab({ onBook, favourites, onToggleFavourite }: Props
                 open={isMenuOpen}
                 onClose={() => setIsMenuOpen(false)}
                 categories={categories}
+                lang={lang}
                 onNavigate={(path) => navigate(path)}
             />
 

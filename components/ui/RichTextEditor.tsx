@@ -1,6 +1,4 @@
-import React, { useMemo } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import React from 'react';
 
 interface RichTextEditorProps {
     value: string;
@@ -11,48 +9,15 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({ value, onChange, placeholder, dir = 'ltr', className }: RichTextEditorProps) {
-    const modules = useMemo(() => ({
-        toolbar: [
-            [{ 'header': [1, 2, 3, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            [{ 'direction': 'rtl' }],
-            ['clean']
-        ],
-    }), []);
-
     return (
         <div className={`rich-text-editor ${className || ''}`} dir={dir}>
-            <ReactQuill
-                theme="snow"
+            <textarea
                 value={value}
-                onChange={onChange}
-                modules={modules}
+                onChange={(event) => onChange(event.target.value)}
                 placeholder={placeholder}
-                className="bg-white rounded-2xl overflow-hidden"
+                rows={6}
+                className="w-full resize-y rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-app-gold focus:ring-2 focus:ring-app-gold/10"
             />
-            <style jsx global>{`
-                .ql-toolbar.ql-snow {
-                    border: 1px solid #f3f4f6;
-                    border-bottom: none;
-                    border-radius: 1rem 1rem 0 0;
-                    background: #f9fafb;
-                }
-                .ql-container.ql-snow {
-                    border: 1px solid #f3f4f6;
-                    border-radius: 0 0 1rem 1rem;
-                    background: #f9fafb;
-                    font-family: inherit;
-                }
-                .ql-editor {
-                    min-height: 120px;
-                    font-size: 0.875rem;
-                }
-                .ql-editor.ql-blank::before {
-                    color: #9ca3af;
-                    font-style: normal;
-                }
-            `}</style>
         </div>
     );
 }

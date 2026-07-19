@@ -37,7 +37,7 @@ export function setAuth(token: TokenPair, user?: User) {
         if (user.id !== undefined) localStorage.setItem(USER_ID_KEY, String(user.id));
     }
 
-    document.cookie = `token=${encodeURIComponent(token.access_token)}; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`;
+    // Do not mirror a bearer token into a second JS-readable storage location.
 }
 
 export function clearAuth() {
@@ -47,7 +47,7 @@ export function clearAuth() {
     localStorage.removeItem(USER_ID_KEY);
     localStorage.removeItem(EXPIRES_AT_KEY);
 
-    document.cookie = `token=; path=/; max-age=0; samesite=lax`;
+    document.cookie = `token=; path=/; max-age=0; samesite=lax; secure`;
 }
 
 export function getAccessToken() {

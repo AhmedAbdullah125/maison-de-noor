@@ -15,8 +15,8 @@ export async function loginRequest(
   const formData = new FormData();
   formData.append("phone", data.phone);
   formData.append("password", data.password);
-  formData.append("client_id", "a0ebbcdd-f4d7-4b9b-9ac0-752d55d6d2be");
-  formData.append("client_secret", "ZsifN3q9uKXTLPDIIUnMVFQVAFP7umZ7pGCc8VUF");
+  formData.append("client_id", import.meta.env.VITE_CLIENT_OAUTH_CLIENT_ID ?? "");
+  formData.append("client_secret", import.meta.env.VITE_CLIENT_OAUTH_CLIENT_SECRET ?? "");
   formData.append("grant_type", "password");
 
   try {

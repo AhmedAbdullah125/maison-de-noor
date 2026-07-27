@@ -115,9 +115,10 @@ export async function getOptionsByIds(params: { lang: Locale; ids: number[] }) {
 export async function moveOption(params: { lang: Locale; id: number | string; new_index: number }) {
     const fd = new FormData();
     fd.append("new_index", String(params.new_index));
+    fd.append("_method", "PATCH");
 
     try {
-        const res = await http.patch(`${DASHBOARD_API_BASE_URL}/service-options/${params.id}/move`, fd, {
+        const res = await http.post(`${DASHBOARD_API_BASE_URL}/service-options/${params.id}/move`, fd, {
             headers: { lang: params.lang, Accept: "application/json" },
         });
 

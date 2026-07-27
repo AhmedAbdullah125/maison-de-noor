@@ -216,12 +216,17 @@ export async function updateRole(
         const formData = new FormData();
         formData.append("name", name);
 
+        // PHP does not populate the request body for PUT/PATCH multipart, so the
+        // server saw an empty payload and wiped the role's permissions. Send POST
+        // with _method instead (same pattern as banners/categories).
+        formData.append("_method", "PUT");
+
         // Add each permission as permission[]
         permissions.forEach((permission) => {
             formData.append("permission[]", permission);
         });
 
-        const res = await http.put<ApiSimpleResponse>(
+        const res = await http.post<ApiSimpleResponse>(
             `${DASHBOARD_API_BASE_URL}/roles/${roleId}`,
             formData,
             {

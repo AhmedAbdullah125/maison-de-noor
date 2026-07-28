@@ -71,8 +71,56 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
         }
     };
 
+    // MyFatoorah gateway environment (live | sandbox)
+    const [gatewayMode, setGatewayMode] = useState<'live' | 'sandbox' | null>(null);
+    const [switchingMode, setSwitchingMode] = useState(false);
+
+    const fetchGatewayMode = async () => {
+        try {
+            const response = await fetch(`${DASHBOARD_API_BASE_URL}/payment-gateways/myfatoorah/mode`, {
+                headers: apiHeaders(true)
+            });
+            const data = await response.json();
+            if (data.status && data.data?.mode) {
+                setGatewayMode(data.data.mode);
+            }
+        } catch (error) {
+            console.error('Error fetching MyFatoorah mode:', error);
+        }
+    };
+
+    const toggleGatewayMode = async () => {
+        if (!gatewayMode || switchingMode) return;
+        const nextMode = gatewayMode === 'live' ? 'sandbox' : 'live';
+        try {
+            setSwitchingMode(true);
+            const response = await fetch(`${DASHBOARD_API_BASE_URL}/payment-gateways/myfatoorah/mode`, {
+                method: 'PATCH',
+                headers: { ...apiHeaders(true), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: nextMode })
+            });
+            const data = await response.json();
+            if (data.status && data.data?.mode) {
+                setGatewayMode(data.data.mode);
+                toast.success(
+                    data.data.mode === 'sandbox'
+                        ? (lang === 'ar' ? 'تم التبديل إلى بيئة الاختبار (Sandbox)' : 'Switched to test sandbox')
+                        : (lang === 'ar' ? 'تم التبديل إلى البيئة الحقيقية (Live)' : 'Switched to live payments')
+                );
+            } else {
+                toast.error(data.message || (lang === 'ar' ? 'فشل تبديل البيئة' : 'Failed to switch mode'));
+            }
+        } catch (error) {
+            console.error('Error switching MyFatoorah mode:', error);
+            toast.error(lang === 'ar' ? 'فشل تبديل البيئة' : 'Failed to switch mode');
+        } finally {
+            setSwitchingMode(false);
+        }
+    };
+
     useEffect(() => {
         fetchPaymentMethods();
+        fetchGatewayMode();
     }, [lang]);
 
     const resetForm = () => {
@@ -275,6 +323,44 @@ const PaymentMethods: React.FC<PaymentMethodsProps> = ({ lang }) => {
                     <Plus size={20} />
                     {t.addPaymentMethod}
                 </button>
+            </div>
+
+            {/* MyFatoorah environment switch */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                <div>
+                    <h2 className="text-sm font-semibold text-gray-900">
+                        {lang === 'ar' ? 'بيئة ماي فاتورة (MyFatoorah)' : 'MyFatoorah environment'}
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                        {lang === 'ar'
+                            ? 'بيئة الاختبار لا تخصم أموالاً حقيقية — للتجربة فقط.'
+                            : 'Sandbox never charges real money — for testing only.'}
+                    </p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${gatewayMode === 'live'
+                        ? 'bg-green-100 text-green-700'
+                        : gatewayMode === 'sandbox'
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-gray-100 text-gray-500'}`}>
+                        {gatewayMode === 'live'
+                            ? (lang === 'ar' ? 'حقيقي (Live)' : 'Live')
+                            : gatewayMode === 'sandbox'
+                                ? (lang === 'ar' ? 'اختبار (Sandbox)' : 'Sandbox')
+                                : '…'}
+                    </span>
+                    <button
+                        onClick={toggleGatewayMode}
+                        disabled={!gatewayMode || switchingMode}
+                        className="px-4 py-2 rounded-xl text-sm font-medium bg-[#483383] text-white hover:bg-[#342461] transition-colors disabled:opacity-50"
+                    >
+                        {switchingMode
+                            ? (lang === 'ar' ? 'جارٍ التبديل…' : 'Switching…')
+                            : gatewayMode === 'live'
+                                ? (lang === 'ar' ? 'التبديل إلى الاختبار' : 'Switch to sandbox')
+                                : (lang === 'ar' ? 'التبديل إلى الحقيقي' : 'Switch to live')}
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

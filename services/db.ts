@@ -51,7 +51,9 @@ const FULL_PERMISSIONS: ManagerPermissions = {
   reports: true,
   notifications: true,
   activityLog: true,
-  managers: true
+  managers: true,
+  payments: true,
+  coupons: true
 };
 
 class DBService {

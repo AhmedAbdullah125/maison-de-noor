@@ -172,11 +172,10 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
   // ----------------- API: GET service by id -----------------
   async function fetchServiceById(serviceId: string) {
-    const res = await http.get(`${DASHBOARD_API_BASE_URL}/services/${serviceId}`, {
+    const res = await http.get(`${DASHBOARD_API_BASE_URL}/v2/dashboard/services/${serviceId}`, {
       headers: { lang },
     });
-    const ok = !!res?.data?.status;
-    if (!ok) throw new Error(res?.data?.message || "Failed to load service");
+    if (!res?.data?.data) throw new Error(res?.data?.error?.message || "Failed to load service");
 
     const item = res.data.data;
     return item;

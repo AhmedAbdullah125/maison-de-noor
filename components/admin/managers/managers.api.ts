@@ -145,7 +145,11 @@ export async function updateAdmin(id: number, payload: CreateAdminPayload, lang:
             formData.append("role", payload.role);
         }
 
-        const res = await http.put<ApiSimpleResponse>(
+        formData.append("_method", "PUT");
+
+
+
+        const res = await http.post<ApiSimpleResponse>(
             `${DASHBOARD_API_BASE_URL}/admins/${id}`,
             formData,
             {

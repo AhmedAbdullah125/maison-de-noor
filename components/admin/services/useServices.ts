@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Locale } from "../../../services/i18n";
-import { ApiService, deleteService, getServices, pickTranslation } from "./services.api";
+import { ApiService, ApiServicesPagination, deleteService, getServices, pickTranslation } from "./services.api";
 
 export type UiServiceRow = {
     id: number;
@@ -15,6 +15,7 @@ export type UiServiceRow = {
 export function useServices(lang: Locale, perPage: number, categoryId?: string) {
     const [isLoading, setIsLoading] = useState(true);
     const [rows, setRows] = useState<ApiService[]>([]);
+    const [pagination, setPagination] = useState<ApiServicesPagination | undefined>();
     const [page, setPage] = useState(1);
 
     useEffect(() => {
@@ -31,11 +32,13 @@ export function useServices(lang: Locale, perPage: number, categoryId?: string) 
 
             if (!res.ok) {
                 setRows([]);
+                setPagination(undefined);
                 setIsLoading(false);
                 return;
             }
 
             setRows(res.data);
+            setPagination(res.meta?.pagination);
             setIsLoading(false);
         })();
 
@@ -75,8 +78,7 @@ export function useServices(lang: Locale, perPage: number, categoryId?: string) 
         setPage,
         uiRows,
         remove,
-        // pagination placeholders (لما الباك يبعت meta هنزبطهم)
         canPrev: page > 1 && !isLoading,
-        canNext: false,
+        canNext: Boolean(pagination?.has_more) && !isLoading,
     };
 }

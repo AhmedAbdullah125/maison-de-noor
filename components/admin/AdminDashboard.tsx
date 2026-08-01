@@ -184,7 +184,7 @@ const AdminDashboard: React.FC = () => {
             <Route path="services/:id/edit" element={canAccess('view services') ? <ServiceFormPage lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="service-addons" element={canAccess('view services') ? <ServiceAddonsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="users" element={canAccess('view users') ? <UsersModule lang={lang} /> : <Navigate to="/admin" />} />
-            <Route path="banners" element={<BannersModule lang={lang} />} />
+            <Route path="banners" element={canAccess('manage settings') ? <BannersModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="users/:userId" element={canAccess('view users') ? <AdminClientProfilePage lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="bookings/upcoming" element={canAccess('view bookings') ? <BookingsModule type="upcoming" lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="bookings/completed" element={canAccess('view bookings') ? <BookingsModule type="completed" lang={lang} /> : <Navigate to="/admin" />} />
@@ -193,16 +193,16 @@ const AdminDashboard: React.FC = () => {
             <Route path="subscriptions/active" element={canAccess('view subscriptions') ? <ActiveSubscriptionsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="subscriptions/expired" element={canAccess('view subscriptions') ? <ExpiredSubscriptionsModule lang={lang} /> : <Navigate to="/admin" />} />
 
-            <Route path="staff" element={<StaffModule lang={lang} />} />
-            <Route path="payments-methods" element={<PaymentMethods lang={lang} />} />
-            <Route path="accounting" element={<AccountingModule lang={lang} />} />
-            <Route path="activity" element={<ActivityLogModule lang={lang} />} />
-            <Route path="notifications" element={<NotificationsModule lang={lang} />} />
-            <Route path="managers" element={<ManagersModule lang={lang} />} />
-            <Route path="coupons" element={<CouponsModule lang={lang} />} />
-            <Route path="reports" element={<ReportsModule lang={lang} />} />
-            <Route path="create-order" element={<CreateOrderModule lang={lang} />} />
-            <Route path="working-days" element={<WorkingDaysModule lang={lang} />} />
+            <Route path="staff" element={canAccess('manage system') ? <StaffModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="payments-methods" element={canAccess('manage settings') ? <PaymentMethods lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="accounting" element={canAccess('export data') ? <AccountingModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="activity" element={canAccess('view logs') ? <ActivityLogModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="notifications" element={canAccess('manage settings') ? <NotificationsModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="managers" element={canAccess('manage system') ? <ManagersModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="coupons" element={canAccess('manage system') ? <CouponsModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="reports" element={canAccess('export data') ? <ReportsModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="create-order" element={canAccess('manage bookings') ? <CreateOrderModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="working-days" element={canAccess('manage settings') ? <WorkingDaysModule lang={lang} /> : <Navigate to="/admin" />} />
 
             <Route path="*" element={<div className="p-20 text-center text-gray-400">Feature under development</div>} />
           </Routes>

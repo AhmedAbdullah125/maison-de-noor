@@ -145,7 +145,6 @@ const AccountTab: React.FC<AccountTabProps> = ({
                     path="history"
                     element={
                         <HistoryScreen
-                            orders={orders}
                             onBack={() => navigate("/account")}
                             onNavigateToHome={onNavigateToHome}
                             onOpenOrder={(id) => navigate(`/account/order/${id}`)}
@@ -206,9 +205,8 @@ function OrderDetailsRoute({
     orders: Order[];
     onBack: () => void;
 }) {
-    const { orderId } = useParams();
-    const selected = orders.find((o) => o.id === orderId);
-    return <OrderDetailsScreen order={selected || null} onBack={onBack} />;
+    const navigate = useNavigate();
+    return <OrderDetailsScreen onBack={onBack} onNavigateToHome={() => navigate("/")} />;
 }
 
 function ProductDetailsRoute({

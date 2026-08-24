@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useNavigate, Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid, CreditCard, PlusCircle, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, Tags, Scissors, Users, CalendarClock, CalendarCheck, Ticket, ShieldCheck, UserRound, Wallet, BarChart3, Bell, History, LogOut, Menu, X, Languages, Clock, LayoutGrid, CreditCard, PlusCircle, CalendarDays, Star } from 'lucide-react';
 import { translations, getLang, setLang, Locale } from '../../services/i18n';
 import { getAdminSession, hasPermission } from './auth/permissions';
 import { authEvents } from '../services/http';
@@ -28,6 +28,7 @@ import CouponsModule from './CouponsModule';
 import CreateOrderModule from './CreateOrderModule';
 import BannersModule from './BannersModule';
 import WorkingDaysModule from './WorkingDaysModule';
+import PointsSettingsModule from './PointsSettingsModule';
 
 
 const AdminDashboard: React.FC = () => {
@@ -90,6 +91,7 @@ const AdminDashboard: React.FC = () => {
       { id: 'managers', label: t.managers, icon: <ShieldCheck size={20} />, path: '/admin/managers', permission: 'manage system' },
       { id: 'coupons', label: t.coupons, icon: <Ticket size={20} />, path: '/admin/coupons', permission: 'manage system' },
       { id: 'workingDays', label: t.workingDays, icon: <CalendarDays size={20} />, path: '/admin/working-days', permission: 'manage settings' },
+      { id: 'pointsSettings', label: t.pointsSettings, icon: <Star size={20} />, path: '/admin/points-settings', permission: 'manage settings' },
       { id: 'banners', label: t.banners, icon: <LayoutGrid size={20} />, path: '/admin/banners', permission: 'manage settings' },
       { id: 'accounting', label: t.accounting, icon: <Wallet size={20} />, path: '/admin/accounting', permission: 'export data' },
       { id: 'reports', label: t.reports, icon: <BarChart3 size={20} />, path: '/admin/reports', permission: 'export data' },
@@ -203,6 +205,7 @@ const AdminDashboard: React.FC = () => {
             <Route path="reports" element={canAccess('export data') ? <ReportsModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="create-order" element={canAccess('manage bookings') ? <CreateOrderModule lang={lang} /> : <Navigate to="/admin" />} />
             <Route path="working-days" element={canAccess('manage settings') ? <WorkingDaysModule lang={lang} /> : <Navigate to="/admin" />} />
+            <Route path="points-settings" element={canAccess('manage settings') ? <PointsSettingsModule lang={lang} /> : <Navigate to="/admin" />} />
 
             <Route path="*" element={<div className="p-20 text-center text-gray-400">Feature under development</div>} />
           </Routes>

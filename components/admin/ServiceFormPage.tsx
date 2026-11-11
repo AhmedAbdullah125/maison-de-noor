@@ -14,6 +14,7 @@ import BasicInfoCard from "./ServiceFormPage/components/BasicInfoCard";
 import AddonsCard from "./ServiceFormPage/components/AddonsCard";
 import SubscriptionsCard from "./ServiceFormPage/components/SubscriptionsCard";
 import MediaCard from "./ServiceFormPage/components/MediaCard";
+import PaymentOptionsCard from "./ServiceFormPage/components/PaymentOptionsCard";
 import ExitPrompt from "./ServiceFormPage/components/ExitPrompt";
 import { GalleryItem } from "./ServiceFormPage/types";
 import { normalizeIds, parsePrice } from "./ServiceFormPage/utils";
@@ -41,7 +42,10 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     subscriptions: [],
     category_id: undefined as any,
     booking_limit_per_time: 1,
-  });
+    use_category_payment: true,
+    allow_pay_at_salon: null,
+    allow_pay_online: null,
+  } as any);
 
   const [initialForm, setInitialForm] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +57,8 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   const [mainImagePreview, setMainImagePreview] = useState<string>("");
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  // What the saved service effectively allows (edit only); fallback when the category flags are unknown.
+  const [effectivePay, setEffectivePay] = useState<{ salon: boolean; online: boolean } | null>(null);
 
   const { isLoading: catsLoading, rows: categories } = useCategoriesOptions(lang);
   const { isLoading: optionsLoading, rows: options, refetch: refetchOptions } = useOptionsOptions(lang);
@@ -257,7 +263,16 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
           (data as any).category_id = item.category_id;
           (data as any).booking_limit_per_time = item.booking_limit_per_time || 1;
+          const usesCat = item.uses_category_payment_options ?? (item.allow_pay_at_salon == null && item.allow_pay_online == null);
+          (data as any).use_category_payment = !!usesCat;
+          (data as any).allow_pay_at_salon = usesCat ? null : (item.allow_pay_at_salon ?? true);
+          (data as any).allow_pay_online = usesCat ? null : (item.allow_pay_online ?? true);
           if (!mounted) return;
+
+          setEffectivePay({
+            salon: item.effective_allow_pay_at_salon ?? true,
+            online: item.effective_allow_pay_online ?? true,
+          });
 
           setForm(data);
           setInitialForm(JSON.stringify(data));
@@ -280,6 +295,10 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
 
           (empty as any).category_id = undefined;
           (empty as any).booking_limit_per_time = 1;
+          (empty as any).use_category_payment = true;
+          (empty as any).allow_pay_at_salon = null;
+          (empty as any).allow_pay_online = null;
+          setEffectivePay(null);
 
           if (!mounted) return;
 
@@ -356,6 +375,16 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     return baseTotal * (percent / 100);
   };
 
+  function appendPaymentOptions(fd: FormData) {
+    if ((form as any).use_category_payment) {
+      fd.append("allow_pay_at_salon", "");
+      fd.append("allow_pay_online", "");
+    } else {
+      fd.append("allow_pay_at_salon", (form as any).allow_pay_at_salon ? "1" : "0");
+      fd.append("allow_pay_online", (form as any).allow_pay_online ? "1" : "0");
+    }
+  }
+
   // ----------------- Create Service API (FormData) -----------------
   async function createService() {
     const fd = new FormData();
@@ -364,6 +393,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     fd.append("service_type", "configurable");
     fd.append("category_id", String((form as any).category_id));
     fd.append("booking_limit_per_time", String((form as any).booking_limit_per_time || 1));
+    appendPaymentOptions(fd);
 
     if (!mainImageFile) {
       toast(lang === "ar" ? "يرجى إضافة الصورة الرئيسية" : "Please add a main image.");
@@ -441,6 +471,7 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
     fd.append("service_type", "configurable");
     fd.append("category_id", String((form as any).category_id));
     fd.append("booking_limit_per_time", String((form as any).booking_limit_per_time || 1));
+    appendPaymentOptions(fd);
 
     if (mainImageFile) {
       fd.append("main_image", mainImageFile);
@@ -618,6 +649,15 @@ const ServiceFormPage: React.FC<ServiceFormPageProps> = ({ lang }) => {
           </div>
 
         </div>
+
+        <PaymentOptionsCard
+          lang={lang}
+          t={t}
+          form={form}
+          setForm={setForm}
+          categories={categories}
+          effectivePay={effectivePay}
+        />
 
         <div className="flex flex-col gap-8">
 

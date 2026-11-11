@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Locale } from "../../../services/i18n";
-import { ApiService, ApiServicesPagination, deleteService, getServices, pickTranslation } from "./services.api";
+import { ApiService, ApiServicesPagination, deleteService, getServices, pickTranslation, updateServicePaymentOptions } from "./services.api";
 
 export type UiServiceRow = {
     id: number;
@@ -10,6 +10,9 @@ export type UiServiceRow = {
     price: string;
     duration: string;
     categoryId: number;
+    usesCategoryPayment: boolean;
+    payAtSalon: boolean;
+    payOnline: boolean;
 };
 
 export function useServices(lang: Locale, perPage: number, categoryId?: string) {
@@ -59,6 +62,9 @@ export function useServices(lang: Locale, perPage: number, categoryId?: string) 
                 duration: "-",
                 booking_limit_per_time: s.booking_limit_per_time,
                 categoryId: s.category_id,
+                usesCategoryPayment: s.uses_category_payment_options ?? true,
+                payAtSalon: s.effective_allow_pay_at_salon ?? true,
+                payOnline: s.effective_allow_pay_online ?? true,
             };
         });
     }, [rows, lang]);
@@ -72,8 +78,18 @@ export function useServices(lang: Locale, perPage: number, categoryId?: string) 
         return res;
     }
 
+    /** Override (both booleans) or reset to the category (both null); the row updates from the server's answer. */
+    async function setPaymentOptions(id: number, opts: { allow_pay_at_salon: boolean | null; allow_pay_online: boolean | null }) {
+        const res = await updateServicePaymentOptions(id, opts, lang);
+        if (res.ok) {
+            setRows((r) => r.map((x) => (x.id === id ? { ...x, ...res.data } : x)));
+        }
+        return res;
+    }
+
     return {
         isLoading,
+        setPaymentOptions,
         page,
         setPage,
         uiRows,

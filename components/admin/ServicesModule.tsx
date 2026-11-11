@@ -5,6 +5,7 @@ import { translations, Locale } from "../../services/i18n";
 import { useServices } from "./services/useServices";
 import { getCategories, ApiCategory } from "./categories/categories.api";
 import { toast } from "sonner";
+import PaymentSwitch from "./categories/PaymentSwitch";
 
 interface ServicesModuleProps {
   lang: Locale;
@@ -93,7 +94,27 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryId, setCategoryId] = useState("");
 
-  const { isLoading, uiRows, remove } = useServices(lang, perPage, categoryId);
+  const { isLoading, uiRows, remove, setPaymentOptions } = useServices(lang, perPage, categoryId);
+  const [savingPaymentId, setSavingPaymentId] = useState<number | null>(null);
+
+  const savePayment = async (id: number, opts: { allow_pay_at_salon: boolean | null; allow_pay_online: boolean | null }) => {
+    setSavingPaymentId(id);
+    try {
+      await setPaymentOptions(id, opts);
+    } finally {
+      setSavingPaymentId(null);
+    }
+  };
+
+  const togglePayment = (svc: { id: number; payAtSalon: boolean; payOnline: boolean }, key: "salon" | "online") => {
+    const next = { salon: svc.payAtSalon, online: svc.payOnline };
+    next[key] = !next[key];
+    if (!next.salon && !next.online) {
+      toast(t.atLeastOnePaymentOption);
+      return;
+    }
+    savePayment(svc.id, { allow_pay_at_salon: next.salon, allow_pay_online: next.online });
+  };
   console.log(uiRows);
 
   const [categories, setCategories] = useState<ApiCategory[]>([]);
@@ -269,6 +290,9 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
                 <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
                   {lang === "ar" ? "حد استيعاب الجلسه" : "Slot capacity"}
                 </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase text-start">
+                  {t.paymentOptions}
+                </th>
                 <th
                   className={`px-6 py-4 text-xs font-semibold text-gray-400 uppercase ${lang === "ar" ? "text-start" : "text-end"
                     }`}
@@ -319,6 +343,39 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
                     </span>
                   </td>
 
+                  <td className="px-6 py-4">
+                    <div className="space-y-2 min-w-[11rem]">
+                      {([
+                        { key: "salon" as const, label: t.payAtSalon, checked: svc.payAtSalon },
+                        { key: "online" as const, label: t.payOnline, checked: svc.payOnline },
+                      ]).map((row) => (
+                        <div key={row.key} className="flex items-center justify-between gap-3">
+                          <span className="text-xs font-semibold text-gray-600">{row.label}</span>
+                          <PaymentSwitch
+                            lang={lang}
+                            checked={row.checked}
+                            saving={savingPaymentId === svc.id}
+                            onToggle={() => togglePayment(svc, row.key)}
+                          />
+                        </div>
+                      ))}
+                      {svc.usesCategoryPayment ? (
+                        <span className="inline-block text-[10px] font-semibold text-gray-400 bg-gray-100 rounded-md px-2 py-0.5">
+                          {t.followsCategory}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={savingPaymentId === svc.id}
+                          onClick={() => savePayment(svc.id, { allow_pay_at_salon: null, allow_pay_online: null })}
+                          className="text-[10px] font-semibold text-[#483383] hover:underline disabled:opacity-50"
+                        >
+                          {t.resetToCategory}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+
                   <td className={`px-6 py-4 ${lang === "ar" ? "text-start" : "text-end"}`}>
                     <div
                       className={`flex items-center gap-2 ${lang === "ar" ? "justify-start" : "justify-end"
@@ -353,7 +410,7 @@ const ServicesModule: React.FC<ServicesModuleProps> = ({ lang }) => {
 
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-400">
+                  <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-400">
                     {t.noResults ?? "لا توجد نتائج"}
                   </td>
                 </tr>

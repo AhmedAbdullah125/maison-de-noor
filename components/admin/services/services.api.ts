@@ -19,6 +19,13 @@ export type ApiService = {
     category_id: number;
     service_options_count: number;
     translations: ApiServiceTranslation[];
+    /** The service's own payment switches; null = follows its category. */
+    allow_pay_at_salon?: boolean | null;
+    allow_pay_online?: boolean | null;
+    uses_category_payment_options?: boolean;
+    /** What the service actually allows after falling back to its category. */
+    effective_allow_pay_at_salon?: boolean;
+    effective_allow_pay_online?: boolean;
 };
 
 export type ApiServicesResponse = {
@@ -89,11 +96,62 @@ export async function getServices(params: {
                 category_id: service.category_id,
                 service_options_count: service.option_count,
                 translations: service.translations,
+                allow_pay_at_salon: service.allow_pay_at_salon ?? null,
+                allow_pay_online: service.allow_pay_online ?? null,
+                uses_category_payment_options: service.uses_category_payment_options ?? true,
+                effective_allow_pay_at_salon: service.effective_allow_pay_at_salon ?? true,
+                effective_allow_pay_online: service.effective_allow_pay_online ?? true,
             })),
             meta: res.data.meta,
         };
     } catch (e: any) {
         const msg = e?.response?.data?.error?.message || e?.response?.data?.message || e?.message || "get services error";
+        toastApi(false, msg);
+        return { ok: false as const, error: msg };
+    }
+}
+
+/**
+ * PUT /services/:id with only the payment switches (other fields are left as they are).
+ * Both null = follow the category; both booleans = override it.
+ */
+export async function updateServicePaymentOptions(
+    id: number,
+    input: { allow_pay_at_salon: boolean | null; allow_pay_online: boolean | null },
+    lang: Locale
+) {
+    try {
+        const fd = new FormData();
+        fd.append("_method", "PUT");
+        fd.append("allow_pay_at_salon", input.allow_pay_at_salon === null ? "" : input.allow_pay_at_salon ? "1" : "0");
+        fd.append("allow_pay_online", input.allow_pay_online === null ? "" : input.allow_pay_online ? "1" : "0");
+
+        const res = await http.post<any>(`${DASHBOARD_API_BASE_URL}/services/${id}`, fd, {
+            headers: { lang, Accept: "application/json" },
+        });
+
+        const data = res?.data?.data;
+        if (!res?.data?.status || !data) {
+            const msg = res?.data?.message || "Update failed";
+            toastApi(false, msg);
+            return { ok: false as const, error: msg };
+        }
+        return {
+            ok: true as const,
+            data: {
+                allow_pay_at_salon: data.allow_pay_at_salon ?? null,
+                allow_pay_online: data.allow_pay_online ?? null,
+                uses_category_payment_options: data.uses_category_payment_options ?? true,
+                effective_allow_pay_at_salon: data.effective_allow_pay_at_salon ?? true,
+                effective_allow_pay_online: data.effective_allow_pay_online ?? true,
+            },
+        };
+    } catch (e: any) {
+        const msg =
+            e?.response?.data?.errors?.allow_pay_online?.[0] ||
+            e?.response?.data?.message ||
+            e?.message ||
+            "Update payment options error";
         toastApi(false, msg);
         return { ok: false as const, error: msg };
     }

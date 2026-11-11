@@ -10,6 +10,8 @@ export type ApiCategory = {
     image: string;
     position: number;
     is_active: boolean;
+    allow_pay_at_salon?: boolean;
+    allow_pay_online?: boolean;
     services_count?: number;
 };
 
@@ -94,7 +96,13 @@ export async function getCategories(params: {
             return { ok: false as const, error: res?.data?.message || "Failed" };
         }
 
-        return { ok: true as const, data: res.data.data.data, meta: res.data.data.meta };
+        const rows = (res.data.data.data || []).map((r) => ({
+            ...r,
+            allow_pay_at_salon: r.allow_pay_at_salon ?? true,
+            allow_pay_online: r.allow_pay_online ?? true,
+        }));
+
+        return { ok: true as const, data: rows, meta: res.data.data.meta };
     } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || "get categories error";
         toastApi(false, msg);
@@ -108,6 +116,8 @@ export async function createCategory(
         name_en: string;
         position: number;
         is_active: boolean;
+        allow_pay_at_salon?: boolean;
+        allow_pay_online?: boolean;
         imageUrl?: string;
     },
     lang: Locale
@@ -118,6 +128,8 @@ export async function createCategory(
         fd.append("name_en", input.name_en);
         fd.append("position", String(input.position));
         fd.append("is_active", String(input.is_active ? 1 : 0));
+        if (input.allow_pay_at_salon !== undefined) fd.append("allow_pay_at_salon", input.allow_pay_at_salon ? "1" : "0");
+        if (input.allow_pay_online !== undefined) fd.append("allow_pay_online", input.allow_pay_online ? "1" : "0");
         fd.append("image", input.imageUrl || "");
 
         const res = await http.post<ApiSimpleResponse>(
@@ -153,6 +165,8 @@ export async function updateCategoryPatch(
         name_en: string;
         position: number;
         is_active: boolean;
+        allow_pay_at_salon?: boolean;
+        allow_pay_online?: boolean;
         imageUrl?: string;
     },
     lang: Locale
@@ -164,6 +178,8 @@ export async function updateCategoryPatch(
         fd.append("name_en", input.name_en);
         fd.append("position", String(input.position));
         fd.append("is_active", String(input.is_active ? 1 : 0));
+        if (input.allow_pay_at_salon !== undefined) fd.append("allow_pay_at_salon", input.allow_pay_at_salon ? "1" : "0");
+        if (input.allow_pay_online !== undefined) fd.append("allow_pay_online", input.allow_pay_online ? "1" : "0");
         if (input.imageUrl) fd.append("image", input.imageUrl);
 
         const res = await http.post<ApiSimpleResponse>(
@@ -187,6 +203,40 @@ export async function updateCategoryPatch(
         return { ok: true as const, updated };
     } catch (e: any) {
         const msg = e?.response?.data?.message || e?.message || "Update category error";
+        toastApi(false, msg);
+        return { ok: false as const, error: msg };
+    }
+}
+
+export async function updateCategoryPaymentOptions(
+    id: number,
+    input: { allow_pay_at_salon: boolean; allow_pay_online: boolean },
+    lang: Locale
+) {
+    try {
+        const fd = new FormData();
+        fd.append("_method", "PATCH");
+        fd.append("allow_pay_at_salon", input.allow_pay_at_salon ? "1" : "0");
+        fd.append("allow_pay_online", input.allow_pay_online ? "1" : "0");
+
+        const res = await http.post<ApiSimpleResponse>(
+            `${DASHBOARD_API_BASE_URL}/categories/${id}/payment-options`,
+            fd,
+            { headers: { lang, Accept: "application/json" } }
+        );
+
+        if (!res?.data?.status) {
+            const msg = res?.data?.message || "Update failed";
+            toastApi(false, msg);
+            return { ok: false as const, error: msg };
+        }
+        return { ok: true as const };
+    } catch (e: any) {
+        const msg =
+            e?.response?.data?.errors?.allow_pay_online?.[0] ||
+            e?.response?.data?.message ||
+            e?.message ||
+            "Update payment options error";
         toastApi(false, msg);
         return { ok: false as const, error: msg };
     }

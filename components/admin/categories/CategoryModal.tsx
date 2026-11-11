@@ -1,9 +1,10 @@
 import React from "react";
 import { X } from "lucide-react";
 import { Locale, translations } from "../../../services/i18n";
+import PaymentSwitch from "./PaymentSwitch";
 import { fileToDataUrl, resolveImageUrl, toastApi } from "./categories.api";
 
-export type CategoryFormState = { name_ar: string; name_en: string; position: number; is_active: boolean; imageUrl: string; currentImage?: string; };
+export type CategoryFormState = { name_ar: string; name_en: string; position: number; is_active: boolean; allow_pay_at_salon: boolean; allow_pay_online: boolean; imageUrl: string; currentImage?: string; };
 
 type Props = {
     lang: Locale;
@@ -93,6 +94,32 @@ export default function CategoryModal({
                                 <option value="1">{t.active}</option>
                                 <option value="0">{t.inactive}</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">{t.paymentOptions}</label>
+                        <div className="space-y-3">
+                            {([
+                                ["allow_pay_at_salon", t.payAtSalon],
+                                ["allow_pay_online", t.payOnline],
+                            ] as const).map(([key, label]) => (
+                                <div key={key} className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-2xl">
+                                    <span className="text-sm text-gray-700">{label}</span>
+                                    <PaymentSwitch
+                                        lang={lang}
+                                        checked={form[key]}
+                                        onToggle={() => {
+                                            const other = key === "allow_pay_at_salon" ? form.allow_pay_online : form.allow_pay_at_salon;
+                                            if (form[key] && !other) {
+                                                toastApi(false, t.atLeastOnePaymentOption);
+                                                return;
+                                            }
+                                            setForm((f) => ({ ...f, [key]: !f[key] }));
+                                        }}
+                                    />
+                                </div>
+                            ))}
                         </div>
                     </div>
 

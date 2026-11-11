@@ -14,6 +14,11 @@ const AdminLogin: React.FC = () => {
   const t = translations[lang];
   const { login, isLoading } = useAdminLogin(lang);
 
+  // Deployment check: confirms the live admin login is built from the maison-de-noor repo.
+  useEffect(() => {
+    console.log('%c[maison-de-noor] admin login loaded from AhmedAbdullah125/maison-de-noor', 'color:#483383;font-weight:bold');
+  }, []);
+
   // Redirect if already logged in
   useEffect(() => {
     if (isLoggedIn()) {

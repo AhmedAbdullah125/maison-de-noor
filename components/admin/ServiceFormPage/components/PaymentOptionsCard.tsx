@@ -25,7 +25,7 @@ export default function PaymentOptionsCard({
     const f = form as any;
     const useCategory: boolean = f.use_category_payment !== false;
 
-    const cat = categories.find((c: any) => c.id === f.category_id);
+    const cat = f.category_id != null && f.category_id !== "" ? categories.find((c: any) => Number(c.id) === Number(f.category_id)) : undefined;
     // Category flags when known (missing flag = true); otherwise the saved effective values.
     const categoryPay: Pay = cat
         ? { salon: cat.allow_pay_at_salon ?? true, online: cat.allow_pay_online ?? true }

@@ -32,6 +32,7 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
     servicesCountById,
     create,
     update,
+    setPaymentOptions,
     remove,
   } = useCategories(lang, perPage);
 
@@ -45,6 +46,8 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
     name_en: "",
     position: 1,
     is_active: true,
+    allow_pay_at_salon: true,
+    allow_pay_online: true,
     imageUrl: "",
     currentImage: "",
   });
@@ -53,6 +56,17 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
     () => [...apiRows].sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).map(mapApiToBrand),
     [apiRows]
   );
+
+  const paymentOptionsById = useMemo(() => {
+    const m = new Map<number, { allow_pay_at_salon: boolean; allow_pay_online: boolean }>();
+    apiRows.forEach((r) =>
+      m.set(r.id, {
+        allow_pay_at_salon: r.allow_pay_at_salon ?? true,
+        allow_pay_online: r.allow_pay_online ?? true,
+      })
+    );
+    return m;
+  }, [apiRows]);
 
   const filtered = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -71,6 +85,8 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
       name_en: "",
       position: 1,
       is_active: true,
+      allow_pay_at_salon: true,
+      allow_pay_online: true,
       imageUrl: "",
       currentImage: "",
     });
@@ -85,6 +101,8 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
       name_en: cat.nameEn || "",
       position: apiCat?.position ?? 0,
       is_active: apiCat?.is_active ?? true,
+      allow_pay_at_salon: apiCat?.allow_pay_at_salon ?? true,
+      allow_pay_online: apiCat?.allow_pay_online ?? true,
       imageUrl: "",
       currentImage: cat.image || "",
     });
@@ -105,6 +123,8 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
         name_en: form.name_en.trim(),
         position: Number(form.position) || 1,
         is_active: !!form.is_active,
+        allow_pay_at_salon: !!form.allow_pay_at_salon,
+        allow_pay_online: !!form.allow_pay_online,
         imageUrl: form.imageUrl || "",
       });
       setSaving(false);
@@ -117,6 +137,8 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
       name_en: form.name_en.trim(),
       position: Number(form.position) || 1,
       is_active: !!form.is_active,
+      allow_pay_at_salon: !!form.allow_pay_at_salon,
+      allow_pay_online: !!form.allow_pay_online,
       imageUrl: form.imageUrl || undefined,
     });
 
@@ -153,6 +175,8 @@ export default function CategoriesModule({ lang }: CategoriesModuleProps) {
           lang={lang}
           rows={filtered}
           servicesCountById={servicesCountById}
+          paymentOptionsById={paymentOptionsById}
+          onTogglePayment={setPaymentOptions}
           onEdit={openEdit}
           onDelete={remove}
         />

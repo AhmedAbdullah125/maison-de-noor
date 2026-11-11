@@ -10,6 +10,8 @@ export type ApiCategory = {
     image: string;
     position: number;
     is_active: boolean;
+    allow_pay_at_salon?: boolean;
+    allow_pay_online?: boolean;
 };
 
 type ApiCategoriesResponse = {

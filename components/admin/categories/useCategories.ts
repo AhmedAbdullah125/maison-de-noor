@@ -7,6 +7,7 @@ import {
     deleteCategory,
     getCategories,
     updateCategoryPatch,
+    updateCategoryPaymentOptions,
 } from "./categories.api";
 
 export function useCategories(lang: Locale, perPage: number) {
@@ -81,6 +82,8 @@ export function useCategories(lang: Locale, perPage: number) {
         name_en: string;
         position: number;
         is_active: boolean;
+        allow_pay_at_salon?: boolean;
+        allow_pay_online?: boolean;
         imageUrl?: string;
     }) {
         const res = await createCategory(input, lang);
@@ -96,6 +99,8 @@ export function useCategories(lang: Locale, perPage: number) {
         name_en: string;
         position: number;
         is_active: boolean;
+        allow_pay_at_salon?: boolean;
+        allow_pay_online?: boolean;
         imageUrl?: string;
     }) {
         const prevSnapshot = apiRows;
@@ -105,6 +110,8 @@ export function useCategories(lang: Locale, perPage: number) {
             name_en: input.name_en,
             position: input.position,
             is_active: input.is_active,
+            ...(input.allow_pay_at_salon !== undefined ? { allow_pay_at_salon: input.allow_pay_at_salon } : {}),
+            ...(input.allow_pay_online !== undefined ? { allow_pay_online: input.allow_pay_online } : {}),
             ...(input.imageUrl ? { image: input.imageUrl } : {}),
         });
 
@@ -116,6 +123,22 @@ export function useCategories(lang: Locale, perPage: number) {
 
         // Revalidate from server to get fresh positions
         await fetchPage(page);
+        return res;
+    }
+
+    async function setPaymentOptions(id: number, opts: { allow_pay_at_salon: boolean; allow_pay_online: boolean }) {
+        const row = apiRows.find((r) => r.id === id);
+        const prevFlags = {
+            allow_pay_at_salon: row?.allow_pay_at_salon ?? true,
+            allow_pay_online: row?.allow_pay_online ?? true,
+        };
+
+        patchRowLocal(id, opts);
+
+        const res = await updateCategoryPaymentOptions(id, opts, lang);
+        if (!res.ok) {
+            patchRowLocal(id, prevFlags);
+        }
         return res;
     }
 
@@ -147,6 +170,7 @@ export function useCategories(lang: Locale, perPage: number) {
         servicesCountById,
         create,
         update,
+        setPaymentOptions,
         remove,
     };
 }
